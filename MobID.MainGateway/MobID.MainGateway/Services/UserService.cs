@@ -10,10 +10,12 @@ namespace MobID.MainGateway.Services
     public class UserService : IUserService
     {
         private readonly IGenericRepository<User> _userRepository;
+        private readonly IGenericRepository<UserRole> _userRoleRepository;
 
-        public UserService(IGenericRepository<User> userRepository)
+        public UserService(IGenericRepository<User> userRepository, IGenericRepository<UserRole> userRoleRepository)
         {
             _userRepository = userRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public async Task<UserDto> AddUser(UserAddReq userDto, CancellationToken ct = default)
@@ -48,18 +50,25 @@ namespace MobID.MainGateway.Services
             return user == null ? null : new UserDto(user);
         }
 
-        public async Task<UsersPagedRsp> GetUsersPaged(int pageSize, int pageNumber, CancellationToken ct = default)
+        public async Task<UsersPagedRsp> GetUsersPaged(int limit, int offset, CancellationToken ct = default)
         {
             var usersQuery = await _userRepository.GetWhere(u => u.DeletedAt == null, ct);
             var totalCount = usersQuery.Count();
 
             var users = usersQuery
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(u => new UserDto(u))
+                .Skip((offset - 1) * limit)
+                .Take(limit)
+                .Select(async u =>
+                {
+                    var roles = await _userRoleRepository
+                        .GetWhereWithInclude(r => r.UserId == u.Id, ct, r => r.Role);
+                    return new UserDto(u, roles.Select(r => r.Role.Name).ToList());
+                })
                 .ToList();
 
-            return new UsersPagedRsp(users, totalCount, pageSize, pageNumber);
+            var resolvedUsers = await Task.WhenAll(users);
+
+            return new UsersPagedRsp(resolvedUsers.ToList(), totalCount, limit, offset);
         }
     }
 }

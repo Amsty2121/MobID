@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MobID.MainGateway.Configuration;
@@ -9,6 +10,10 @@ using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace MobID.MainGateway.Services
 {
@@ -148,13 +153,7 @@ namespace MobID.MainGateway.Services
                 await _userRoleRepository.Add(new UserRole { UserId = user.Id, RoleId = role.Id, IsActive = true }, ct);
             }
 
-            return new UserRegisterRsp
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Username = user.Username,
-                Roles = roles.Select(r => r.Name).ToList()
-            };
+            return new UserRegisterRsp(user, roles.Select(r => r.Name).ToList());
         }
     }
 }
