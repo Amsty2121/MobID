@@ -1,6 +1,8 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
-using MobID.MainGateway.Models.Dtos.Rsp;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Services.Interfaces
 {
@@ -9,6 +11,6 @@ namespace MobID.MainGateway.Services.Interfaces
         Task<UserDto> AddUser(UserAddReq userDto, CancellationToken ct = default);
         Task<bool> DeleteUser(Guid userId, CancellationToken ct = default);
         Task<UserDto?> GetUserById(Guid userId, CancellationToken ct = default);
-        Task<UsersPagedRsp> GetUsersPaged(int limit, int offset, CancellationToken ct = default);
+        Task<PagedResponse<UserDto>> GetUsersPaged(PagedRequest pagedRequest, CancellationToken ct = default);
     }
 }

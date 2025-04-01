@@ -1,0 +1,71 @@
+:root {
+  /* Variabile de culoare */
+  --color-primary: #ff9800;
+  --color-primary-hover: #e68a00;
+  --color-primary-filter: brightness(0) saturate(100%) invert(82%) sepia(52%) saturate(3562%) hue-rotate(359deg) brightness(97%) contrast(95%);
+  --color-tuna: #32353e;
+  --color-tuna-light: #3c3e47;
+  --color-regent-gray: #949ba2;
+  --color-pale-sky: #ffffff99;
+  --color-iron: #e6e6e7;
+  --color-bombay: #b1b2b5;
+  --color-shark: #292c34;
+
+  /* Stiluri de bază */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: var(--color-pale-sky);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background-color: var(--color-shark);
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+}
+a:hover {
+  color: var(--color-tuna-light);
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--color-tuna);
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: var(--color-primary);
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--color-tuna);
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: var(--color-bombay);
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

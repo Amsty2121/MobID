@@ -1,6 +1,5 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
-using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
@@ -37,7 +36,8 @@ namespace MobID.MainGateway.Services
         public async Task<bool> DeleteUser(Guid userId, CancellationToken ct = default)
         {
             var user = await _userRepository.GetById(userId, ct);
-            if (user == null) return false;
+            if (user == null)
+                return false;
 
             user.DeletedAt = DateTime.UtcNow;
             await _userRepository.Update(user, ct);
@@ -50,25 +50,22 @@ namespace MobID.MainGateway.Services
             return user == null ? null : new UserDto(user);
         }
 
-        public async Task<UsersPagedRsp> GetUsersPaged(int limit, int offset, CancellationToken ct = default)
+        public async Task<PagedResponse<UserDto>> GetUsersPaged(PagedRequest pagedRequest, CancellationToken ct = default)
         {
-            var usersQuery = await _userRepository.GetWhere(u => u.DeletedAt == null, ct);
-            var totalCount = usersQuery.Count();
+            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
+            var userList = (await _userRepository.GetWhere(u => u.DeletedAt == null, ct))?.ToList() ?? new List<User>();
+            int total = userList.Count;
+            var result = new List<UserDto>();
 
-            var users = usersQuery
-                .Skip((offset - 1) * limit)
-                .Take(limit)
-                .Select(async u =>
-                {
-                    var roles = await _userRoleRepository
-                        .GetWhereWithInclude(r => r.UserId == u.Id, ct, r => r.Role);
-                    return new UserDto(u, roles.Select(r => r.Role.Name).ToList());
-                })
-                .ToList();
+            var pagedUsers = userList.Skip(offset).Take(pagedRequest.PageSize).ToList();
+            foreach (var user in pagedUsers)
+            {
+                var roles = await _userRoleRepository.GetWhereWithInclude(r => r.UserId == user.Id, ct, r => r.Role);
+                result.Add(new UserDto(user, roles.Select(r => r.Role.Name).ToList()));
+            }
 
-            var resolvedUsers = await Task.WhenAll(users);
-
-            return new UsersPagedRsp(resolvedUsers.ToList(), totalCount, limit, offset);
+            return new PagedResponse<UserDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, result);
         }
+
     }
 }

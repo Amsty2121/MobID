@@ -2,11 +2,7 @@
 using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using MobID.MainGateway.Models.Dtos;
 
 namespace MobID.MainGateway.Services
 {
@@ -15,9 +11,7 @@ namespace MobID.MainGateway.Services
         private readonly IGenericRepository<Role> _roleRepository;
         private readonly IGenericRepository<UserRole> _userRoleRepository;
 
-        public RoleService(
-            IGenericRepository<Role> roleRepository,
-            IGenericRepository<UserRole> userRoleRepository)
+        public RoleService(IGenericRepository<Role> roleRepository, IGenericRepository<UserRole> userRoleRepository)
         {
             _roleRepository = roleRepository;
             _userRoleRepository = userRoleRepository;
@@ -40,7 +34,8 @@ namespace MobID.MainGateway.Services
         public async Task<bool> DeleteRole(Guid roleId, CancellationToken ct = default)
         {
             var role = await _roleRepository.GetById(roleId, ct);
-            if (role == null) return false;
+            if (role == null)
+                return false;
 
             role.DeletedAt = DateTime.UtcNow;
             await _roleRepository.Update(role, ct);
@@ -68,7 +63,8 @@ namespace MobID.MainGateway.Services
         public async Task<bool> AssignRoleToUser(Guid userId, Guid roleId, CancellationToken ct = default)
         {
             var existing = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (existing != null) return false; // User already has this role
+            if (existing != null)
+                return false;
 
             var userRole = new UserRole
             {
@@ -86,7 +82,8 @@ namespace MobID.MainGateway.Services
         public async Task<bool> RemoveRoleFromUser(Guid userId, Guid roleId, CancellationToken ct = default)
         {
             var userRole = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (userRole == null) return false;
+            if (userRole == null)
+                return false;
 
             await _userRoleRepository.Remove(userRole, ct);
             return true;
@@ -96,6 +93,19 @@ namespace MobID.MainGateway.Services
         {
             var roles = await _userRoleRepository.GetWhereWithInclude(ur => ur.UserId == userId, ct, ur => ur.Role);
             return roles.Select(r => r.Role.Name).ToList();
+        }
+
+        public async Task<PagedResponse<RoleDto>> GetRolesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
+        {
+            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
+            var roleList = (await _roleRepository.GetWhere(r => r.DeletedAt == null, ct))?.ToList() ?? new List<Role>();
+            int total = roleList.Count;
+            var roles = roleList
+                            .Skip(offset)
+                            .Take(pagedRequest.PageSize)
+                            .Select(r => new RoleDto(r))
+                            .ToList();
+            return new PagedResponse<RoleDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, roles);
         }
     }
 }

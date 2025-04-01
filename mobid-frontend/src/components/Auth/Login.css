@@ -1,0 +1,161 @@
+/* Wrapper care umple tot ecranul și centrează cardul */
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Animație slideInDown */
+.slideInDown {
+  animation: slideInDown 0.4s forwards ease;
+}
+@keyframes slideInDown {
+  from {
+    transform: translate3d(0, -100px, 0);
+    opacity: 0.6;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* Card de login */
+.login-wrapper {
+  background-color: var(--color-tuna-light);
+  padding: 1.5rem;
+  border-radius: 6px;
+  width: 320px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Heading (icon + text) */
+.heading {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.heading .mat-icon {
+  width: 45px;
+  height: 45px;
+  margin-right: 0.5rem;
+  /* Filtru ce colorează lacătul cu var(--color-primary) */
+  filter: var(--color-primary-filter);
+}
+
+.heading .text {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading .title {
+  font-size: 24px;
+  color: var(--color-iron);
+  font-weight: 500;
+}
+
+.heading .subtitle {
+  font-size: 12px;
+  color: var(--color-pale-sky);
+}
+
+/* Formular (input-uri + buton) */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Fiecare control (label + input) */
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--color-iron);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.content input {
+  padding: 0.6rem;
+  border: 1px solid var(--color-regent-gray);
+  border-radius: 4px;
+  background-color: var(--color-tuna);
+  color: var(--color-iron);
+  outline: none;
+  font-size: 0.9rem;
+}
+.content input::placeholder {
+  color: var(--color-bombay);
+}
+.content input:focus {
+  border-color: var(--color-primary);
+}
+
+/* Pentru al doilea input (cel de parolă), folosim clasa .pw-field 
+   și setăm width: -webkit-fill-available 
+   (ATENȚIE: funcționează doar în browsere WebKit-based) */
+.pw-field {
+  width: -webkit-fill-available;
+}
+
+/* Grupăm input-ul de parolă și butonul toggle pe același rând */
+.password-control .password-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* spațiu între input și buton */
+}
+
+/* Buton toggle: rotund, portocaliu, icon alb */
+.toggle-password {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+.toggle-password:hover {
+  background-color: var(--color-primary-hover, #e68a00);
+}
+.toggle-password:focus {
+  outline: 2px solid var(--color-primary);
+}
+
+/* Buton de login (mare, portocaliu) */
+.content button[type="submit"] {
+  margin-top: 0.5rem;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.content button[type="submit"]:hover {
+  background-color: var(--color-primary-hover);
+}
+.content button[type="submit"]:focus {
+  outline: 2px solid var(--color-primary);
+}
+
+/* Eroare la login */
+.login-error {
+  color: #ff5555;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}

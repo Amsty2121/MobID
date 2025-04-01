@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MobID.MainGateway.Configuration;
@@ -10,10 +9,6 @@ using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace MobID.MainGateway.Services
 {
@@ -56,15 +51,23 @@ namespace MobID.MainGateway.Services
 
         private async Task<RefreshToken> ProcessRefreshToken(Guid userId, CancellationToken ct)
         {
-            var refreshToken = await _tokenRepository.FirstOrDefault(t => t.UserId == userId, ct)
-                ?? GenerateRefreshToken(userId);
+            var refreshToken = await _tokenRepository.FirstOrDefault(t => t.UserId == userId, ct);
 
-            refreshToken.Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
+            if (refreshToken == null)
+            {
+                refreshToken = GenerateRefreshToken(userId);
+                await _tokenRepository.Add(refreshToken, ct);
+            }
+            else
+            {
+                refreshToken.Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+                refreshToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
+                await _tokenRepository.Update(refreshToken, ct);
+            }
 
-            await _tokenRepository.Update(refreshToken, ct);
             return refreshToken;
         }
+
 
         public async Task<UserLoginRsp> RefreshToken(string refreshToken, CancellationToken ct = default)
         {

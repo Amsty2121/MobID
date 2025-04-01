@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MobID.MainGateway.Migrations
 {
     /// <inheritdoc />
@@ -150,6 +152,7 @@ namespace MobID.MainGateway.Migrations
                     TotalUses = table.Column<int>(type: "integer", nullable: true),
                     MaxUsersPerUsage = table.Column<int>(type: "integer", nullable: true),
                     ExpirationDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RestrictToOrganizationMembers = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -261,6 +264,45 @@ namespace MobID.MainGateway.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AccessTypes",
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "IsLimitedUse", "IsSubscription", "Name", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "One time usage access", true, false, "OneUse", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Multiple usage access", true, false, "MultiUse", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Subscription access", false, true, "Subscription", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Identity confirmation access", false, false, "IdentityConfirm", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "Description", "Name", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Administrator role", "Admin", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Organization user role", "OrgUser", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "Simple user role", "SimpleUser", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "CreatedAt", "DeletedAt", "Email", "PasswordHash", "UpdatedAt", "Username" },
+                values: new object[,]
+                {
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
+                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "UserRoles",
+                columns: new[] { "RoleId", "UserId", "CreatedAt", "DeletedAt", "Id", "IsActive", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8983) },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8990) }
                 });
 
             migrationBuilder.CreateIndex(

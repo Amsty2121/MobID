@@ -1,0 +1,223 @@
+/* src/components/Role/Role.css */
+
+/* Container general */
+.role-page {
+    padding: 1rem;
+    position: relative;
+    color: var(--color-iron);
+}
+
+/* Titlu centrat, de culoare oranj */
+.role-heading {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: var(--color-primary); /* Oranj */
+    text-align: center;
+}
+
+/* Containerul general al tabelului */
+.role-table-container {
+    background-color: var(--color-tuna-light);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+/* ======== Filter + Plus row ======== */
+.filter-plus-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* filtrul la stânga, plusul la dreapta */
+    margin-bottom: 1rem;
+}
+
+/* Containerul de filtrare */
+.filter-container {
+    border: 1px solid var(--color-regent-gray);
+    background-color: transparent;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    width: 300px;
+}
+
+.filter-container input {
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--color-iron);
+    width: 100%;
+    font-size: 1rem;
+}
+
+/* Butonul plus */
+.add-role-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 152, 0, 0.1);
+    border: 1px solid var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.2s ease;
+}
+
+.add-role-icon:hover {
+    background-color: rgba(255, 152, 0, 0.2);
+}
+
+/* ======== Tabel ======== */
+.role-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background-color: var(--color-tuna);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Antetul tabelului: fundal oranj, text color-shark */
+.role-table thead {
+    background-color: var(--color-primary);
+    color: var(--color-shark);
+}
+
+.role-table th,
+.role-table td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid #444;
+}
+
+.role-table th {
+    font-weight: 700;
+}
+
+.actions-col {
+    width: 80px;
+    text-align: center;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--color-iron);
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 0 4px;
+}
+
+.icon-btn:hover {
+    color: var(--color-primary-hover);
+}
+
+/* ======== Paginare ======== */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination-left,
+.pagination-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-left button {
+    background-color: var(--color-primary);
+    border: none;
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-left button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+.pagination-right select {
+    background-color: var(--color-tuna);
+    border: 1px solid var(--color-regent-gray);
+    color: var(--color-iron);
+    padding: 0.3rem;
+    border-radius: 4px;
+}
+
+/* ======== MODAL pentru adăugare rol ======== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--color-tuna);
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--color-iron);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.add-role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.add-role-form label {
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.add-role-form input {
+    background-color: var(--color-tuna-light);
+    border: 1px solid var(--color-regent-gray);
+    color: var(--color-iron);
+    border-radius: 4px;
+    padding: 0.5rem;
+    outline: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.form-actions button {
+    background-color: var(--color-primary);
+    border: none;
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-actions button:hover {
+    background-color: var(--color-primary-hover);
+}

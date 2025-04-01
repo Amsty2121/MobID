@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MobID.MainGateway.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20250313185157_Initial")]
+    [Migration("20250325161246_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -63,6 +63,9 @@ namespace MobID.MainGateway.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("RestrictToOrganizationMembers")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ScanMode")
                         .HasColumnType("integer");
@@ -116,6 +119,48 @@ namespace MobID.MainGateway.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AccessTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "One time usage access",
+                            IsLimitedUse = true,
+                            IsSubscription = false,
+                            Name = "OneUse",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Multiple usage access",
+                            IsLimitedUse = true,
+                            IsSubscription = false,
+                            Name = "MultiUse",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Subscription access",
+                            IsLimitedUse = false,
+                            IsSubscription = true,
+                            Name = "Subscription",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Identity confirmation access",
+                            IsLimitedUse = false,
+                            IsSubscription = false,
+                            Name = "IdentityConfirm",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Organization", b =>
@@ -259,6 +304,32 @@ namespace MobID.MainGateway.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Administrator role",
+                            Name = "Admin",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Organization user role",
+                            Name = "OrgUser",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Simple user role",
+                            Name = "SimpleUser",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.User", b =>
@@ -291,6 +362,26 @@ namespace MobID.MainGateway.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "admin@example.com",
+                            PasswordHash = "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Username = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "user@example.com",
+                            PasswordHash = "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO",
+                            UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Username = "user"
+                        });
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.UserRole", b =>
@@ -321,6 +412,26 @@ namespace MobID.MainGateway.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                            RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Id = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            UpdatedAt = new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8983)
+                        },
+                        new
+                        {
+                            UserId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+                            RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Id = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            UpdatedAt = new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8990)
+                        });
                 });
 
             modelBuilder.Entity("Scan", b =>

@@ -1,14 +1,8 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
-using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Services
 {
@@ -49,7 +43,6 @@ namespace MobID.MainGateway.Services
             };
 
             await _accessRepository.Add(access, ct);
-
             return new AccessDto(access);
         }
 
@@ -57,7 +50,6 @@ namespace MobID.MainGateway.Services
         {
             var access = await _accessRepository.GetByIdWithInclude(
                 accessId, ct, a => a.Organization, a => a.Creator, a => a.AccessType, a => a.QrCodes);
-
             return access == null ? null : new AccessDto(access);
         }
 
@@ -66,7 +58,6 @@ namespace MobID.MainGateway.Services
             var accesses = await _accessRepository.GetWhereWithInclude(
                 a => a.OrganizationId == organizationId && a.DeletedAt == null, ct,
                 a => a.Organization, a => a.Creator, a => a.AccessType, a => a.QrCodes);
-
             return accesses.Select(a => new AccessDto(a)).ToList();
         }
 
@@ -74,10 +65,22 @@ namespace MobID.MainGateway.Services
         {
             var access = await _accessRepository.GetById(accessId, ct);
             if (access == null) return false;
-
             access.DeletedAt = DateTime.UtcNow;
             await _accessRepository.Update(access, ct);
             return true;
+        }
+
+        public async Task<PagedResponse<AccessDto>> GetAccessesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
+        {
+            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
+            var queryList = (await _accessRepository.GetWhere(a => a.DeletedAt == null, ct))?.ToList() ?? new List<Access>();
+            int total = queryList.Count;
+            var accesses = queryList
+                                .Skip(offset)
+                                .Take(pagedRequest.PageSize)
+                                .Select(a => new AccessDto(a))
+                                .ToList();
+            return new PagedResponse<AccessDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, accesses);
         }
     }
 }

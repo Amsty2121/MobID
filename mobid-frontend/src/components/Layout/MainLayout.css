@@ -1,0 +1,154 @@
+/* Layout pe verticală: top bar + rest */
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  /* =========== TOP BAR =========== */
+  .top-bar {
+    display: flex;
+    height: 56px;
+  }
+  
+  /* Secțiunea oranj (lățime fixă 220px) */
+  .orange-section {
+    width: 220px;
+    background-color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .brand-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  /* Secțiunea albă (restul spațiului) */
+  .white-section {
+    flex: 1;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .white-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Butonul pentru toggle (hamburger) */
+  .hamburger-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #333;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  .hamburger-btn:hover {
+    opacity: 0.7;
+  }
+  
+  .hamburger-btn:focus,
+  .hamburger-btn:active,
+  .hamburger-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  .white-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .user-name {
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .logout-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #333;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  .logout-btn:hover {
+    opacity: 0.7;
+  }
+  
+  .logout-btn:focus,
+  .logout-btn:active,
+  .logout-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+  
+  /* =========== SIDEBAR + MAIN CONTENT =========== */
+  .content-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden; /* menține layout-ul */
+  }
+  
+  /* Sidebar */
+  .left-sidebar {
+    width: 220px;                     /* lățimea normală a sidebar-ului */
+    background-color: var(--color-tuna-light);
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .left-sidebar.hidden {
+    width: 0;                         /* se reduce la 0 când e ascuns */
+    padding: 0;                       /* eliminăm padding-ul */
+    overflow: hidden;                 /* ascundem conținutul */
+  }
+  
+  /* Meniul din sidebar */
+  .left-sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .left-sidebar li {
+    margin-bottom: 1rem;
+  }
+  .left-sidebar a {
+    text-decoration: none;
+    color: var(--color-iron);
+    font-size: 1rem;
+    transition: color 0.2s ease;
+  }
+  .left-sidebar a:hover {
+    color: var(--color-primary);
+  }
+  
+  /* Conținut principal */
+  .main-content {
+    flex: 1;                          /* se extinde pe toată lățimea rămasă */
+    background-color: var(--color-shark);
+    color: var(--color-pale-sky);
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
