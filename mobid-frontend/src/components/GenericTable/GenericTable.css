@@ -1,32 +1,34 @@
-/* src/components/Role/Role.css */
+/* src/components/GenericTable/GenericTable.css */
 
-/* Container general */
-.role-page {
+.generic-table-page {
     padding: 1rem;
     position: relative;
     color: var(--color-iron);
-}
-
-/* Titlu centrat, de culoare oranj */
-.role-heading {
+    /* Poți să pui un alt fundal dacă vrei un contrast și mai mare */
+    /* background-color: var(--color-shark); */
+  }
+  
+  /* Titlu centrat, oranj */
+  .role-heading {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
-    color: var(--color-primary); /* Oranj */
+    color: var(--color-primary);
     text-align: center;
-}
-
-/* Containerul general al tabelului */
-.role-table-container {
+  }
+  
+  /* Container cu fundal diferit pentru filtru + tabel */
+  .role-table-container {
     background-color: var(--color-tuna-light);
     border-radius: 6px;
     padding: 1rem;
-}
+    /* margin: 1rem 0;  (opțional) */
+  }
 
 /* ======== Filter + Plus row ======== */
 .filter-plus-row {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* filtrul la stânga, plusul la dreapta */
+    justify-content: space-between;
     margin-bottom: 1rem;
 }
 
@@ -78,7 +80,6 @@
     overflow: hidden;
 }
 
-/* Antetul tabelului: fundal oranj, text color-shark */
 .role-table thead {
     background-color: var(--color-primary);
     color: var(--color-shark);
@@ -149,14 +150,14 @@
     border-radius: 4px;
 }
 
-/* ======== MODAL pentru adăugare rol ======== */
+/* ======== MODAL ======== */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -205,13 +206,13 @@
 
 .form-actions {
     display: flex;
-    flex-direction: row; /* fiecare buton pe propriul rând */
+    flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
-  }
-  
-  .form-actions button {
-    width: 100%;                /* fiecare buton ocupă lățimea maximă */
+}
+
+.form-actions button {
+    width: 100%;
     background-color: var(--color-primary);
     border: none;
     color: #fff;
@@ -220,8 +221,8 @@
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-  }
-  
-  .form-actions button:hover {
+}
+
+.form-actions button:hover {
     background-color: var(--color-primary-hover);
-  }
+}
