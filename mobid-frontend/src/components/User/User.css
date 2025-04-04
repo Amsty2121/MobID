@@ -1,28 +1,26 @@
-/* src/components/GenericTable/GenericTable.css */
+/* src/components/User/User.css */
 
-.generic-table-page {
+/* Container general pentru pagina de utilizatori */
+.user-page {
     padding: 1rem;
     position: relative;
     color: var(--color-iron);
-    /* Poți să pui un alt fundal dacă vrei un contrast și mai mare */
-    /* background-color: var(--color-shark); */
-  }
-  
-  /* Titlu centrat, oranj */
-  .role-heading {
+}
+
+/* Titlu centrat, de culoare oranj */
+.user-heading {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
-    color: var(--color-primary);
+    color: var(--color-primary); /* Oranj */
     text-align: center;
-  }
-  
-  /* Container cu fundal diferit pentru filtru + tabel */
-  .role-table-container {
+}
+
+/* Containerul general pentru tabelul de utilizatori */
+.user-table-container {
     background-color: var(--color-tuna-light);
     border-radius: 6px;
     padding: 1rem;
-    /* margin: 1rem 0;  (opțional) */
-  }
+}
 
 /* ======== Filter + Plus row ======== */
 .filter-plus-row {
@@ -50,8 +48,8 @@
     font-size: 1rem;
 }
 
-/* Butonul plus */
-.add-role-icon {
+/* Butonul plus pentru adăugare utilizator */
+.add-user-icon {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -66,12 +64,12 @@
     transition: background-color 0.2s ease;
 }
 
-.add-role-icon:hover {
+.add-user-icon:hover {
     background-color: rgba(255, 152, 0, 0.2);
 }
 
-/* ======== Tabel ======== */
-.role-table {
+/* Tabel pentru utilizatori */
+.user-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1rem;
@@ -80,30 +78,26 @@
     overflow: hidden;
 }
 
-.role-table thead {
+.user-table thead {
     background-color: var(--color-primary);
     color: var(--color-shark);
 }
 
-.role-table th,
-.role-table td {
+.user-table th,
+.user-table td {
     text-align: left;
     padding: 0.75rem;
     border-bottom: 1px solid #444;
 }
 
-.role-table th {
+.user-table th {
     font-weight: 700;
 }
 
+/* Coloana de acțiuni */
 .actions-col {
-    width: 120px;
+    width: 80px;
     text-align: center;
-  }
-  
-.actions-col .icon-btn {
-    display: inline-block; 
-    margin: 0 0.25rem; /* puțin spațiu între butoane */
 }
 
 .icon-btn {
@@ -155,7 +149,7 @@
     border-radius: 4px;
 }
 
-/* ======== MODAL ======== */
+/* ======== Modal pentru utilizatori ======== */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -189,18 +183,19 @@
     cursor: pointer;
 }
 
-.add-role-form {
+/* Stiluri pentru formularul de adăugare utilizator */
+.add-user-form {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.add-role-form label {
+.add-user-form label {
     font-weight: 500;
     margin-top: 0.5rem;
 }
 
-.add-role-form input {
+.add-user-form input {
     background-color: var(--color-tuna-light);
     border: 1px solid var(--color-regent-gray);
     color: var(--color-iron);
@@ -209,6 +204,7 @@
     outline: none;
 }
 
+/* Stiluri pentru butoanele din formular */
 .form-actions {
     display: flex;
     flex-direction: column;
@@ -231,3 +227,47 @@
 .form-actions button:hover {
     background-color: var(--color-primary-hover);
 }
+
+.role-list {
+    margin: 0;
+    padding-left: 1.2rem; /* sau 0 dacă vrei să elimini bullet-urile */
+    list-style-type: disc; /* sau none, dacă nu dorești bullet */
+  }
+  
+  .role-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* text la stânga, buton la dreapta */
+    gap: 1rem; /* spațiu între text și buton */
+    margin-bottom: 0.3rem; /* spațiu vertical între iteme */
+  }
+  
+  /* Buton Elimină (roșu) */
+  .remove-role-btn {
+    background-color: #ff5555;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  .remove-role-btn:hover {
+    background-color: #e04545;
+  }
+  
+  /* Buton Adaugă (verde) */
+  .add-role-btn {
+    background-color: #55cc55;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  .add-role-btn:hover {
+    background-color: #45b045;
+  }

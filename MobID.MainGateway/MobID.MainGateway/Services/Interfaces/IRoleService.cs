@@ -14,9 +14,6 @@ namespace MobID.MainGateway.Services.Interfaces
         Task<RoleDto?> GetRoleById(Guid roleId, CancellationToken ct = default);
         Task<RoleDto?> GetRoleByName(string roleName, CancellationToken ct = default);
         Task<List<RoleDto>> GetAllRoles(CancellationToken ct = default);
-        Task<bool> AssignRoleToUser(Guid userId, Guid roleId, CancellationToken ct = default);
-        Task<bool> RemoveRoleFromUser(Guid userId, Guid roleId, CancellationToken ct = default);
-        Task<List<string>> GetUserRoles(Guid userId, CancellationToken ct = default);
         Task<PagedResponse<RoleDto>> GetRolesPaged(PagedRequest pagedRequest, CancellationToken ct = default);
     }
 }

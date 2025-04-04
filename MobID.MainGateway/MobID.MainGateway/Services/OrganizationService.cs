@@ -3,6 +3,11 @@ using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace MobID.MainGateway.Services
 {
@@ -95,7 +100,7 @@ namespace MobID.MainGateway.Services
         public async Task<PagedResponse<OrganizationDto>> GetOrganizationsPaged(PagedRequest pagedRequest, CancellationToken ct = default)
         {
             int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var orgList = (await _organizationRepository.GetWhere(o => o.DeletedAt == null, ct))?.ToList() ?? new List<Organization>();
+            var orgList = (await _organizationRepository.GetWhereWithInclude(o => o.DeletedAt == null, ct, x => x.Owner))?.ToList() ?? new List<Organization>();
             int total = orgList.Count;
             var orgs = orgList
                             .Skip(offset)
@@ -104,5 +109,40 @@ namespace MobID.MainGateway.Services
                             .ToList();
             return new PagedResponse<OrganizationDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, orgs);
         }
+
+        // Noile metode
+
+        public async Task<bool> DeleteOrganization(Guid organizationId, CancellationToken ct = default)
+        {
+            var organization = await _organizationRepository.GetById(organizationId, ct);
+            if (organization == null)
+                return false;
+
+            organization.DeletedAt = DateTime.UtcNow;
+            await _organizationRepository.Update(organization, ct);
+            return true;
+        }
+
+        public async Task<OrganizationDto> UpdateOrganization(OrganizationUpdateReq request, CancellationToken ct = default)
+        {
+            var organization = await _organizationRepository.GetById(request.OrganizationId, ct);
+            if (organization == null)
+                throw new InvalidOperationException("Organizație inexistentă.");
+
+            if (request.Name != null)
+            {
+                organization.Name = request.Name;
+            }
+            if (request.OwnerId.HasValue)
+            {
+                organization.OwnerId = request.OwnerId.Value;
+            }
+
+            organization.UpdatedAt = DateTime.UtcNow;
+            await _organizationRepository.Update(organization, ct);
+
+            return new OrganizationDto(organization);
+        }
+
     }
 }

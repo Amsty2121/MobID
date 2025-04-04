@@ -14,7 +14,7 @@ namespace MobID.MainGateway.Models.Dtos
             Id = organization.Id;
             Name = organization.Name;
             OwnerId = organization.OwnerId;
-            OwnerName = organization.Owner?.Username ?? "Unknown";
+            OwnerName = string.Join(" | ", organization.Owner?.Username, organization.Owner?.Id) ?? "Unknown";
         }
     }
 }

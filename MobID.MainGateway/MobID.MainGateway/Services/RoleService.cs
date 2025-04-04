@@ -60,41 +60,6 @@ namespace MobID.MainGateway.Services
             return roles.Select(r => new RoleDto(r)).ToList();
         }
 
-        public async Task<bool> AssignRoleToUser(Guid userId, Guid roleId, CancellationToken ct = default)
-        {
-            var existing = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (existing != null)
-                return false;
-
-            var userRole = new UserRole
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                RoleId = roleId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _userRoleRepository.Add(userRole, ct);
-            return true;
-        }
-
-        public async Task<bool> RemoveRoleFromUser(Guid userId, Guid roleId, CancellationToken ct = default)
-        {
-            var userRole = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (userRole == null)
-                return false;
-
-            await _userRoleRepository.Remove(userRole, ct);
-            return true;
-        }
-
-        public async Task<List<string>> GetUserRoles(Guid userId, CancellationToken ct = default)
-        {
-            var roles = await _userRoleRepository.GetWhereWithInclude(ur => ur.UserId == userId, ct, ur => ur.Role);
-            return roles.Select(r => r.Role.Name).ToList();
-        }
-
         public async Task<PagedResponse<RoleDto>> GetRolesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
         {
             int offset = pagedRequest.PageIndex * pagedRequest.PageSize;

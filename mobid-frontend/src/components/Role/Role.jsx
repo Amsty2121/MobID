@@ -4,6 +4,7 @@ import { getRolesPaged, addRole, deleteRole } from "../../api/roleApi";
 import GenericTable from "../GenericTable/GenericTable";
 import AddRoleModal from "./AddRoleModal";
 import DeleteRoleModal from "./DeleteRoleModal";
+import "./Role.css";
 
 const Role = () => {
   const [roles, setRoles] = useState([]);

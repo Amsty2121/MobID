@@ -12,8 +12,8 @@ const GenericTable = ({
   showAddOption,
   onDelete,
   showDeleteOption,
-  onEdit,          
-  showEditOption,  
+  onEdit,
+  showEditOption,
   currentPage,
   totalCount,
   pageSize,
@@ -78,8 +78,11 @@ const GenericTable = ({
                 {columns.map((col, index) => (
                   <th key={index}>{col.header}</th>
                 ))}
-                {showEditOption && <th className="actions-col">Edit</th>}
-                {showDeleteOption && <th className="actions-col">Acțiuni</th>}
+                {/* Afișăm doar o singură coloană „Acțiuni” 
+                    dacă avem edit sau delete activate */}
+                {(showEditOption || showDeleteOption) && (
+                  <th className="actions-col">Acțiuni</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -88,24 +91,28 @@ const GenericTable = ({
                   {columns.map((col, idx) => (
                     <td key={idx}>{row[col.accessor]}</td>
                   ))}
-                  {showEditOption && (
+
+                  {/* În aceeași coloană afișăm butoanele de edit și delete, dacă sunt activate */}
+                  {(showEditOption || showDeleteOption) && (
                     <td className="actions-col">
-                      <button
-                        className="icon-btn"
-                        onClick={() => onEdit && onEdit(row)}
-                      >
-                        <FaEdit />
-                      </button>
-                    </td>
-                  )}
-                  {showDeleteOption && (
-                    <td className="actions-col">
-                      <button
-                        className="icon-btn"
-                        onClick={() => onDelete(row)}
-                      >
-                        <FaTrash />
-                      </button>
+                      {showEditOption && (
+                        <button
+                          className="icon-btn"
+                          onClick={() => onEdit && onEdit(row)}
+                          title="Editează"
+                        >
+                          <FaEdit />
+                        </button>
+                      )}
+                      {showDeleteOption && (
+                        <button
+                          className="icon-btn"
+                          onClick={() => onDelete && onDelete(row)}
+                          title="Șterge"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>

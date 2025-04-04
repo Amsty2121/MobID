@@ -29,6 +29,34 @@ namespace MobID.MainGateway.Controllers
             }
         }
 
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateOrganization([FromBody] OrganizationUpdateReq request, CancellationToken ct)
+        {
+            try
+            {
+                var updatedOrg = await _orgService.UpdateOrganization(request, ct);
+                return Ok(updatedOrg);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{organizationId}")]
+        public async Task<IActionResult> DeleteOrganization(Guid organizationId, CancellationToken ct)
+        {
+            try
+            {
+                bool success = await _orgService.DeleteOrganization(organizationId, ct);
+                return success ? NoContent() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpGet("{organizationId}")]
         public async Task<IActionResult> GetOrganizationById(Guid organizationId, CancellationToken ct)
         {

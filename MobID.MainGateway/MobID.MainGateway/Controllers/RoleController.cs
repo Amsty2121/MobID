@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Services.Interfaces;
 using System;
 using System.Threading;
@@ -85,54 +84,12 @@ namespace MobID.MainGateway.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetRolesPaged([FromQuery] PagedRequest request, CancellationToken ct)
+        public async Task<IActionResult> GetRolesPaged([FromQuery] Models.Dtos.PagedRequest request, CancellationToken ct)
         {
             try
             {
                 var pagedRoles = await _roleService.GetRolesPaged(request, ct);
                 return Ok(pagedRoles);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("assign")]
-        public async Task<IActionResult> AssignRoleToUser([FromQuery] Guid userId, [FromQuery] Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _roleService.AssignRoleToUser(userId, roleId, ct);
-                return success ? Ok() : BadRequest("Role already assigned or error occurred.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("remove")]
-        public async Task<IActionResult> RemoveRoleFromUser([FromQuery] Guid userId, [FromQuery] Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _roleService.RemoveRoleFromUser(userId, roleId, ct);
-                return success ? Ok() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserRoles(Guid userId, CancellationToken ct)
-        {
-            try
-            {
-                var roles = await _roleService.GetUserRoles(userId, ct);
-                return Ok(roles);
             }
             catch (Exception ex)
             {

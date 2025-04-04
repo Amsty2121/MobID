@@ -57,31 +57,3 @@ export async function getRolesPaged(pagedRequest) {
   });
   return response.data;
 }
-
-/**
- * Atribuie un rol unui utilizator.
- */
-export async function assignRoleToUser(userId, roleId) {
-  const response = await api.post("/Role/assign", null, {
-    params: { userId, roleId },
-  });
-  return response.data;
-}
-
-/**
- * Elimină un rol de la un utilizator.
- */
-export async function removeRoleFromUser(userId, roleId) {
-  const response = await api.post("/Role/remove", null, {
-    params: { userId, roleId },
-  });
-  return response.data;
-}
-
-/**
- * Obține rolurile pentru un utilizator.
- */
-export async function getUserRoles(userId) {
-  const response = await api.get(`/Role/user/${userId}`);
-  return response.data;
-}
