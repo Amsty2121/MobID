@@ -1,10 +1,8 @@
-/* src/components/GenericTable/GenericTable.css */
-
 .generic-table-page {
     padding: 1rem;
     position: relative;
     color: var(--color-iron);
-    /* Poți să pui un alt fundal dacă vrei un contrast și mai mare */
+    /* Poți adăuga un background suplimentar dacă dorești */
     /* background-color: var(--color-shark); */
   }
   
@@ -16,42 +14,39 @@
     text-align: center;
   }
   
-  /* Container cu fundal diferit pentru filtru + tabel */
+  /* Container pentru filtrare și tabel */
   .role-table-container {
     background-color: var(--color-tuna-light);
     border-radius: 6px;
     padding: 1rem;
-    /* margin: 1rem 0;  (opțional) */
   }
-
-/* ======== Filter + Plus row ======== */
-.filter-plus-row {
+  
+  /* Rând pentru filtrare și butonul plus */
+  .filter-plus-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1rem;
-}
-
-/* Containerul de filtrare */
-.filter-container {
+  }
+  
+  .filter-container {
     border: 1px solid var(--color-regent-gray);
     background-color: transparent;
     border-radius: 4px;
     padding: 0.3rem 0.6rem;
     width: 300px;
-}
-
-.filter-container input {
+  }
+  
+  .filter-container input {
     border: none;
     outline: none;
     background: transparent;
     color: var(--color-iron);
     width: 100%;
     font-size: 1rem;
-}
-
-/* Butonul plus */
-.add-role-icon {
+  }
+  
+  .add-role-icon {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -64,99 +59,97 @@
     cursor: pointer;
     font-size: 1.2rem;
     transition: background-color 0.2s ease;
-}
-
-.add-role-icon:hover {
+  }
+  
+  .add-role-icon:hover {
     background-color: rgba(255, 152, 0, 0.2);
-}
-
-/* ======== Tabel ======== */
-.role-table {
+  }
+  
+  /* Tabel generic pentru componente */
+  .role-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1rem;
     background-color: var(--color-tuna);
     border-radius: 6px;
     overflow: hidden;
-}
-
-.role-table thead {
+  }
+  
+  .role-table thead {
     background-color: var(--color-primary);
     color: var(--color-shark);
-}
-
-.role-table th,
-.role-table td {
+  }
+  
+  .role-table th,
+  .role-table td {
     text-align: left;
     padding: 0.75rem;
     border-bottom: 1px solid #444;
-}
-
-.role-table th {
-    font-weight: 700;
-}
-
-.actions-col {
-    width: 120px;
-    text-align: center;
   }
   
-.actions-col .icon-btn {
-    display: inline-block; 
-    margin: 0 0.25rem; /* puțin spațiu între butoane */
-}
-
-.icon-btn {
+  .role-table th {
+    font-weight: 700;
+  }
+  
+  /* Coloana de acțiuni (include butoane edit/delete în același rând) */
+  .actions-col {
+    width: 120px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .icon-btn {
     background: none;
     border: none;
     color: var(--color-iron);
     font-size: 1rem;
     cursor: pointer;
-    margin: 0 4px;
-}
-
-.icon-btn:hover {
+  }
+  
+  .icon-btn:hover {
     color: var(--color-primary-hover);
-}
-
-/* ======== Paginare ======== */
-.pagination {
+  }
+  
+  /* Paginare */
+  .pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.pagination-left,
-.pagination-right {
+  }
+  
+  .pagination-left,
+  .pagination-right {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.pagination-left button {
+  }
+  
+  .pagination-left button {
     background-color: var(--color-primary);
     border: none;
     color: #fff;
     padding: 0.4rem 0.8rem;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.pagination-left button:disabled {
+  }
+  
+  .pagination-left button:disabled {
     background-color: #999;
     cursor: not-allowed;
-}
-
-.pagination-right select {
+  }
+  
+  .pagination-right select {
     background-color: var(--color-tuna);
     border: 1px solid var(--color-regent-gray);
     color: var(--color-iron);
     padding: 0.3rem;
     border-radius: 4px;
-}
-
-/* ======== MODAL ======== */
-.modal-overlay {
+  }
+  
+  /* Modaluri și formulare (generic) */
+  .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -167,18 +160,18 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-}
-
-.modal-content {
+  }
+  
+  .modal-content {
     background-color: var(--color-tuna);
     padding: 1.5rem;
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
     position: relative;
-}
-
-.modal-close {
+  }
+  
+  .modal-close {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
@@ -187,36 +180,16 @@
     color: var(--color-iron);
     font-size: 1.2rem;
     cursor: pointer;
-}
-
-.add-role-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.add-role-form label {
-    font-weight: 500;
-    margin-top: 0.5rem;
-}
-
-.add-role-form input {
-    background-color: var(--color-tuna-light);
-    border: 1px solid var(--color-regent-gray);
-    color: var(--color-iron);
-    border-radius: 4px;
-    padding: 0.5rem;
-    outline: none;
-}
-
-.form-actions {
+  }
+  
+  .form-actions {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
-}
-
-.form-actions button {
+  }
+  
+  .form-actions button {
     width: 100%;
     background-color: var(--color-primary);
     border: none;
@@ -226,8 +199,54 @@
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-}
-
-.form-actions button:hover {
+  }
+  
+  .form-actions button:hover {
     background-color: var(--color-primary-hover);
-}
+  }
+  
+  /* Stiluri pentru listele din modale (ex. roluri) */
+  .role-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    list-style-type: disc;
+  }
+  
+  .role-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .remove-role-btn {
+    background-color: #ff5555;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .remove-role-btn:hover {
+    background-color: #e04545;
+  }
+  
+  .add-role-btn {
+    background-color: #55cc55;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .add-role-btn:hover {
+    background-color: #45b045;
+  }
+  

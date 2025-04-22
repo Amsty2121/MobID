@@ -1,0 +1,133 @@
+@import "./_variables.css";
+@import "./_common.css";
+
+/* User.css */
+
+.user-page {
+  padding: 1rem;
+  position: relative;
+  color: var(--color-iron);
+}
+
+.user-heading {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.user-table-container {
+  background-color: var(--color-tuna-light);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+/* Buton plus pentru adăugare utilizator */
+.add-user-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 152, 0, 0.1);
+  border: 1px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease;
+}
+
+.add-user-icon:hover {
+  background-color: rgba(255, 152, 0, 0.2);
+}
+
+/* Stiluri pentru listele din modalurile de editare roluri */
+.role-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style-type: disc;
+}
+
+.role-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.remove-role-btn {
+  background-color: #ff5555;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.remove-role-btn:hover {
+  background-color: #e04545;
+}
+
+.add-role-btn {
+  background-color: #55cc55;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.add-role-btn:hover {
+  background-color: #45b045;
+}
+
+/* Stiluri pentru formularul de adăugare utilizator */
+.add-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-user-form label {
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.add-user-form input {
+  background-color: var(--color-tuna-light);
+  border: 1px solid var(--color-regent-gray);
+  color: var(--color-iron);
+  border-radius: 4px;
+  padding: 0.5rem;
+  outline: none;
+}
+
+/* Form actions pentru butoane */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  width: 100%;
+  background-color: var(--color-primary);
+  border: none;
+  color: #fff;
+  padding: 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.form-actions button:hover {
+  background-color: var(--color-primary-hover);
+}

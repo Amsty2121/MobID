@@ -5,214 +5,45 @@
     padding: 1rem;
     position: relative;
     color: var(--color-iron);
-}
-
-/* Titlu centrat, de culoare oranj */
-.user-heading {
+  }
+  
+  /* Titlu centrat, de culoare oranj */
+  .user-heading {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
-    color: var(--color-primary); /* Oranj */
-    text-align: center;
-}
-
-/* Containerul general pentru tabelul de utilizatori */
-.user-table-container {
-    background-color: var(--color-tuna-light);
-    border-radius: 6px;
-    padding: 1rem;
-}
-
-/* ======== Filter + Plus row ======== */
-.filter-plus-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-
-/* Containerul de filtrare */
-.filter-container {
-    border: 1px solid var(--color-regent-gray);
-    background-color: transparent;
-    border-radius: 4px;
-    padding: 0.3rem 0.6rem;
-    width: 300px;
-}
-
-.filter-container input {
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--color-iron);
-    width: 100%;
-    font-size: 1rem;
-}
-
-/* Butonul plus pentru adăugare utilizator */
-.add-user-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: rgba(255, 152, 0, 0.1);
-    border: 1px solid var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: var(--color-primary);
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: background-color 0.2s ease;
-}
-
-.add-user-icon:hover {
-    background-color: rgba(255, 152, 0, 0.2);
-}
-
-/* Tabel pentru utilizatori */
-.user-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-    background-color: var(--color-tuna);
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.user-table thead {
-    background-color: var(--color-primary);
-    color: var(--color-shark);
-}
-
-.user-table th,
-.user-table td {
-    text-align: left;
-    padding: 0.75rem;
-    border-bottom: 1px solid #444;
-}
-
-.user-table th {
-    font-weight: 700;
-}
-
-/* Coloana de acțiuni */
-.actions-col {
-    width: 80px;
     text-align: center;
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    color: var(--color-iron);
-    font-size: 1rem;
-    cursor: pointer;
-    margin: 0 4px;
-}
-
-.icon-btn:hover {
-    color: var(--color-primary-hover);
-}
-
-/* ======== Paginare ======== */
-.pagination {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.pagination-left,
-.pagination-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pagination-left button {
-    background-color: var(--color-primary);
-    border: none;
-    color: #fff;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.pagination-left button:disabled {
-    background-color: #999;
-    cursor: not-allowed;
-}
-
-.pagination-right select {
-    background-color: var(--color-tuna);
-    border: 1px solid var(--color-regent-gray);
-    color: var(--color-iron);
-    padding: 0.3rem;
-    border-radius: 4px;
-}
-
-/* ======== Modal pentru utilizatori ======== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: var(--color-tuna);
-    padding: 1.5rem;
-    border-radius: 8px;
-    width: 400px;
-    max-width: 90%;
-    position: relative;
-}
-
-.modal-close {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background: none;
-    border: none;
-    color: var(--color-iron);
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-/* Stiluri pentru formularul de adăugare utilizator */
-.add-user-form {
+  }
+  
+  /* Stiluri pentru formularele din pagina de utilizatori */
+  .add-user-form {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-}
-
-.add-user-form label {
+  }
+  
+  .add-user-form label {
     font-weight: 500;
     margin-top: 0.5rem;
-}
-
-.add-user-form input {
+  }
+  
+  .add-user-form input {
     background-color: var(--color-tuna-light);
     border: 1px solid var(--color-regent-gray);
     color: var(--color-iron);
     border-radius: 4px;
     padding: 0.5rem;
     outline: none;
-}
-
-/* Stiluri pentru butoanele din formular */
-.form-actions {
+  }
+  
+  .form-actions {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
-}
-
-.form-actions button {
+  }
+  
+  .form-actions button {
     width: 100%;
     background-color: var(--color-primary);
     border: none;
@@ -222,27 +53,32 @@
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-}
-
-.form-actions button:hover {
+  }
+  
+  .form-actions button:hover {
     background-color: var(--color-primary-hover);
-}
-
-.role-list {
+  }
+  
+  .error {
+    color: #ff5555;
+    margin: 0.5rem 0;
+  }
+  
+  /* Stiluri suplimentare pentru listarea rolurilor (dacă este cazul) */
+  .role-list {
     margin: 0;
-    padding-left: 1.2rem; /* sau 0 dacă vrei să elimini bullet-urile */
-    list-style-type: disc; /* sau none, dacă nu dorești bullet */
+    padding-left: 1.2rem;
+    list-style-type: disc;
   }
   
   .role-list-item {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* text la stânga, buton la dreapta */
-    gap: 1rem; /* spațiu între text și buton */
-    margin-bottom: 0.3rem; /* spațiu vertical între iteme */
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.3rem;
   }
   
-  /* Buton Elimină (roșu) */
   .remove-role-btn {
     background-color: #ff5555;
     color: #fff;
@@ -253,11 +89,11 @@
     font-size: 0.9rem;
     transition: background-color 0.2s ease;
   }
+  
   .remove-role-btn:hover {
     background-color: #e04545;
   }
   
-  /* Buton Adaugă (verde) */
   .add-role-btn {
     background-color: #55cc55;
     color: #fff;
@@ -268,6 +104,8 @@
     font-size: 0.9rem;
     transition: background-color 0.2s ease;
   }
+  
   .add-role-btn:hover {
     background-color: #45b045;
   }
+  

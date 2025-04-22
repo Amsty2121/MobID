@@ -1,0 +1,72 @@
+/* src/styles/_common.css */
+
+/* Container central */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  /* Butoane generale */
+  .btn {
+    border-radius: 8px;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: border-color 0.25s;
+    border: 1px solid transparent;
+  }
+  .btn:hover {
+    border-color: var(--color-primary);
+  }
+  
+  /* Butoane de tip icon (folosite la acțiuni) */
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--color-iron);
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 0 4px;
+  }
+  .icon-btn:hover {
+    color: var(--color-primary-hover);
+  }
+  
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: var(--color-tuna);
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--color-iron);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
