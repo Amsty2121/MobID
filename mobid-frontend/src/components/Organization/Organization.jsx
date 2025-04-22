@@ -1,6 +1,10 @@
 // src/components/Organization/Organization.jsx
 import React, { useEffect, useState } from "react";
-import { getOrganizationsPaged, createOrganization, updateOrganization, deleteOrganization } from "../../api/organizationApi";
+import {
+  getOrganizationsPaged,
+  deleteOrganization,
+  updateOrganization
+} from "../../api/organizationApi";
 import GenericTable from "../GenericTable/GenericTable";
 import AddOrganizationModal from "./AddOrganizationModal";
 import EditOrganizationModal from "./EditOrganizationModal";
@@ -10,19 +14,14 @@ import "./Organization.css";
 const Organization = () => {
   const [organizations, setOrganizations] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0); // PageIndex
-  const [limit, setLimit] = useState(5);             // PageSize
+  const [currentPage, setCurrentPage] = useState(0);
+  const [limit, setLimit] = useState(5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Modal de adăugare organizație
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // Modal de editare organizație
   const [showEditModal, setShowEditModal] = useState(false);
   const [orgToEdit, setOrgToEdit] = useState(null);
-
-  // Modal de ștergere organizație
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [orgToDelete, setOrgToDelete] = useState(null);
 
@@ -30,117 +29,83 @@ const Organization = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getOrganizationsPaged({ pageIndex: currentPage, pageSize: limit });
+      const data = await getOrganizationsPaged({
+        pageIndex: currentPage,
+        pageSize: limit
+      });
       setOrganizations(data.items || []);
       setTotalCount(data.total || 0);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Eroare la preluarea organizațiilor.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchOrganizations();
-  }, [currentPage, limit]);
-
-  const handleAdd = () => {
-    setShowAddModal(true);
-  };
+  useEffect(() => { fetchOrganizations(); }, [currentPage, limit]);
 
   const handleEdit = (org) => {
     setOrgToEdit(org);
     setShowEditModal(true);
+  };
+  const submitEdit = async (updateData) => {
+    try {
+      await updateOrganization(updateData);
+      setShowEditModal(false);
+      fetchOrganizations();
+    } catch {
+      setError("Eroare la actualizarea organizației.");
+    }
   };
 
   const handleDelete = (org) => {
     setOrgToDelete(org);
     setShowDeleteModal(true);
   };
-
-  const submitEdit = async (updateData) => {
-    try {
-      await updateOrganization(updateData);
-      setShowEditModal(false);
-      setOrgToEdit(null);
-      fetchOrganizations();
-    } catch (err) {
-      console.error(err);
-      setError("Eroare la actualizarea organizației.");
-    }
-  };
-
   const confirmDelete = async () => {
     try {
       await deleteOrganization(orgToDelete.id);
       setShowDeleteModal(false);
-      setOrgToDelete(null);
       fetchOrganizations();
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Eroare la ștergerea organizației.");
     }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteModal(false);
-    setOrgToDelete(null);
   };
 
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "Nume Organizație", accessor: "name" },
-    { header: "Proprietar", accessor: "ownerName" },
+    { header: "Proprietar", accessor: "ownerName" }
   ];
-
-  const filterColumns = ["name", "ownerName"];
+  const filterCols = ["name", "ownerName"];
 
   return (
     <>
       {loading && <p>Se încarcă...</p>}
-      {error && <p className="error">{error}</p>}
+      {error   && <p className="error">{error}</p>}
+
       <GenericTable
         title="Organizații"
         columns={columns}
-        filterColumns={filterColumns}
+        filterColumns={filterCols}
         data={organizations}
-        onAdd={handleAdd}
-        showAddOption={true}
+        onAdd={() => setShowAddModal(true)}
+        showAddOption
         onEdit={handleEdit}
-        showEditOption={true}
+        showEditOption
         onDelete={handleDelete}
-        showDeleteOption={true}
+        showDeleteOption
         currentPage={currentPage}
         totalCount={totalCount}
         pageSize={limit}
-        onPageChange={(newPage) => setCurrentPage(newPage)}
-        onPageSizeChange={(newSize) => {
-          setLimit(newSize);
-          setCurrentPage(0);
-        }}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={size => { setLimit(size); setCurrentPage(0); }}
       />
 
       {showAddModal && (
         <AddOrganizationModal
+          onSuccess={fetchOrganizations}
           onClose={() => setShowAddModal(false)}
-          handleAddOrg={async (e) => {
-            e.preventDefault();
-            try {
-              // Presupunem că AddOrganizationModal va trimite datele sub forma:
-              // { name, ownerId }
-              // Iar createOrganization API le va primi corect
-              const formData = new FormData(e.target);
-              const name = formData.get("orgName");
-              const ownerId = formData.get("orgOwner");
-              await createOrganization({ name, ownerId });
-              setShowAddModal(false);
-              fetchOrganizations();
-            } catch (err) {
-              console.error(err);
-              setError("Eroare la adăugarea organizației.");
-            }
-          }}
         />
       )}
 
@@ -148,10 +113,7 @@ const Organization = () => {
         <EditOrganizationModal
           organization={orgToEdit}
           onSubmit={submitEdit}
-          onClose={() => {
-            setShowEditModal(false);
-            setOrgToEdit(null);
-          }}
+          onClose={() => setShowEditModal(false)}
         />
       )}
 
@@ -159,7 +121,7 @@ const Organization = () => {
         <DeleteOrganizationModal
           organization={orgToDelete}
           onConfirm={confirmDelete}
-          onCancel={cancelDelete}
+          onCancel={() => setShowDeleteModal(false)}
         />
       )}
     </>

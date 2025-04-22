@@ -1,19 +1,27 @@
 // src/components/User/AddUserModal.jsx
-import React from "react";
+import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import "./User.css"; // Poți avea un fișier de stiluri separat pentru User
+import { addUser } from "../../api/userApi";
+import "./User.css";
 
+const AddUserModal = ({ onSuccess, onClose }) => {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-const AddUserModal = ({
-  newUserEmail,
-  setNewUserEmail,
-  newUserUsername,
-  setNewUserUsername,
-  newUserPassword,
-  setNewUserPassword,
-  handleAddUser,
-  onClose,
-}) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await addUser({ email, username, password });
+      onSuccess();   // reîmprospătează lista
+      onClose();
+    } catch {
+      setError("Nu am putut adăuga utilizatorul.");
+    }
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -21,36 +29,38 @@ const AddUserModal = ({
           <FaTimes />
         </button>
         <h3>Adaugă Utilizator Nou</h3>
-        <form onSubmit={handleAddUser} className="add-user-form">
+        {error && <p className="error">{error}</p>}
+        <form onSubmit={handleSubmit} className="add-user-form">
           <label htmlFor="userEmail">Email</label>
           <input
             id="userEmail"
             type="email"
-            value={newUserEmail}
-            onChange={(e) => setNewUserEmail(e.target.value)}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             required
           />
+
           <label htmlFor="userUsername">Username</label>
           <input
             id="userUsername"
             type="text"
-            value={newUserUsername}
-            onChange={(e) => setNewUserUsername(e.target.value)}
+            value={username}
+            onChange={e => setUsername(e.target.value)}
             required
           />
+
           <label htmlFor="userPassword">Parolă</label>
           <input
             id="userPassword"
             type="password"
-            value={newUserPassword}
-            onChange={(e) => setNewUserPassword(e.target.value)}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
             required
           />
+
           <div className="form-actions">
             <button type="submit">Salvează</button>
-            <button type="button" onClick={onClose}>
-              Anulează
-            </button>
+            <button type="button" onClick={onClose}>Anulează</button>
           </div>
         </form>
       </div>

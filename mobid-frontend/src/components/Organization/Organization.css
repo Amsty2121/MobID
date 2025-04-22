@@ -147,3 +147,73 @@
   font-size: 1.2rem;
   cursor: pointer;
 }
+
+/* ============================================= */
+/* React‑Select cu prefix org-select, dark theme */
+/* ============================================= */
+
+/* Control (container input + indicator) */
+.org-select__control {
+  background-color: var(--color-tuna-light) !important;
+  border: 1px solid var(--color-regent-gray) !important;
+  color: var(--color-iron) !important;
+  box-shadow: none !important;
+}
+.org-select__control:hover {
+  border-color: var(--color-primary) !important;
+}
+.org-select__control--is-focused {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
+}
+
+/* Input text */
+.org-select__input input {
+  color: var(--color-iron) !important;
+}
+.org-select__single-value {
+  color: var(--color-iron) !important;
+}
+.org-select__placeholder {
+  color: var(--color-bombay) !important;
+}
+
+/* Dropdown indicator */
+.org-select__dropdown-indicator {
+  color: var(--color-iron) !important;
+}
+.org-select__dropdown-indicator:hover {
+  color: var(--color-primary) !important;
+}
+/* Ascunde separatorul */
+.org-select__indicator-separator {
+  display: none !important;
+}
+
+/* Menu (lista de opțiuni) */
+.org-select__menu {
+  background-color: var(--color-tuna-light) !important;
+  color: var(--color-iron) !important;
+}
+/* Fiecare opțiune */
+.org-select__option {
+  background-color: var(--color-tuna-light) !important;
+  color: var(--color-iron) !important;
+}
+.org-select__option--is-focused {
+  background-color: var(--color-tuna) !important;
+  color: var(--color-iron) !important;
+}
+
+/* FormatOptionLabel content */
+.org-option {
+  line-height: 1.2;
+}
+.org-option-name {
+  /* text normal pentru Name */
+  color: var(--color-iron);
+}
+.org-option-id {
+  font-size: 0.85em;
+  color: var(--color-bombay);
+}
