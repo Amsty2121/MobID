@@ -27,10 +27,12 @@ export async function getOrganizationsPaged(pagedRequest) {
   return response.data;
 }
 
-export async function addUserToOrganization(orgId, userId) {
-  const response = await api.post(`/Organization/${orgId}/addUser`, null, {
-    params: { userId },
-  });
+export async function addUserToOrganization(orgId, addUserReq) {
+  // send { userId, role } in the request body
+  const response = await api.post(
+    `/Organization/${orgId}/addUser`,
+    addUserReq
+  );
   return response.data;
 }
 

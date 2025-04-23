@@ -9,6 +9,7 @@ import GenericTable from "../GenericTable/GenericTable";
 import AddOrganizationModal from "./AddOrganizationModal";
 import EditOrganizationModal from "./EditOrganizationModal";
 import DeleteOrganizationModal from "./DeleteOrganizationModal";
+import OrganizationMembers from "./OrganizationMembers";
 import "./Organization.css";
 
 const Organization = () => {
@@ -25,14 +26,15 @@ const Organization = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [orgToDelete, setOrgToDelete] = useState(null);
 
+  // Select for members table
+  const [selectedOrgId, setSelectedOrgId] = useState("");
+  const [selectedOrgName, setSelectedOrgName] = useState("");
+
   const fetchOrganizations = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getOrganizationsPaged({
-        pageIndex: currentPage,
-        pageSize: limit
-      });
+      const data = await getOrganizationsPaged({ pageIndex: currentPage, pageSize: limit });
       setOrganizations(data.items || []);
       setTotalCount(data.total || 0);
     } catch {
@@ -72,6 +74,14 @@ const Organization = () => {
     }
   };
 
+  // When user selects org from dropdown
+  const handleSelectOrg = (e) => {
+    const id = e.target.value;
+    setSelectedOrgId(id);
+    const org = organizations.find(o => o.id === id);
+    setSelectedOrgName(org ? org.name : "");
+  };
+
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "Nume Organizație", accessor: "name" },
@@ -101,6 +111,13 @@ const Organization = () => {
         onPageChange={setCurrentPage}
         onPageSizeChange={size => { setLimit(size); setCurrentPage(0); }}
       />
+
+      {
+        <OrganizationMembers
+          organizationId={selectedOrgId}
+          organizationName={selectedOrgName}
+        />
+      }
 
       {showAddModal && (
         <AddOrganizationModal
