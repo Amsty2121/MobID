@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MobID.MainGateway.Models.Dtos.Req
+﻿namespace MobID.MainGateway.Models.Dtos.Req
 {
     public class AccessCreateReq
     {

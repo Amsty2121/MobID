@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
+using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Controllers
 {
@@ -15,11 +13,11 @@ namespace MobID.MainGateway.Controllers
         public QrCodeController(IQrCodeService qrCodeService) => _qrCodeService = qrCodeService;
 
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateQrCode([FromQuery] Guid accessId, CancellationToken ct)
+        public async Task<IActionResult> GenerateQrCode([FromBody] QrCodeGenerateReq request, CancellationToken ct)
         {
             try
             {
-                var qrCode = await _qrCodeService.GenerateQrCode(accessId, ct);
+                var qrCode = await _qrCodeService.GenerateQrCode(request.AccessId, ct);
                 return Ok(qrCode);
             }
             catch (Exception ex)
@@ -27,6 +25,7 @@ namespace MobID.MainGateway.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
 
         [HttpGet("{qrCodeId}")]
         public async Task<IActionResult> GetQrCodeById(Guid qrCodeId, CancellationToken ct)

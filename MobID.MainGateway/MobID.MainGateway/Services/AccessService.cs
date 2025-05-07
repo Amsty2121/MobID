@@ -9,26 +9,32 @@ namespace MobID.MainGateway.Services
     public class AccessService : IAccessService
     {
         private readonly IGenericRepository<Access> _accessRepository;
+        private readonly IGenericRepository<User> _userRepository;
         private readonly IGenericRepository<AccessType> _accessTypeRepository;
         private readonly IGenericRepository<Organization> _organizationRepository;
         private readonly IGenericRepository<QrCode> _qrCodeRepository;
 
         public AccessService(
             IGenericRepository<Access> accessRepository,
+            IGenericRepository<User> userRepository,
             IGenericRepository<AccessType> accessTypeRepository,
             IGenericRepository<Organization> organizationRepository,
             IGenericRepository<QrCode> qrCodeRepository)
         {
             _accessRepository = accessRepository;
+            _userRepository = userRepository;
             _accessTypeRepository = accessTypeRepository;
             _organizationRepository = organizationRepository;
             _qrCodeRepository = qrCodeRepository;
         }
 
-        public async Task<AccessDto> CreateAccess(AccessCreateReq request, CancellationToken ct = default)
+        public async Task<AccessDto> CreateAccess(AccessCreateReq request, Guid creatorId, CancellationToken ct = default)
         {
             var accessType = await _accessTypeRepository.GetById(request.AccessTypeId, ct)
                 ?? throw new InvalidOperationException("Access type not found.");
+            
+            var user = await _userRepository.GetById(creatorId, ct)
+                ?? throw new InvalidOperationException("User Creator not found.");
 
             var organization = await _organizationRepository.GetById(request.OrganizationId, ct)
                 ?? throw new InvalidOperationException("Organization not found.");
@@ -36,6 +42,7 @@ namespace MobID.MainGateway.Services
             var access = new Access
             {
                 Id = Guid.NewGuid(),
+                CreatedBy = user.Id,
                 OrganizationId = organization.Id,
                 AccessTypeId = accessType.Id,
                 ExpirationDateTime = request.ExpirationDate,
@@ -73,7 +80,7 @@ namespace MobID.MainGateway.Services
         public async Task<PagedResponse<AccessDto>> GetAccessesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
         {
             int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var queryList = (await _accessRepository.GetWhere(a => a.DeletedAt == null, ct))?.ToList() ?? new List<Access>();
+            var queryList = (await _accessRepository.GetWhereWithInclude(a => a.DeletedAt == null, ct, x => x.AccessType, y => y.Creator))?.ToList() ?? new List<Access>();
             int total = queryList.Count;
             var accesses = queryList
                                 .Skip(offset)

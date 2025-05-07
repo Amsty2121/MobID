@@ -184,16 +184,17 @@ namespace MobID.MainGateway.Migrations
                 name: "OrganizationUsers",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrganizationUsers", x => new { x.OrganizationId, x.UserId });
+                    table.PrimaryKey("PK_OrganizationUsers", x => x.Id);
                     table.ForeignKey(
                         name: "FK_OrganizationUsers_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
@@ -292,8 +293,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Email", "PasswordHash", "UpdatedAt", "Username" },
                 values: new object[,]
                 {
-                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
-                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
+                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
                 });
 
             migrationBuilder.InsertData(
@@ -301,8 +302,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "RoleId", "UserId", "CreatedAt", "DeletedAt", "Id", "IsActive", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8983) },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8990) }
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3853) },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3859) }
                 });
 
             migrationBuilder.CreateIndex(
@@ -324,6 +325,11 @@ namespace MobID.MainGateway.Migrations
                 name: "IX_Organizations_OwnerId",
                 table: "Organizations",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationUsers_OrganizationId",
+                table: "OrganizationUsers",
+                column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrganizationUsers_UserId",

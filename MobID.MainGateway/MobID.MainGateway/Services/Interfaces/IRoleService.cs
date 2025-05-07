@@ -1,9 +1,5 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Rsp;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Services.Interfaces
 {

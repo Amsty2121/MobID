@@ -1,8 +1,5 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Services.Interfaces
 {

@@ -2,9 +2,6 @@
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Controllers
 {
@@ -13,14 +10,20 @@ namespace MobID.MainGateway.Controllers
     public class AccessController : ControllerBase
     {
         private readonly IAccessService _accessService;
-        public AccessController(IAccessService accessService) => _accessService = accessService;
+        public AccessController(IAccessService accessService)
+        {
+            _accessService = accessService;
+        }
+
+        private Guid UserId => Guid.Parse(HttpContext.User.Claims.First(t => t.Type == nameof(MobID.MainGateway.Models.Entities.User.Id)).Value);
+
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccess([FromBody] AccessCreateReq request, CancellationToken ct)
         {
             try
             {
-                var access = await _accessService.CreateAccess(request, ct);
+                var access = await _accessService.CreateAccess(request, UserId, ct);
                 return Ok(access);
             }
             catch (Exception ex)

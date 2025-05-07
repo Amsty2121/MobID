@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Enums;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Controllers
 {
@@ -100,12 +98,30 @@ namespace MobID.MainGateway.Controllers
         }
 
         [HttpPost("{organizationId}/addUser")]
-        public async Task<IActionResult> AddUserToOrganization(Guid organizationId, [FromQuery] Guid userId, CancellationToken ct)
+        public async Task<IActionResult> AddUserToOrganization(
+            Guid organizationId,
+            [FromBody] OrganizationAddUserReq request,
+            CancellationToken ct)
         {
             try
             {
-                bool success = await _orgService.AddUserToOrganization(organizationId, userId, ct);
-                return success ? Ok() : BadRequest("Could not add user to organization.");
+                var role = Enum.Parse<OrganizationUserRole>(request.Role ?? OrganizationUserRole.Member.ToString(), ignoreCase: true);
+
+                bool success = await _orgService.AddUserToOrganization(
+                    organizationId,
+                    request.UserId,
+                    role,
+                    ct
+                );
+
+                if (!success)
+                    return BadRequest(new { message = "Utilizatorul este deja membru al organizației." });
+
+                return Ok();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new { message = $"Rol invalid: '{request.Role}'. Rolurile permise sunt Owner, Admin, Member." });
             }
             catch (Exception ex)
             {
@@ -114,7 +130,10 @@ namespace MobID.MainGateway.Controllers
         }
 
         [HttpPost("{organizationId}/removeUser")]
-        public async Task<IActionResult> RemoveUserFromOrganization(Guid organizationId, [FromQuery] Guid userId, CancellationToken ct)
+        public async Task<IActionResult> RemoveUserFromOrganization(
+            Guid organizationId,
+            [FromQuery] Guid userId,
+            CancellationToken ct)
         {
             try
             {

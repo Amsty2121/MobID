@@ -191,10 +191,8 @@ namespace MobID.MainGateway.Migrations
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.OrganizationUser", b =>
                 {
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -203,13 +201,21 @@ namespace MobID.MainGateway.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("OrganizationId", "UserId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UserId");
 
@@ -366,7 +372,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO",
+                            PasswordHash = "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "admin"
                         },
@@ -375,7 +381,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$L.wGPquSbEzgetnKMSdFpufh4bZFyz8BoeexjNrxpaKfAMCIaKTVO",
+                            PasswordHash = "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "user"
                         });
@@ -418,7 +424,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8983)
+                            UpdatedAt = new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3853)
                         },
                         new
                         {
@@ -427,7 +433,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 3, 25, 16, 12, 46, 480, DateTimeKind.Utc).AddTicks(8990)
+                            UpdatedAt = new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3859)
                         });
                 });
 

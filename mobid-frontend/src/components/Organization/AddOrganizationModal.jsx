@@ -49,6 +49,7 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
         ownerId: selectedOwner.value
       });
       onSuccess();
+      onClose();
     } catch (err) {
       setError("Nu am putut crea organizația: " + err.message);
     }

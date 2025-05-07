@@ -4,7 +4,6 @@
 
 /* Container general pentru pagina de organizații */
 .org-page {
-  padding: 1rem;
   position: relative;
   color: var(--color-iron);
 }
@@ -42,7 +41,10 @@
 }
 
 /* Input text & single value */
-.org-select__input input,
+.org-select__input {
+  color: var(--color-iron) !important;
+}
+
 .org-select__single-value {
   color: var(--color-primary) !important;
 }

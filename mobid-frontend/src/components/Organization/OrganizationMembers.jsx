@@ -1,3 +1,4 @@
+// src/components/Organization/OrganizationMembers.jsx
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import GenericTable from "../GenericTable/GenericTable";
@@ -6,7 +7,6 @@ import DeleteMemberModal from "./DeleteMemberModal";
 import {
   getOrganizationsPaged,
   getUsersForOrganization,
-  addUserToOrganization,
   removeUserFromOrganization
 } from "../../api/organizationApi";
 import { FaTrash } from "react-icons/fa";
@@ -69,7 +69,13 @@ const OrganizationMembers = () => {
     setMembers(data);
   };
 
-  const orgOptions = orgs.map(o => ({ value: o.id, label: o.name }));
+  // build options with both name and id
+  const orgOptions = orgs.map(o => ({
+    value: o.id,
+    name: o.name,
+    id: o.id,
+    label: o.name, // fallback if needed
+  }));
 
   const memberColumns = [
     { header: "User ID",   accessor: "userId"   },
@@ -93,6 +99,7 @@ const OrganizationMembers = () => {
     <div className="org-page">
       {error && <p className="error">{error}</p>}
 
+      {/* organizații Select with Name + Id */}
       <div className="org-select-wrapper">
         <Select
           className="org-select"
@@ -102,13 +109,20 @@ const OrganizationMembers = () => {
           onChange={setSelectedOrg}
           isLoading={loadingOrgs}
           placeholder="Selectează organizație..."
+          noOptionsMessage={() => "Nu s-au găsit organizații"}
+          formatOptionLabel={({ name, id }) => (
+            <div className="org-option">
+              <div className="org-option-name"><strong>Name:</strong> {name}</div>
+              <div className="org-option-id">Id: {id}</div>
+            </div>
+          )}
         />
       </div>
 
       {selectedOrg && (
         <>
           <h2 className="org-heading">
-            Membri din „{selectedOrg.label}”
+            Membri din „{selectedOrg.name}”
           </h2>
           <GenericTable
             title=""

@@ -24,18 +24,6 @@ namespace MobID.MainGateway.Repo
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configurarea relațiilor
-            modelBuilder.Entity<OrganizationUser>()
-                .HasKey(ou => new { ou.OrganizationId, ou.UserId });
-            modelBuilder.Entity<OrganizationUser>()
-                .HasOne(ou => ou.Organization)
-                .WithMany(o => o.OrganizationUsers)
-                .HasForeignKey(ou => ou.OrganizationId);
-            modelBuilder.Entity<OrganizationUser>()
-                .HasOne(ou => ou.User)
-                .WithMany(u => u.OrganizationUsers)
-                .HasForeignKey(ou => ou.UserId);
-
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
             modelBuilder.Entity<UserRole>()

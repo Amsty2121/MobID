@@ -2,11 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import {
-  getAllRoles,
   assignRoleToUser,
   removeRoleFromUser,
   getUserRoles
 } from "../../api/userApi";
+
+import {
+  getAllRoles
+} from "../../api/roleApi"
+
+
 import "./User.css";
 
 const EditUserRolesModal = ({ user, onClose }) => {
