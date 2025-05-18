@@ -55,3 +55,4 @@ export async function getAccessTypeById(typeId) {
   const { data } = await api.get(`/AccessType/${typeId}`);
   return data;
 }
+

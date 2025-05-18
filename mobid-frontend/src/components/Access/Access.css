@@ -65,12 +65,12 @@
   display: none !important;
 }
 
-/* Menu (lista de optiuni) */
+/* Menu (lista de opțiuni) */
 .org-select__menu {
   background-color: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
 }
-/* Fiecare optiune */
+/* Fiecare opțiune */
 .org-select__option {
   background-color: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
@@ -106,4 +106,110 @@
 }
 .icon-btn:hover {
   color: var(--color-primary);
+}
+
+/* =============================
+   Detalii Acces (AccessDetails)
+   ============================= */
+
+.details-modal {
+  width: 500px;
+}
+
+.details-title {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.details-item {
+  background-color: var(--color-tuna-light);
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.details-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--color-iron);
+  font-size: 0.9rem;
+}
+
+.details-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--color-shark);
+}
+
+.details-desc {
+  font-size: 0.8rem;
+  color: var(--color-bombay);
+}
+
+/* ===========================================
+   PREVIEW MODAL
+   =========================================== */
+
+.preview-modal {
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+}
+
+.preview-header {
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.preview-body {
+  background-color: var(--color-tuna);
+  padding: 1rem;
+  color: var(--color-iron);
+
+  /* împachetare text pentru descrieri lungi */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* aliniază sus pentru multiline */
+  margin-bottom: 0.75rem;
+}
+
+.preview-label {
+  flex: 0 0 150px; /* coloană fixă pentru label */
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.preview-value {
+  flex: 1 1 auto;  /* valorea se poate sparge pe mai multe rânduri */
+  color: var(--color-regent-gray);
+}
+
+/* ===========================================
+   FORM TEXTAREA
+   =========================================== */
+
+.add-org-form textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  /* păstrează newline și sparge cuvinte foarte lungi */
+  white-space: pre-wrap;
+  word-break: break-word;
 }

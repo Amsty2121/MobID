@@ -1,6 +1,7 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Entities;
+using MobID.MainGateway.Models.Enums;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 
@@ -8,86 +9,123 @@ namespace MobID.MainGateway.Services
 {
     public class AccessService : IAccessService
     {
-        private readonly IGenericRepository<Access> _accessRepository;
-        private readonly IGenericRepository<User> _userRepository;
-        private readonly IGenericRepository<AccessType> _accessTypeRepository;
-        private readonly IGenericRepository<Organization> _organizationRepository;
-        private readonly IGenericRepository<QrCode> _qrCodeRepository;
+        private readonly IGenericRepository<Access> _accessRepo;
+        private readonly IGenericRepository<User> _userRepo;
+        private readonly IGenericRepository<AccessType> _accessTypeRepo;
+        private readonly IGenericRepository<Organization> _orgRepo;
 
         public AccessService(
-            IGenericRepository<Access> accessRepository,
-            IGenericRepository<User> userRepository,
-            IGenericRepository<AccessType> accessTypeRepository,
-            IGenericRepository<Organization> organizationRepository,
-            IGenericRepository<QrCode> qrCodeRepository)
+            IGenericRepository<Access> accessRepo,
+            IGenericRepository<User> userRepo,
+            IGenericRepository<AccessType> accessTypeRepo,
+            IGenericRepository<Organization> orgRepo)
         {
-            _accessRepository = accessRepository;
-            _userRepository = userRepository;
-            _accessTypeRepository = accessTypeRepository;
-            _organizationRepository = organizationRepository;
-            _qrCodeRepository = qrCodeRepository;
+            _accessRepo = accessRepo;
+            _userRepo = userRepo;
+            _accessTypeRepo = accessTypeRepo;
+            _orgRepo = orgRepo;
         }
 
-        public async Task<AccessDto> CreateAccess(AccessCreateReq request, Guid creatorId, CancellationToken ct = default)
+        public async Task<AccessDto> CreateAccess(AccessCreateReq req, Guid creatorId, CancellationToken ct = default)
         {
-            var accessType = await _accessTypeRepository.GetById(request.AccessTypeId, ct)
+            var at = await _accessTypeRepo.GetById(req.AccessTypeId, ct)
                 ?? throw new InvalidOperationException("Access type not found.");
-            
-            var user = await _userRepository.GetById(creatorId, ct)
-                ?? throw new InvalidOperationException("User Creator not found.");
 
-            var organization = await _organizationRepository.GetById(request.OrganizationId, ct)
+            // validări articol
+            switch (at.Name)
+            {
+                case "OneUse":
+                    if (!req.MaxUsersPerPass.HasValue)
+                        throw new InvalidOperationException("MaxUsersPerPass e obligatoriu pentru OneUse.");
+                    break;
+                case "MultiUse":
+                    if (!req.MaxUses.HasValue || !req.MaxUsersPerPass.HasValue)
+                        throw new InvalidOperationException("MaxUses și MaxUsersPerPass sunt obligatorii pentru MultiUse.");
+                    break;
+                case "Subscription":
+                    if (!req.MonthlyLimit.HasValue || !req.SubscriptionPeriodMonths.HasValue)
+                        throw new InvalidOperationException("MonthlyLimit și SubscriptionPeriodMonths sunt obligatorii pentru Subscription.");
+                    break;
+                case "IdentityConfirm":
+                    // nici o validare suplimentară
+                    break;
+                default:
+                    throw new InvalidOperationException("Tip de acces necunoscut.");
+            }
+
+            var org = await _orgRepo.GetById(req.OrganizationId, ct)
                 ?? throw new InvalidOperationException("Organization not found.");
 
             var access = new Access
             {
                 Id = Guid.NewGuid(),
-                CreatedBy = user.Id,
-                OrganizationId = organization.Id,
-                AccessTypeId = accessType.Id,
-                ExpirationDateTime = request.ExpirationDate,
-                CreatedAt = DateTime.UtcNow
+                OrganizationId = org.Id,
+                CreatedBy = creatorId,
+                AccessTypeId = at.Id,
+                Description = req.Description,
+                ExpirationDateTime = req.ExpirationDate.HasValue
+                    ? DateTime.SpecifyKind(req.ExpirationDate.Value, DateTimeKind.Utc)
+                    : (DateTime?)null,
+                RestrictToOrganizationMembers = req.RestrictToOrganizationMembers,
+                ScanMode = Enum.Parse<AccessNumberScanMode>(req.ScanMode),
+                MaxUses = req.MaxUses,
+                MaxUsersPerPass = req.MaxUsersPerPass,
+                MonthlyLimit = req.MonthlyLimit,
+                SubscriptionPeriodMonths = req.SubscriptionPeriodMonths,
+                UpdatedAt = DateTime.UtcNow
             };
 
-            await _accessRepository.Add(access, ct);
+            await _accessRepo.Add(access, ct);
             return new AccessDto(access);
         }
 
+
         public async Task<AccessDto?> GetAccessById(Guid accessId, CancellationToken ct = default)
         {
-            var access = await _accessRepository.GetByIdWithInclude(
-                accessId, ct, a => a.Organization, a => a.Creator, a => a.AccessType, a => a.QrCodes);
-            return access == null ? null : new AccessDto(access);
+            var a = await _accessRepo.GetByIdWithInclude(
+                accessId, ct,
+                x => x.Organization,
+                x => x.Creator,
+                x => x.AccessType,
+                x => x.QrCodes
+            );
+            return a is null ? null : new AccessDto(a);
         }
 
         public async Task<List<AccessDto>> GetAccessesForOrganization(Guid organizationId, CancellationToken ct = default)
         {
-            var accesses = await _accessRepository.GetWhereWithInclude(
-                a => a.OrganizationId == organizationId && a.DeletedAt == null, ct,
-                a => a.Organization, a => a.Creator, a => a.AccessType, a => a.QrCodes);
-            return accesses.Select(a => new AccessDto(a)).ToList();
+            var list = await _accessRepo.GetWhereWithInclude(
+                x => x.OrganizationId == organizationId && x.DeletedAt == null,
+                ct,
+                x => x.Organization,
+                x => x.Creator,
+                x => x.AccessType,
+                x => x.QrCodes
+            );
+            return list.Select(x => new AccessDto(x)).ToList();
         }
 
         public async Task<bool> DeactivateAccess(Guid accessId, CancellationToken ct = default)
         {
-            var access = await _accessRepository.GetById(accessId, ct);
-            if (access == null) return false;
-            access.DeletedAt = DateTime.UtcNow;
-            await _accessRepository.Update(access, ct);
+            var a = await _accessRepo.GetById(accessId, ct);
+            if (a == null) return false;
+            a.DeletedAt = DateTime.UtcNow;
+            await _accessRepo.Update(a, ct);
             return true;
         }
 
         public async Task<PagedResponse<AccessDto>> GetAccessesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
         {
-            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var queryList = (await _accessRepository.GetWhereWithInclude(a => a.DeletedAt == null, ct, x => x.AccessType, y => y.Creator))?.ToList() ?? new List<Access>();
-            int total = queryList.Count;
-            var accesses = queryList
-                                .Skip(offset)
-                                .Take(pagedRequest.PageSize)
-                                .Select(a => new AccessDto(a))
-                                .ToList();
-            return new PagedResponse<AccessDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, accesses);
+            var all = (await _accessRepo.GetWhereWithInclude(x => x.DeletedAt == null, ct, x => x.AccessType, x => x.Creator))?.ToList()
+                      ?? new List<Access>();
+            int total = all.Count;
+            var page = all
+                .Skip(pagedRequest.PageIndex * pagedRequest.PageSize)
+                .Take(pagedRequest.PageSize)
+                .Select(x => new AccessDto(x))
+                .ToList();
+
+            return new PagedResponse<AccessDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, page);
         }
     }
 }

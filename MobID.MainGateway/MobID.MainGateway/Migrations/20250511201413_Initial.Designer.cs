@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MobID.MainGateway.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20250422205231_Initial")]
+    [Migration("20250511201413_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -43,6 +43,10 @@ namespace MobID.MainGateway.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("ExpirationDateTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -50,9 +54,6 @@ namespace MobID.MainGateway.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<int?>("MaxUsersPerPass")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("MaxUsersPerUsage")
                         .HasColumnType("integer");
 
                     b.Property<int?>("MaxUses")
@@ -70,11 +71,14 @@ namespace MobID.MainGateway.Migrations
                     b.Property<int>("ScanMode")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("TotalUses")
+                    b.Property<int?>("SubscriptionPeriodMonths")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UsesPerPeriod")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -375,7 +379,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy",
+                            PasswordHash = "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "admin"
                         },
@@ -384,7 +388,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$lK22nHzxu3lK.M0nXmL2B.ZMeWIGckOxn0jKePCVQeDqHcVG2vZRy",
+                            PasswordHash = "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "user"
                         });
@@ -427,7 +431,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3853)
+                            UpdatedAt = new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8193)
                         },
                         new
                         {
@@ -436,7 +440,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 4, 22, 20, 52, 30, 781, DateTimeKind.Utc).AddTicks(3859)
+                            UpdatedAt = new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8199)
                         });
                 });
 

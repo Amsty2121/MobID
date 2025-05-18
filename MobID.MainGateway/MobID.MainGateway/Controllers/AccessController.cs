@@ -19,12 +19,12 @@ namespace MobID.MainGateway.Controllers
 
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateAccess([FromBody] AccessCreateReq request, CancellationToken ct)
+        public async Task<IActionResult> CreateAccess([FromBody] AccessCreateReq req, CancellationToken ct)
         {
             try
             {
-                var access = await _accessService.CreateAccess(request, UserId, ct);
-                return Ok(access);
+                var dto = await _accessService.CreateAccess(req, UserId, ct);
+                return Ok(dto);
             }
             catch (Exception ex)
             {

@@ -252,3 +252,7 @@
     background-color: #45b045;
   }
   
+ .clickable-row:hover {
+  background-color: var(--color-tuna-light);
+  cursor: pointer;
+}

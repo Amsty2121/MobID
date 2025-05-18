@@ -58,15 +58,21 @@ namespace MobID.MainGateway.Services
             var access = await _accessRepository.GetById(qrCode.AccessId, ct);
             if (access == null || access.DeletedAt != null ||
                 (access.ExpirationDateTime != null && access.ExpirationDateTime < DateTime.UtcNow))
+            {
                 return false;
+            }
 
             if (access.RestrictToOrganizationMembers)
             {
                 var membership = await _organizationUserRepository.FirstOrDefault(
-                    ou => ou.OrganizationId == access.OrganizationId && ou.UserId == scanningUserId, ct);
+                    ou => ou.OrganizationId == access.OrganizationId
+                       && ou.UserId == scanningUserId,
+                    ct
+                );
                 if (membership == null)
                     return false;
             }
+
             return true;
         }
 

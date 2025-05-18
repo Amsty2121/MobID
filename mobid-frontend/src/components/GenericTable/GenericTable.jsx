@@ -1,4 +1,3 @@
-// src/components/GenericTable/GenericTable.jsx
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaEdit } from "react-icons/fa";
 import "./GenericTable.css";
@@ -14,6 +13,7 @@ const GenericTable = ({
   showDeleteOption,
   onEdit,
   showEditOption,
+  onRowClick,           // nou
   currentPage,
   totalCount,
   pageSize,
@@ -23,47 +23,36 @@ const GenericTable = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(data || []);
 
-  // Filtrare locală pe baza coloanelor specificate
   useEffect(() => {
-    if (!data) {
-      setFilteredData([]);
-      return;
-    }
-    const lowerSearch = searchTerm.toLowerCase();
-    const filtered = data.filter((row) =>
-      filterColumns.some((col) => {
-        const cell = row[col];
-        return cell && cell.toString().toLowerCase().includes(lowerSearch);
-      })
+    if (!data) return setFilteredData([]);
+    const lower = searchTerm.toLowerCase();
+    setFilteredData(
+      data.filter(row =>
+        filterColumns.some(col => {
+          const cell = row[col];
+          return cell && cell.toString().toLowerCase().includes(lower);
+        })
+      )
     );
-    setFilteredData(filtered);
   }, [searchTerm, data, filterColumns]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="generic-table-page">
-      {/* Titlu centrat */}
       <h2 className="role-heading">{title}</h2>
-
-      {/* Container cu fundal diferit pentru filtrare și tabel */}
       <div className="role-table-container">
-        {/* Rând pentru filtrare și, opțional, butonul de adăugare */}
         <div className="filter-plus-row">
           <div className="filter-container">
             <input
               type="text"
-              placeholder="Filtrează după nume/descriere..."
+              placeholder="Filtrează..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
           {showAddOption && (
-            <div
-              className="add-role-icon"
-              title="Adaugă"
-              onClick={onAdd}
-            >
+            <div className="add-role-icon" onClick={onAdd} title="Adaugă">
               <FaPlus />
             </div>
           )}
@@ -75,26 +64,26 @@ const GenericTable = ({
           <table className="role-table">
             <thead>
               <tr>
-                {columns.map((col, index) => (
-                  <th key={index}>{col.header}</th>
+                {columns.map((col, i) => (
+                  <th key={i}>{col.header}</th>
                 ))}
-                {/* Afișăm doar o singură coloană „Acțiuni” 
-                    dacă avem edit sau delete activate */}
                 {(showEditOption || showDeleteOption) && (
                   <th className="actions-col">Acțiuni</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((row, index) => (
-                <tr key={index}>
-                  {columns.map((col, idx) => (
-                    <td key={idx}>{row[col.accessor]}</td>
+              {filteredData.map((row, i) => (
+                <tr
+                  key={i}
+                  className={onRowClick ? "clickable-row" : ""}
+                  onClick={() => onRowClick && onRowClick(row)}
+                >
+                  {columns.map((col, j) => (
+                    <td key={j}>{row[col.accessor]}</td>
                   ))}
-
-                  {/* În aceeași coloană afișăm butoanele de edit și delete, dacă sunt activate */}
                   {(showEditOption || showDeleteOption) && (
-                    <td className="actions-col">
+                    <td className="actions-col" onClick={e => e.stopPropagation()}>
                       {showEditOption && (
                         <button
                           className="icon-btn"
@@ -121,7 +110,6 @@ const GenericTable = ({
           </table>
         )}
 
-        {/* Paginare */}
         <div className="pagination">
           <div className="pagination-left">
             <button
@@ -145,11 +133,12 @@ const GenericTable = ({
             <select
               id="pageSizeSelect"
               value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}>
+              {[10, 20, 50, 5000].map((sz) => (
+                <option key={sz} value={sz}>
+                  {sz === 5000 ? "ALL" : sz}
+                </option>
+              ))}
             </select>
             <span>Total: {totalCount}</span>
           </div>

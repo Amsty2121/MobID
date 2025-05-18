@@ -5,6 +5,7 @@ import {
   deleteOrganization,
   updateOrganization
 } from "../../api/organizationApi";
+import Select from "react-select";
 import GenericTable from "../GenericTable/GenericTable";
 import AddOrganizationModal from "./AddOrganizationModal";
 import EditOrganizationModal from "./EditOrganizationModal";
@@ -13,22 +14,21 @@ import OrganizationMembers from "./OrganizationMembers";
 import "./Organization.css";
 
 const Organization = () => {
-  const [organizations, setOrganizations] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [limit, setLimit] = useState(5);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [organizations, setOrganizations]     = useState([]);
+  const [totalCount, setTotalCount]           = useState(0);
+  const [currentPage, setCurrentPage]         = useState(0);
+  const [limit, setLimit]                     = useState(5);
+  const [loading, setLoading]                 = useState(false);
+  const [error, setError]                     = useState("");
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [orgToEdit, setOrgToEdit] = useState(null);
+  const [showAddModal, setShowAddModal]       = useState(false);
+  const [showEditModal, setShowEditModal]     = useState(false);
+  const [orgToEdit, setOrgToEdit]             = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [orgToDelete, setOrgToDelete] = useState(null);
+  const [orgToDelete, setOrgToDelete]         = useState(null);
 
-  // Select for members table
-  const [selectedOrgId, setSelectedOrgId] = useState("");
-  const [selectedOrgName, setSelectedOrgName] = useState("");
+  // lifted selector state
+  const [selectedOrg, setSelectedOrg]         = useState(null);
 
   const fetchOrganizations = async () => {
     setLoading(true);
@@ -44,15 +44,19 @@ const Organization = () => {
     }
   };
 
-  useEffect(() => { fetchOrganizations(); }, [currentPage, limit]);
+  // ❌ was useEffect(fetchOrganizations, [currentPage, limit]);
+  // ✅ now wrap in a plain callback so we don't return a Promise
+  useEffect(() => {
+    fetchOrganizations();
+  }, [currentPage, limit]);
 
-  const handleEdit = (org) => {
+  const handleEdit = org => {
     setOrgToEdit(org);
     setShowEditModal(true);
   };
-  const submitEdit = async (updateData) => {
+  const submitEdit = async upd => {
     try {
-      await updateOrganization(updateData);
+      await updateOrganization(upd);
       setShowEditModal(false);
       fetchOrganizations();
     } catch {
@@ -60,7 +64,7 @@ const Organization = () => {
     }
   };
 
-  const handleDelete = (org) => {
+  const handleDelete = org => {
     setOrgToDelete(org);
     setShowDeleteModal(true);
   };
@@ -74,13 +78,12 @@ const Organization = () => {
     }
   };
 
-  // When user selects org from dropdown
-  const handleSelectOrg = (e) => {
-    const id = e.target.value;
-    setSelectedOrgId(id);
-    const org = organizations.find(o => o.id === id);
-    setSelectedOrgName(org ? org.name : "");
-  };
+  const orgOptions = organizations.map(o => ({
+    value: o.id,
+    label: o.name,
+    name:  o.name,
+    id:    o.id
+  }));
 
   const columns = [
     { header: "ID", accessor: "id" },
@@ -112,12 +115,31 @@ const Organization = () => {
         onPageSizeChange={size => { setLimit(size); setCurrentPage(0); }}
       />
 
-      {
-        <OrganizationMembers
-          organizationId={selectedOrgId}
-          organizationName={selectedOrgName}
+      <div className="org-select-wrapper">
+        <Select
+          className="org-select"
+          classNamePrefix="org-select"
+          options={orgOptions}
+          value={selectedOrg}
+          onChange={setSelectedOrg}
+          isLoading={loading}
+          placeholder="Selectează organizație..."
+          noOptionsMessage={() => "Nu s-au găsit organizații"}
+          formatOptionLabel={({ name, id }) => (
+            <div className="org-option">
+              <div className="org-option-name"><strong>Name:</strong> {name}</div>
+              <div className="org-option-id">Id: {id}</div>
+            </div>
+          )}
         />
-      }
+      </div>
+
+      {selectedOrg && (
+        <OrganizationMembers
+          organizationId={selectedOrg.value}
+          organizationName={selectedOrg.name}
+        />
+      )}
 
       {showAddModal && (
         <AddOrganizationModal
@@ -125,7 +147,6 @@ const Organization = () => {
           onClose={() => setShowAddModal(false)}
         />
       )}
-
       {showEditModal && orgToEdit && (
         <EditOrganizationModal
           organization={orgToEdit}
@@ -133,7 +154,6 @@ const Organization = () => {
           onClose={() => setShowEditModal(false)}
         />
       )}
-
       {showDeleteModal && orgToDelete && (
         <DeleteOrganizationModal
           organization={orgToDelete}
