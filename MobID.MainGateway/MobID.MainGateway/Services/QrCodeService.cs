@@ -3,100 +3,89 @@ using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 
-namespace MobID.MainGateway.Services
+namespace MobID.MainGateway.Services;
+
+public class QrCodeService : IQrCodeService
 {
-    public class QrCodeService : IQrCodeService
+    private readonly IGenericRepository<QrCode> _qrRepo;
+    private readonly IGenericRepository<Access> _accessRepo;
+    private readonly IGenericRepository<OrganizationUser> _orgUserRepo;
+
+    public QrCodeService(
+        IGenericRepository<QrCode> qrRepo,
+        IGenericRepository<Access> accessRepo,
+        IGenericRepository<OrganizationUser> orgUserRepo)
     {
-        private readonly IGenericRepository<QrCode> _qrCodeRepository;
-        private readonly IGenericRepository<Access> _accessRepository;
-        private readonly IGenericRepository<OrganizationUser> _organizationUserRepository;
+        _qrRepo = qrRepo;
+        _accessRepo = accessRepo;
+        _orgUserRepo = orgUserRepo;
+    }
 
-        public QrCodeService(
-            IGenericRepository<QrCode> qrCodeRepository,
-            IGenericRepository<Access> accessRepository,
-            IGenericRepository<OrganizationUser> organizationUserRepository)
+    /// <inheritdoc/>
+    public async Task<QrCodeDto> CreateQrCodeAsync(Guid accessId, CancellationToken ct = default)
+    {
+        var access = await _accessRepo.GetById(accessId, ct)
+                   ?? throw new InvalidOperationException("Access not found.");
+        var qr = new QrCode { Id = Guid.NewGuid(), AccessId = accessId, CreatedAt = DateTime.UtcNow };
+        await _qrRepo.Add(qr, ct);
+        return new QrCodeDto(qr);
+    }
+
+    /// <inheritdoc/>
+    public async Task<QrCodeDto?> GetQrCodeByIdAsync(Guid qrCodeId, CancellationToken ct = default)
+    {
+        var qr = await _qrRepo.GetById(qrCodeId, ct);
+        return qr == null ? null : new QrCodeDto(qr);
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<QrCodeDto>> GetQrCodesForAccessAsync(Guid accessId, CancellationToken ct = default)
+    {
+        var qrs = await _qrRepo.GetWhere(q => q.AccessId == accessId && q.DeletedAt == null, ct);
+        return qrs.Select(q => new QrCodeDto(q)).ToList();
+    }
+
+    /// <inheritdoc/>
+    public async Task<PagedResponse<QrCodeDto>> GetQrCodesPagedAsync(PagedRequest request, CancellationToken ct = default)
+    {
+        var all = (await _qrRepo.GetWhere(q => q.DeletedAt == null, ct)).ToList();
+        var total = all.Count;
+        var page = all
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .Select(q => new QrCodeDto(q))
+            .ToList();
+        return new PagedResponse<QrCodeDto>(request.PageIndex, request.PageSize, total, page);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> DeactivateQrCodeAsync(Guid qrCodeId, CancellationToken ct = default)
+    {
+        var qr = await _qrRepo.GetById(qrCodeId, ct);
+        if (qr == null) return false;
+        qr.DeletedAt = DateTime.UtcNow;
+        await _qrRepo.Update(qr, ct);
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ValidateQrCodeAsync(Guid qrCodeId, Guid scanningUserId, CancellationToken ct = default)
+    {
+        var qr = await _qrRepo.GetById(qrCodeId, ct);
+        if (qr == null || qr.DeletedAt != null) return false;
+
+        var access = await _accessRepo.GetById(qr.AccessId, ct);
+        if (access == null || access.DeletedAt != null ||
+           (access.ExpirationDateTime.HasValue && access.ExpirationDateTime < DateTime.UtcNow))
+            return false;
+
+        if (access.RestrictToOrganizationMembers)
         {
-            _qrCodeRepository = qrCodeRepository;
-            _accessRepository = accessRepository;
-            _organizationUserRepository = organizationUserRepository;
+            var member = await _orgUserRepo.FirstOrDefault(
+                ou => ou.OrganizationId == access.OrganizationId && ou.UserId == scanningUserId, ct);
+            if (member == null) return false;
         }
 
-        public async Task<QrCodeDto> GenerateQrCode(Guid accessId, CancellationToken ct = default)
-        {
-            var access = await _accessRepository.GetById(accessId, ct)
-                ?? throw new InvalidOperationException("Access not found.");
-
-            var qrCode = new QrCode
-            {
-                Id = Guid.NewGuid(),
-                AccessId = accessId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _qrCodeRepository.Add(qrCode, ct);
-            return new QrCodeDto(qrCode);
-        }
-
-        public async Task<QrCodeDto?> GetQrCodeById(Guid qrCodeId, CancellationToken ct = default)
-        {
-            var qrCode = await _qrCodeRepository.GetById(qrCodeId, ct);
-            return qrCode == null ? null : new QrCodeDto(qrCode);
-        }
-
-        public async Task<List<QrCodeDto>> GetQrCodesForAccess(Guid accessId, CancellationToken ct = default)
-        {
-            var qrCodes = await _qrCodeRepository.GetWhere(qr => qr.AccessId == accessId && qr.DeletedAt == null, ct);
-            return qrCodes.Select(qr => new QrCodeDto(qr)).ToList();
-        }
-
-        public async Task<bool> ValidateQrCode(Guid qrCodeId, Guid scanningUserId, CancellationToken ct = default)
-        {
-            var qrCode = await _qrCodeRepository.GetById(qrCodeId, ct);
-            if (qrCode == null || qrCode.DeletedAt != null)
-                return false;
-
-            var access = await _accessRepository.GetById(qrCode.AccessId, ct);
-            if (access == null || access.DeletedAt != null ||
-                (access.ExpirationDateTime != null && access.ExpirationDateTime < DateTime.UtcNow))
-            {
-                return false;
-            }
-
-            if (access.RestrictToOrganizationMembers)
-            {
-                var membership = await _organizationUserRepository.FirstOrDefault(
-                    ou => ou.OrganizationId == access.OrganizationId
-                       && ou.UserId == scanningUserId,
-                    ct
-                );
-                if (membership == null)
-                    return false;
-            }
-
-            return true;
-        }
-
-        public async Task<bool> DeactivateQrCode(Guid qrCodeId, CancellationToken ct = default)
-        {
-            var qrCode = await _qrCodeRepository.GetById(qrCodeId, ct);
-            if (qrCode == null)
-                return false;
-            qrCode.DeletedAt = DateTime.UtcNow;
-            await _qrCodeRepository.Update(qrCode, ct);
-            return true;
-        }
-
-        public async Task<PagedResponse<QrCodeDto>> GetQrCodesPaged(PagedRequest pagedRequest, CancellationToken ct = default)
-        {
-            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var qrList = (await _qrCodeRepository.GetWhere(qr => qr.DeletedAt == null, ct))?.ToList() ?? new List<QrCode>();
-            int total = qrList.Count;
-            var qrCodes = qrList
-                                .Skip(offset)
-                                .Take(pagedRequest.PageSize)
-                                .Select(qr => new QrCodeDto(qr))
-                                .ToList();
-            return new PagedResponse<QrCodeDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, qrCodes);
-        }
+        return true;
     }
 }

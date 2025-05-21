@@ -11,16 +11,20 @@ namespace MobID.MainGateway.Models.Dtos
         public DateTime CreatedAt { get; }
         public DateTime UpdatedAt { get; }
 
-        public QrCodeDto(QrCode qrCode)
+        //–– toate scanările asociate
+        public List<ScanDto> Scans { get; }
+
+        public QrCodeDto(QrCode qr)
         {
-            Id = qrCode.Id;
-            AccessId = qrCode.AccessId;
-            Description = qrCode.Description;
+            Id = qr.Id;
+            AccessId = qr.AccessId;
+            Description = qr.Description;
+            IsActive = qr.IsActive && qr.DeletedAt == null;
+            CreatedAt = qr.CreatedAt;
+            UpdatedAt = qr.UpdatedAt;
 
-            IsActive = qrCode.IsActive && qrCode.DeletedAt == null;
-
-            CreatedAt = qrCode.CreatedAt;
-            UpdatedAt = qrCode.UpdatedAt;
+            Scans = qr.Scans?.Select(s => new ScanDto(s)).ToList()
+                 ?? new List<ScanDto>();
         }
     }
 }

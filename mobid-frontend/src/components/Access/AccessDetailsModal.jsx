@@ -4,12 +4,13 @@ import "./Access.css";
 
 export default function AccessDetailsModal({ access, onClose }) {
   const rows = [
-    { label: "Tip Acces",     value: access.accessType },
-    { label: "Expirare",      value: access.expirationDateTime
+    { label: "Nume Acces",            value: access.name },
+    { label: "Tip Acces",             value: access.accessType },
+    { label: "Expirare",              value: access.expirationDateTime
         ? new Date(access.expirationDateTime).toLocaleString()
         : "(niciuna)" },
-    { label: "Restricționat",  value: access.restrictToOrganizationMembers ? "Da" : "Nu" },
-    { label: "Mod Scanare",   value: access.scanModeLabel || access.scanMode },
+    { label: "Restricționat",         value: access.restrictToOrganizationMembers ? "Da" : "Nu" },
+    { label: "Mod Scanare",           value: access.scanModeLabel || access.scanMode },
     ...(access.maxUsersPerPass != null
       ? [{ label: "Max utilizatori/scanare", value: access.maxUsersPerPass }]
       : []),
@@ -23,17 +24,16 @@ export default function AccessDetailsModal({ access, onClose }) {
       ? [{ label: "Durata abonament",         value: `${access.subscriptionPeriodMonths} luni` }]
       : []),
     ...(access.usesPerPeriod != null
-      ? [{ label: "Utilizări / perioadă",     value: access.usesPerPeriod }]
+      ? [{ label: "Utilizări/ perioadă",     value: access.usesPerPeriod }]
       : []),
-    // Descriere apare întotdeauna la final
-    { label: "Descriere",      value: access.description || "(niciuna)" },
+    { label: "Descriere",              value: access.description || "(niciuna)" },
   ];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content preview-modal" onClick={e => e.stopPropagation()}>
         <div className="preview-header">
-          Detalii Acces “{access.accessType}”
+          Detalii Acces “{access.name}”
         </div>
         <div className="preview-body">
           {rows.map(({ label, value }) => (

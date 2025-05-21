@@ -59,6 +59,10 @@ namespace MobID.MainGateway.Migrations
                     b.Property<int?>("MonthlyLimit")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
@@ -191,6 +195,43 @@ namespace MobID.MainGateway.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Organizations");
+                });
+
+            modelBuilder.Entity("MobID.MainGateway.Models.Entities.OrganizationAccessShare", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SourceOrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TargetOrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("SourceOrganizationId");
+
+                    b.HasIndex("TargetOrganizationId");
+
+                    b.ToTable("OrganizationAccessShares");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.OrganizationUser", b =>
@@ -376,7 +417,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m",
+                            PasswordHash = "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "admin"
                         },
@@ -385,10 +426,52 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m",
+                            PasswordHash = "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "user"
                         });
+                });
+
+            modelBuilder.Entity("MobID.MainGateway.Models.Entities.UserAccess", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("GrantType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GrantedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessId");
+
+                    b.HasIndex("GrantedByUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAccesses");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.UserRole", b =>
@@ -428,7 +511,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8193)
+                            UpdatedAt = new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7812)
                         },
                         new
                         {
@@ -437,7 +520,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8199)
+                            UpdatedAt = new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7824)
                         });
                 });
 
@@ -447,7 +530,7 @@ namespace MobID.MainGateway.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AccessId")
+                    b.Property<Guid?>("AccessId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -456,7 +539,7 @@ namespace MobID.MainGateway.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("QrCodeId")
+                    b.Property<Guid>("QrCodeId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("ScannedAt")
@@ -517,6 +600,41 @@ namespace MobID.MainGateway.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("MobID.MainGateway.Models.Entities.OrganizationAccessShare", b =>
+                {
+                    b.HasOne("MobID.MainGateway.Models.Entities.Access", "Access")
+                        .WithMany("OrganizationAccessShares")
+                        .HasForeignKey("AccessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.Organization", "SourceOrganization")
+                        .WithMany()
+                        .HasForeignKey("SourceOrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.Organization", "TargetOrganization")
+                        .WithMany("OrganizationAccessShares")
+                        .HasForeignKey("TargetOrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Access");
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("SourceOrganization");
+
+                    b.Navigation("TargetOrganization");
+                });
+
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.OrganizationUser", b =>
                 {
                     b.HasOne("MobID.MainGateway.Models.Entities.Organization", "Organization")
@@ -558,6 +676,33 @@ namespace MobID.MainGateway.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MobID.MainGateway.Models.Entities.UserAccess", b =>
+                {
+                    b.HasOne("MobID.MainGateway.Models.Entities.Access", "Access")
+                        .WithMany("UserAccesses")
+                        .HasForeignKey("AccessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "GrantedByUser")
+                        .WithMany()
+                        .HasForeignKey("GrantedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "User")
+                        .WithMany("UserAccesses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Access");
+
+                    b.Navigation("GrantedByUser");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.UserRole", b =>
                 {
                     b.HasOne("MobID.MainGateway.Models.Entities.Role", "Role")
@@ -579,23 +724,21 @@ namespace MobID.MainGateway.Migrations
 
             modelBuilder.Entity("Scan", b =>
                 {
-                    b.HasOne("MobID.MainGateway.Models.Entities.Access", "Access")
-                        .WithMany()
-                        .HasForeignKey("AccessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("MobID.MainGateway.Models.Entities.Access", null)
+                        .WithMany("Scans")
+                        .HasForeignKey("AccessId");
 
                     b.HasOne("MobID.MainGateway.Models.Entities.QrCode", "QrCode")
-                        .WithMany()
-                        .HasForeignKey("QrCodeId");
+                        .WithMany("Scans")
+                        .HasForeignKey("QrCodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MobID.MainGateway.Models.Entities.User", "ScannedBy")
                         .WithMany()
                         .HasForeignKey("ScannedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Access");
 
                     b.Navigation("QrCode");
 
@@ -604,7 +747,13 @@ namespace MobID.MainGateway.Migrations
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Access", b =>
                 {
+                    b.Navigation("OrganizationAccessShares");
+
                     b.Navigation("QrCodes");
+
+                    b.Navigation("Scans");
+
+                    b.Navigation("UserAccesses");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.AccessType", b =>
@@ -614,7 +763,14 @@ namespace MobID.MainGateway.Migrations
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Organization", b =>
                 {
+                    b.Navigation("OrganizationAccessShares");
+
                     b.Navigation("OrganizationUsers");
+                });
+
+            modelBuilder.Entity("MobID.MainGateway.Models.Entities.QrCode", b =>
+                {
+                    b.Navigation("Scans");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Role", b =>
@@ -628,6 +784,8 @@ namespace MobID.MainGateway.Migrations
 
                     b.Navigation("RefreshToken")
                         .IsRequired();
+
+                    b.Navigation("UserAccesses");
 
                     b.Navigation("UserRoles");
                 });

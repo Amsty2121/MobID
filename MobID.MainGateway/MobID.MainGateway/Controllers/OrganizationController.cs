@@ -1,163 +1,222 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Enums;
 using MobID.MainGateway.Services.Interfaces;
 
-namespace MobID.MainGateway.Controllers
+namespace MobID.MainGateway.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class OrganizationController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OrganizationController : ControllerBase
+    private readonly IOrganizationService _orgService;
+    public OrganizationController(IOrganizationService orgService)
+        => _orgService = orgService;
+
+    /// <summary>
+    /// Creează o organizaţie nouă.
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(OrganizationDto), 201)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult<OrganizationDto>> CreateOrganizationAsync(
+        [FromBody] OrganizationCreateReq req,
+        CancellationToken ct)
     {
-        private readonly IOrganizationService _orgService;
-        public OrganizationController(IOrganizationService orgService) => _orgService = orgService;
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateOrganization([FromBody] OrganizationCreateReq request, CancellationToken ct)
+        try
         {
-            try
-            {
-                var org = await _orgService.CreateOrganization(request, ct);
-                return Ok(org);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var dto = await _orgService.CreateOrganizationAsync(req, ct);
+            return CreatedAtAction(
+                nameof(GetOrganizationByIdAsync),
+                new { organizationId = dto.Id },
+                dto
+            );
         }
-
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateOrganization([FromBody] OrganizationUpdateReq request, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var updatedOrg = await _orgService.UpdateOrganization(request, ct);
-                return Ok(updatedOrg);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpDelete("{organizationId}")]
-        public async Task<IActionResult> DeleteOrganization(Guid organizationId, CancellationToken ct)
+    /// <summary>
+    /// Returnează o organizaţie după ID.
+    /// </summary>
+    [HttpGet("{organizationId:guid}")]
+    [ProducesResponseType(typeof(OrganizationDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult<OrganizationDto>> GetOrganizationByIdAsync(
+        Guid organizationId,
+        CancellationToken ct)
+    {
+        try
         {
-            try
-            {
-                bool success = await _orgService.DeleteOrganization(organizationId, ct);
-                return success ? NoContent() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var dto = await _orgService.GetOrganizationByIdAsync(organizationId, ct);
+            return dto == null ? NotFound() : Ok(dto);
         }
-
-        [HttpGet("{organizationId}")]
-        public async Task<IActionResult> GetOrganizationById(Guid organizationId, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var org = await _orgService.GetOrganizationById(organizationId, ct);
-                return org == null ? NotFound() : Ok(org);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllOrganizations(CancellationToken ct)
+    /// <summary>
+    /// Listează organizaţiile paginat.
+    /// </summary>
+    [HttpGet("paged")]
+    [ProducesResponseType(typeof(PagedResponse<OrganizationDto>), 200)]
+    public async Task<ActionResult<PagedResponse<OrganizationDto>>> GetOrganizationsPagedAsync(
+        [FromQuery] PagedRequest req,
+        CancellationToken ct)
+    {
+        try
         {
-            try
-            {
-                var orgs = await _orgService.GetAllOrganizations(ct);
-                return Ok(orgs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var page = await _orgService.GetOrganizationsPagedAsync(req, ct);
+            return Ok(page);
         }
-
-        [HttpGet("paged")]
-        public async Task<IActionResult> GetOrganizationsPaged([FromQuery] PagedRequest request, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var pagedOrgs = await _orgService.GetOrganizationsPaged(request, ct);
-                return Ok(pagedOrgs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpPost("{organizationId}/addUser")]
-        public async Task<IActionResult> AddUserToOrganization(
-            Guid organizationId,
-            [FromBody] OrganizationAddUserReq request,
-            CancellationToken ct)
+    /// <summary>
+    /// Listează toate organizaţiile.
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(List<OrganizationDto>), 200)]
+    public async Task<ActionResult<List<OrganizationDto>>> GetAllOrganizationsAsync(
+        CancellationToken ct)
+    {
+        try
         {
-            try
-            {
-                var role = Enum.Parse<OrganizationUserRole>(request.Role ?? OrganizationUserRole.Member.ToString(), ignoreCase: true);
-
-                bool success = await _orgService.AddUserToOrganization(
-                    organizationId,
-                    request.UserId,
-                    role,
-                    ct
-                );
-
-                if (!success)
-                    return BadRequest(new { message = "Utilizatorul este deja membru al organizației." });
-
-                return Ok();
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest(new { message = $"Rol invalid: '{request.Role}'. Rolurile permise sunt Owner, Admin, Member." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var list = await _orgService.GetAllOrganizationsAsync(ct);
+            return Ok(list);
         }
-
-        [HttpPost("{organizationId}/removeUser")]
-        public async Task<IActionResult> RemoveUserFromOrganization(
-            Guid organizationId,
-            [FromQuery] Guid userId,
-            CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                bool success = await _orgService.RemoveUserFromOrganization(organizationId, userId, ct);
-                return success ? Ok() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpGet("{organizationId}/users")]
-        public async Task<IActionResult> GetUsersForOrganization(Guid organizationId, CancellationToken ct)
+    /// <summary>
+    /// Actualizează datele unei organizaţii.
+    /// </summary>
+    [HttpPut]
+    [ProducesResponseType(typeof(OrganizationDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult<OrganizationDto>> UpdateOrganizationAsync(
+        [FromBody] OrganizationUpdateReq req,
+        CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        try
         {
-            try
-            {
-                var users = await _orgService.GetUsersForOrganization(organizationId, ct);
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var dto = await _orgService.UpdateOrganizationAsync(req, ct);
+            return Ok(dto);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Deactivează (soft-delete) o organizaţie.
+    /// </summary>
+    [HttpDelete("{organizationId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeactivateOrganizationAsync(
+        Guid organizationId,
+        CancellationToken ct)
+    {
+        try
+        {
+            var success = await _orgService.DeactivateOrganizationAsync(organizationId, ct);
+            return success ? NoContent() : NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // ─── Gestionare membri ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Adaugă un utilizator într-o organizaţie.
+    /// </summary>
+    [HttpPost("{organizationId:guid}/users")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> AddUserToOrganizationAsync(
+        Guid organizationId,
+        [FromBody] OrganizationAddUserReq req,
+        CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        try
+        {
+            var success = await _orgService.AddUserToOrganizationAsync(organizationId, req, ct);
+            if (!success)
+                return BadRequest(new { message = "Utilizator deja membru sau invalid." });
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Elimină un utilizator dintr-o organizaţie (soft-delete).
+    /// </summary>
+    [HttpDelete("{organizationId:guid}/users/{userId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> RemoveUserFromOrganizationAsync(
+        Guid organizationId,
+        Guid userId,
+        CancellationToken ct)
+    {
+        try
+        {
+            var success = await _orgService.RemoveUserFromOrganizationAsync(organizationId, userId, ct);
+            return success ? NoContent() : NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Listează toţi membrii unei organizaţii.
+    /// </summary>
+    [HttpGet("{organizationId:guid}/users")]
+    [ProducesResponseType(typeof(List<OrganizationUserDto>), 200)]
+    public async Task<ActionResult<List<OrganizationUserDto>>> GetUsersForOrganizationAsync(
+        Guid organizationId,
+        CancellationToken ct)
+    {
+        try
+        {
+            var list = await _orgService.GetUsersForOrganizationAsync(organizationId, ct);
+            return Ok(list);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

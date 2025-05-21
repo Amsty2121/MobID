@@ -1,9 +1,12 @@
-﻿namespace MobID.MainGateway.Models.Dtos.Req
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MobID.MainGateway.Models.Dtos.Req;
+
+public class ScanCreateReq
 {
-    public class ScanCreateReq
-    {
-        public Guid AccessId { get; set; }
-        public Guid ScannedById { get; set; }
-        public Guid? QrCodeId { get; set; }
-    }
+    [Required]
+    public Guid ScannedById { get; set; }
+
+    [Required]
+    public Guid QrCodeId { get; set; }
 }

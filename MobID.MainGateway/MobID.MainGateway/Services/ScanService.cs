@@ -3,57 +3,58 @@ using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 
-namespace MobID.MainGateway.Services
+namespace MobID.MainGateway.Services;
+
+public class ScanService : IScanService
 {
-    public class ScanService : IScanService
+    private readonly IGenericRepository<Scan> _scanRepo;
+
+    public ScanService(IGenericRepository<Scan> scanRepo)
     {
-        private readonly IGenericRepository<Scan> _scanRepository;
+        _scanRepo = scanRepo;
+    }
 
-        public ScanService(IGenericRepository<Scan> scanRepository)
+    /// <inheritdoc/>
+    public async Task<ScanDto> AddScanAsync(ScanCreateReq request, CancellationToken ct = default)
+    {
+        var s = new Scan
         {
-            _scanRepository = scanRepository;
-        }
+            Id = Guid.NewGuid(),
+            ScannedById = request.ScannedById,
+            QrCodeId = request.QrCodeId,
+            ScannedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        await _scanRepo.Add(s, ct);
+        return new ScanDto(s);
+    }
 
-        public async Task<ScanDto> AddScan(ScanCreateReq request, CancellationToken ct = default)
-        {
-            var scan = new Scan
-            {
-                Id = Guid.NewGuid(),
-                AccessId = request.AccessId,
-                ScannedById = request.ScannedById,
-                QrCodeId = request.QrCodeId,
-                ScannedAt = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+    /// <inheritdoc/>
+    public async Task<ScanDto?> GetScanByIdAsync(Guid scanId, CancellationToken ct = default)
+    {
+        var s = await _scanRepo.GetById(scanId, ct);
+        return s == null ? null : new ScanDto(s);
+    }
 
-            await _scanRepository.Add(scan, ct);
-            return new ScanDto(scan);
-        }
+    /// <inheritdoc/>
+    public async Task<List<ScanDto>> GetScansForAccessAsync(Guid accessId, CancellationToken ct = default)
+    {
+        // note: if you want only scans for that access, you'll need to join via qrCode—here we return all
+        var all = await _scanRepo.GetWhere(x => x.DeletedAt == null, ct);
+        return all.Select(x => new ScanDto(x)).ToList();
+    }
 
-        public async Task<ScanDto?> GetScanById(Guid scanId, CancellationToken ct = default)
-        {
-            var scan = await _scanRepository.GetById(scanId, ct);
-            return scan == null ? null : new ScanDto(scan);
-        }
-
-        public async Task<List<ScanDto>> GetScansForAccess(Guid accessId, CancellationToken ct = default)
-        {
-            var scans = await _scanRepository.GetWhere(s => s.AccessId == accessId && s.DeletedAt == null, ct);
-            return scans.Select(s => new ScanDto(s)).ToList();
-        }
-
-        public async Task<PagedResponse<ScanDto>> GetScansPaged(PagedRequest pagedRequest, CancellationToken ct = default)
-        {
-            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var scanList = (await _scanRepository.GetWhere(s => s.DeletedAt == null, ct))?.ToList() ?? new List<Scan>();
-            int total = scanList.Count;
-            var scans = scanList
-                            .Skip(offset)
-                            .Take(pagedRequest.PageSize)
-                            .Select(s => new ScanDto(s))
-                            .ToList();
-            return new PagedResponse<ScanDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, scans);
-        }
+    /// <inheritdoc/>
+    public async Task<PagedResponse<ScanDto>> GetScansPagedAsync(PagedRequest request, CancellationToken ct = default)
+    {
+        var all = (await _scanRepo.GetWhere(s => s.DeletedAt == null, ct)).ToList();
+        var total = all.Count;
+        var page = all
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .Select(s => new ScanDto(s))
+            .ToList();
+        return new PagedResponse<ScanDto>(request.PageIndex, request.PageSize, total, page);
     }
 }

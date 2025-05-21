@@ -21,6 +21,8 @@ namespace MobID.MainGateway.Repo
         public DbSet<QrCode> QrCodes { get; set; }
         public DbSet<Scan> Scans { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<UserAccess> UserAccesses { get; set; }
+        public DbSet<OrganizationAccessShare> OrganizationAccessShares { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,20 +50,69 @@ namespace MobID.MainGateway.Repo
                 .WithMany(a => a.QrCodes)
                 .HasForeignKey(qr => qr.AccessId);
             modelBuilder.Entity<Scan>()
-                .HasOne(s => s.Access)
-                .WithMany()
-                .HasForeignKey(s => s.AccessId);
-            modelBuilder.Entity<Scan>()
                 .HasOne(s => s.QrCode)
                 .WithMany()
                 .HasForeignKey(s => s.QrCodeId)
                 .IsRequired(false);
             modelBuilder.Entity<Scan>()
-                .HasOne(s => s.ScannedBy)
-                .WithMany()
-                .HasForeignKey(s => s.ScannedById);
+               .HasOne(s => s.QrCode)
+               .WithMany(q => q.Scans)                
+               .HasForeignKey(s => s.QrCodeId)
+               .IsRequired()                          
+               .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<QrCode>()
+                .HasQueryFilter(q => q.DeletedAt == null);
+            modelBuilder.Entity<Scan>()
+              .HasQueryFilter(s => s.DeletedAt == null);
+
             modelBuilder.Entity<RefreshToken>()
                 .HasQueryFilter(rt => rt.User.DeletedAt == null);
+
+            modelBuilder.Entity<UserAccess>(ent =>
+            {
+                ent.HasOne(ua => ua.User)
+                        .WithMany(u => u.UserAccesses)
+                        .HasForeignKey(ua => ua.UserId);
+                
+                ent.HasOne(ua => ua.Access)
+                        .WithMany(a => a.UserAccesses)
+                        .HasForeignKey(ua => ua.AccessId);
+                
+                ent.HasOne(ua => ua.GrantedByUser)
+                        .WithMany()              // nu punem back-ref la granted-by
+                        .HasForeignKey(ua => ua.GrantedByUserId);
+                
+                ent.Property(ua => ua.GrantType)
+                        .HasConversion<string>();  // stocăm enum-ul ca text
+                   });
+
+            modelBuilder.Entity<OrganizationAccessShare>()
+                .HasOne(s => s.SourceOrganization)
+                .WithMany() // nu va exista colecția inversă pe Organization
+                .HasForeignKey(s => s.SourceOrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrganizationAccessShare>()
+                .HasOne(s => s.TargetOrganization)
+                .WithMany(o => o.OrganizationAccessShares) // trebuie adăugat ICollection în Organization
+                .HasForeignKey(s => s.TargetOrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrganizationAccessShare>()
+                .HasOne(s => s.Access)
+                .WithMany(a => a.OrganizationAccessShares) // adaugă colecția în Access
+                .HasForeignKey(s => s.AccessId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrganizationAccessShare>()
+                .HasOne(s => s.Creator)
+                .WithMany() // nu avem colecția inversă
+                .HasForeignKey(s => s.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Soft-delete filter
+            modelBuilder.Entity<OrganizationAccessShare>()
+                .HasQueryFilter(s => s.DeletedAt == null);
 
             // Soft Delete: Query Filter pentru DeletedAt
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

@@ -1,100 +1,114 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MobID.MainGateway.Models.Dtos.Rsp;
+using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Services.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using MobID.MainGateway.Models.Dtos.Req;
 
-namespace MobID.MainGateway.Controllers
+namespace MobID.MainGateway.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class RoleController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class RoleController : ControllerBase
+    private readonly IRoleService _roleService;
+
+    public RoleController(IRoleService roleService)
+        => _roleService = roleService;
+
+    /// <summary>
+    /// Creează un rol nou.
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(RoleDto), 201)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult<RoleDto>> CreateRoleAsync(
+        [FromBody] RoleCreateReq req,
+        CancellationToken ct)
     {
-        private readonly IRoleService _roleService;
-        public RoleController(IRoleService roleService) => _roleService = roleService;
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddRole([FromQuery] string roleName, [FromQuery] string description, CancellationToken ct)
+        try
         {
-            try
-            {
-                var result = await _roleService.AddRole(roleName, description, ct);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var dto = await _roleService.CreateRoleAsync(req.Name, req.Description, ct);
+            return CreatedAtAction(
+                nameof(GetRoleByIdAsync),
+                new { roleId = dto.Id },
+                dto
+            );
         }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
-        [HttpDelete("delete/{roleId}")]
-        public async Task<IActionResult> DeleteRole(Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _roleService.DeleteRole(roleId, ct);
-                return success ? NoContent() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Obține un rol după ID.
+    /// </summary>
+    [HttpGet("{roleId:guid}")]
+    [ProducesResponseType(typeof(RoleDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult<RoleDto>> GetRoleByIdAsync(
+        Guid roleId,
+        CancellationToken ct)
+    {
+        var dto = await _roleService.GetRoleByIdAsync(roleId, ct);
+        return dto == null ? NotFound() : Ok(dto);
+    }
 
-        [HttpGet("{roleId}")]
-        public async Task<IActionResult> GetRoleById(Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                var role = await _roleService.GetRoleById(roleId, ct);
-                return role == null ? NotFound() : Ok(role);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Obține un rol după nume.
+    /// </summary>
+    [HttpGet("by-name/{roleName}")]
+    [ProducesResponseType(typeof(RoleDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult<RoleDto>> GetRoleByNameAsync(
+        string roleName,
+        CancellationToken ct)
+    {
+        var dto = await _roleService.GetRoleByNameAsync(roleName, ct);
+        return dto == null ? NotFound() : Ok(dto);
+    }
 
-        [HttpGet("byname/{roleName}")]
-        public async Task<IActionResult> GetRoleByName(string roleName, CancellationToken ct)
-        {
-            try
-            {
-                var role = await _roleService.GetRoleByName(roleName, ct);
-                return role == null ? NotFound() : Ok(role);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Listează toate rolurile.
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(List<RoleDto>), 200)]
+    public async Task<ActionResult<List<RoleDto>>> GetAllRolesAsync(
+        CancellationToken ct)
+    {
+        var list = await _roleService.GetAllRolesAsync(ct);
+        return Ok(list);
+    }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllRoles(CancellationToken ct)
-        {
-            try
-            {
-                var roles = await _roleService.GetAllRoles(ct);
-                return Ok(roles);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Listează rolurile paginat.
+    /// </summary>
+    [HttpGet("paged")]
+    [ProducesResponseType(typeof(PagedResponse<RoleDto>), 200)]
+    public async Task<ActionResult<PagedResponse<RoleDto>>> GetRolesPagedAsync(
+        [FromQuery] PagedRequest req,
+        CancellationToken ct)
+    {
+        var page = await _roleService.GetRolesPagedAsync(req, ct);
+        return Ok(page);
+    }
 
-        [HttpGet("paged")]
-        public async Task<IActionResult> GetRolesPaged([FromQuery] Models.Dtos.PagedRequest request, CancellationToken ct)
-        {
-            try
-            {
-                var pagedRoles = await _roleService.GetRolesPaged(request, ct);
-                return Ok(pagedRoles);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Dezactivează (soft-delete) un rol.
+    /// </summary>
+    [HttpDelete("{roleId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeactivateRoleAsync(
+        Guid roleId,
+        CancellationToken ct)
+    {
+        var ok = await _roleService.DeactivateRoleAsync(roleId, ct);
+        return ok ? NoContent() : NotFound();
     }
 }

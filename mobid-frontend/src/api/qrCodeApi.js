@@ -1,3 +1,4 @@
+// src/api/qrCodeApi.js
 import api from "./api";
 
 /**
@@ -5,33 +6,28 @@ import api from "./api";
  * @param {string} accessId
  */
 export async function generateQrCode(accessId) {
-    // acum trimitem `{ accessId }` în body
-    const { data } = await api.post("/QrCode/generate", { accessId });
-    return data;
-  }
-  
-  export async function getQrCodeById(qrCodeId) {
-    const { data } = await api.get(`/QrCode/${qrCodeId}`);
-    return data;
-  }
-  
-  export async function getQrCodesForAccess(accessId) {
-    const { data } = await api.get(`/QrCode/access/${accessId}`);
-    return data;
-  }
-  
-  export async function validateQrCode(qrCodeId, scanningUserId) {
-    const { data } = await api.post("/QrCode/validate", null, {
-      params: { qrCodeId, scanningUserId }
-    });
-    return data.isValid;
-  }
-  
-  export async function getQrCodesPaged({ pageIndex, pageSize }) {
-    const { data } = await api.get("/QrCode/paged", { params: { pageIndex, pageSize } });
-    return data;
-  }
-  
-  export async function deactivateQrCode(qrCodeId) {
-    return api.delete(`/QrCode/${qrCodeId}`);
-  }
+  // ATENȚIE: pe backend generator-ul așteaptă accessId ca query string, nu în body
+  const { data } = await api.post(
+    "/QrCode/generate",
+    null,
+    { params: { accessId } }
+  );
+  return data;
+}
+
+/**
+ * Obține toate codurile QR asociate unui acces.
+ * @param {string} accessId
+ */
+export async function getQrCodesForAccess(accessId) {
+  const { data } = await api.get(`/QrCode/access/${accessId}`);
+  return data;
+}
+
+/**
+ * Dezactivează un cod QR.
+ * @param {string} qrCodeId
+ */
+export async function deactivateQrCode(qrCodeId) {
+  return api.delete(`/QrCode/${qrCodeId}`);
+}

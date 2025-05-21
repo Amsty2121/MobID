@@ -4,133 +4,123 @@ using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 
-namespace MobID.MainGateway.Services
+namespace MobID.MainGateway.Services;
+
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private readonly IGenericRepository<User> _userRepo;
+    private readonly IGenericRepository<UserRole> _userRoleRepo;
+
+    public UserService(
+        IGenericRepository<User> userRepo,
+        IGenericRepository<UserRole> userRoleRepo)
     {
-        private readonly IGenericRepository<User> _userRepository;
-        private readonly IGenericRepository<UserRole> _userRoleRepository;
+        _userRepo = userRepo;
+        _userRoleRepo = userRoleRepo;
+    }
 
-        public UserService(IGenericRepository<User> userRepository, IGenericRepository<UserRole> userRoleRepository)
+    /// <inheritdoc/>
+    public async Task<UserDto> CreateUserAsync(UserAddReq request, CancellationToken ct = default)
+    {
+        var u = new User
         {
-            _userRepository = userRepository;
-            _userRoleRepository = userRoleRepository;
+            Id = Guid.NewGuid(),
+            Email = request.Email,
+            Username = request.Username,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            CreatedAt = DateTime.UtcNow
+        };
+        await _userRepo.Add(u, ct);
+
+        // assign default SimpleUser role
+        var defaultRoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        var ur = new UserRole
+        {
+            Id = Guid.NewGuid(),
+            UserId = u.Id,
+            RoleId = defaultRoleId,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _userRoleRepo.Add(ur, ct);
+
+        u.UserRoles = new List<UserRole> { ur };
+        return new UserDto(u, new[] { "SimpleUser" });
+    }
+
+    /// <inheritdoc/>
+    public async Task<UserDto?> GetUserByIdAsync(Guid userId, CancellationToken ct = default)
+    {
+        var u = await _userRepo.GetById(userId, ct);
+        return u == null
+            ? null
+            : new UserDto(u, (await _userRoleRepo.GetWhereWithInclude(r => r.UserId == u.Id, ct, r => r.Role))
+                               .Select(r => r.Role.Name)
+                               .ToList());
+    }
+
+    /// <inheritdoc/>
+    public async Task<PagedResponse<UserDto>> GetUsersPagedAsync(PagedRequest request, CancellationToken ct = default)
+    {
+        var all = (await _userRepo.GetWhere(u => u.DeletedAt == null, ct)).ToList();
+        var total = all.Count;
+        var pageEntities = all.Skip(request.PageIndex * request.PageSize)
+                              .Take(request.PageSize)
+                              .ToList();
+
+        var dtos = new List<UserDto>();
+        foreach (var u in pageEntities)
+        {
+            var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == u.Id, ct, r => r.Role);
+            dtos.Add(new UserDto(u, roles.Select(r => r.Role.Name).ToList()));
         }
 
-        public async Task<UserDto> AddUser(UserAddReq userDto, CancellationToken ct = default)
+        return new PagedResponse<UserDto>(request.PageIndex, request.PageSize, total, dtos);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> DeactivateUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var u = await _userRepo.GetById(userId, ct);
+        if (u == null) return false;
+        u.DeletedAt = DateTime.UtcNow;
+        await _userRepo.Update(u, ct);
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> AssignRoleToUserAsync(Guid userId, Guid roleId, CancellationToken ct = default)
+    {
+        if (!await _userRepo.IsIdPresent(userId)) return false;
+        if (await _userRoleRepo.FirstOrDefault(r => r.UserId == userId && r.RoleId == roleId, ct) != null)
+            return false;
+
+        var ur = new UserRole
         {
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = userDto.Email,
-                Username = userDto.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            RoleId = roleId,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _userRoleRepo.Add(ur, ct);
+        return true;
+    }
 
-            await _userRepository.Add(user, ct);
+    /// <inheritdoc/>
+    public async Task<bool> RemoveRoleFromUserAsync(Guid userId, Guid roleId, CancellationToken ct = default)
+    {
+        var ur = await _userRoleRepo.FirstOrDefault(r => r.UserId == userId && r.RoleId == roleId, ct);
+        if (ur == null) return false;
+        await _userRoleRepo.Remove(ur, ct);
+        return true;
+    }
 
-            var simpleRoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-            var userRole = new UserRole
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                RoleId = simpleRoleId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _userRoleRepository.Add(userRole, ct);
-
-            user.UserRoles = new List<UserRole> { userRole };
-
-            return new UserDto(user);
-        }
-
-        public async Task<bool> DeleteUser(Guid userId, CancellationToken ct = default)
-        {
-            var user = await _userRepository.GetById(userId, ct);
-            if (user == null)
-                return false;
-
-            user.DeletedAt = DateTime.UtcNow;
-            await _userRepository.Update(user, ct);
-            return true;
-        }
-
-        public async Task<UserDto?> GetUserById(Guid userId, CancellationToken ct = default)
-        {
-            var user = await _userRepository.GetById(userId, ct);
-            return user == null ? null : new UserDto(user);
-        }
-
-        public async Task<PagedResponse<UserDto>> GetUsersPaged(PagedRequest pagedRequest, CancellationToken ct = default)
-        {
-            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var userList = (await _userRepository.GetWhere(u => u.DeletedAt == null, ct))?.ToList() ?? new List<User>();
-            int total = userList.Count;
-            var result = new List<UserDto>();
-
-            var pagedUsers = userList.Skip(offset).Take(pagedRequest.PageSize).ToList();
-            foreach (var user in pagedUsers)
-            {
-                var roles = await _userRoleRepository.GetWhereWithInclude(r => r.UserId == user.Id, ct, r => r.Role);
-                result.Add(new UserDto(user, roles.Select(r => r.Role.Name).ToList()));
-            }
-
-            return new PagedResponse<UserDto>(pagedRequest.PageIndex, pagedRequest.PageSize, total, result);
-        }
-
-        public async Task<bool> AssignRoleToUser(Guid userId, Guid roleId, CancellationToken ct = default)
-        {
-            if (!await _userRepository.IsIdPresent(userId))
-            {
-                return false;
-            }
-            
-            var existing = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (existing != null)
-                return false;
-
-            var userRole = new UserRole
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                RoleId = roleId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _userRoleRepository.Add(userRole, ct);
-            return true;
-        }
-
-        public async Task<bool> RemoveRoleFromUser(Guid userId, Guid roleId, CancellationToken ct = default)
-        {
-            if (!await _userRepository.IsIdPresent(userId))
-            {
-                return false;
-            }
-
-            var userRole = await _userRoleRepository.FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId, ct);
-            if (userRole == null)
-                return false;
-
-            await _userRoleRepository.Remove(userRole, ct);
-            return true;
-        }
-
-        public async Task<List<string>> GetUserRoles(Guid userId, CancellationToken ct = default)
-        {
-            if (!await _userRepository.IsIdPresent(userId))
-            {
-                return Enumerable.Empty<string>().ToList();
-            }
-
-            var roles = await _userRoleRepository.GetWhereWithInclude(ur => ur.UserId == userId, ct, ur => ur.Role);
-            return roles.Select(r => r.Role.Name).ToList();
-        }
-
+    /// <inheritdoc/>
+    public async Task<List<string>> GetUserRolesAsync(Guid userId, CancellationToken ct = default)
+    {
+        if (!await _userRepo.IsIdPresent(userId)) return new List<string>();
+        var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == userId, ct, r => r.Role);
+        return roles.Select(r => r.Role.Name).ToList();
     }
 }

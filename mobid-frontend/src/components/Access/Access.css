@@ -3,22 +3,16 @@
 /* ===========================================
    ACCESS PAGE LAYOUT
    =========================================== */
-
-/* Container general pentru pagina de accese */
 .access-page {
   padding: 1rem;
   color: var(--color-iron);
 }
-
-/* Heading principal */
 .access-heading {
   margin: 1.5rem 0 1rem;
   font-size: 1.5rem;
   text-align: center;
   color: var(--color-primary);
 }
-
-/* Wrapper pentru centrare select */
 .access-select-wrapper {
   width: 300px;
   margin: 1rem auto;
@@ -26,77 +20,44 @@
 
 /* ===========================================
    REACT-SELECT DARK THEME (prefix: org-select)
-   reuse for access selects
    =========================================== */
-
-/* Control (container input + indicator) */
 .org-select__control {
-  background-color: var(--color-tuna-light) !important;
+  background: var(--color-tuna-light) !important;
   border: 1px solid var(--color-primary) !important;
   box-shadow: none !important;
 }
-.org-select__control:hover {
-  border-color: var(--color-primary) !important;
-}
+.org-select__control:hover,
 .org-select__control--is-focused {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 1px var(--color-primary) !important;
 }
-
-/* Input text & single value */
 .org-select__input input,
-.org-select__single-value {
-  color: var(--color-primary) !important;
-}
+.org-select__single-value,
 .org-select__placeholder {
   color: var(--color-primary) !important;
 }
-
-/* Dropdown indicator */
 .org-select__dropdown-indicator {
   color: var(--color-iron) !important;
 }
 .org-select__dropdown-indicator:hover {
   color: var(--color-primary) !important;
 }
-
-/* Separator */
-.org-select__indicator-separator {
-  display: none !important;
-}
-
-/* Menu (lista de opțiuni) */
+.org-select__indicator-separator { display: none !important; }
 .org-select__menu {
-  background-color: var(--color-tuna-light) !important;
+  background: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
 }
-/* Fiecare opțiune */
 .org-select__option {
-  background-color: var(--color-tuna-light) !important;
+  background: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
 }
 .org-select__option--is-focused {
-  background-color: var(--color-tuna) !important;
-  color: var(--color-iron) !important;
-}
-
-/* FormatOptionLabel content */
-.org-option {
-  line-height: 1.2;
-}
-.org-option-name {
-  font-weight: 500;
-  color: var(--color-iron);
-}
-.org-option-id {
-  font-size: 0.85em;
-  color: var(--color-bombay);
+  background: var(--color-tuna) !important;
 }
 
 /* ===========================================
    GENERIC TABLE BUTTONS
    =========================================== */
-
 .icon-btn {
   background: none;
   border: none;
@@ -108,108 +69,119 @@
   color: var(--color-primary);
 }
 
-/* =============================
-   Detalii Acces (AccessDetails)
-   ============================= */
-
-.details-modal {
-  width: 500px;
-}
-
+/* ===========================================
+   ACCESS DETAILS / PREVIEW MODAL
+   =========================================== */
+.details-modal { width: 500px; }
 .details-title {
   margin-bottom: 1rem;
   color: var(--color-primary);
   font-size: 1.5rem;
   text-align: center;
 }
-
 .details-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
 }
-
 .details-item {
-  background-color: var(--color-tuna-light);
+  background: var(--color-tuna-light);
   padding: 0.75rem;
   border-radius: 6px;
 }
-
 .details-label {
   display: block;
   margin-bottom: 0.25rem;
   color: var(--color-iron);
   font-size: 0.9rem;
 }
-
 .details-value {
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
   color: var(--color-shark);
 }
-
 .details-desc {
   font-size: 0.8rem;
   color: var(--color-bombay);
 }
-
-/* ===========================================
-   PREVIEW MODAL
-   =========================================== */
 
 .preview-modal {
   width: 400px;
   max-width: 90%;
   border-radius: 8px;
 }
-
 .preview-header {
-  background-color: var(--color-primary);
+  background: var(--color-primary);
   color: #fff;
   padding: 1rem;
   font-size: 1.25rem;
-  font-weight: 600;
   text-align: center;
 }
-
 .preview-body {
-  background-color: var(--color-tuna);
+  background: var(--color-tuna);
   padding: 1rem;
   color: var(--color-iron);
-
-  /* împachetare text pentru descrieri lungi */
   white-space: pre-wrap;
   word-break: break-word;
 }
-
 .preview-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* aliniază sus pentru multiline */
+  align-items: flex-start;
   margin-bottom: 0.75rem;
 }
-
 .preview-label {
-  flex: 0 0 150px; /* coloană fixă pentru label */
+  flex: 0 0 150px;
   font-weight: 600;
   color: var(--color-primary);
 }
-
 .preview-value {
-  flex: 1 1 auto;  /* valorea se poate sparge pe mai multe rânduri */
+  flex: 1 1 auto;
   color: var(--color-regent-gray);
 }
 
 /* ===========================================
-   FORM TEXTAREA
+   FORM (Pasul 1 & 2)
    =========================================== */
+.add-org-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.add-org-form label {
+  font-weight: 500;
+}
 
+/* Stil comun pentru toate input-urile și textarea */
+.add-org-form input,
 .add-org-form textarea {
+  background: var(--color-tuna-light);
+  border: 1px solid var(--color-regent-gray);
+  border-radius: 4px;
+  padding: 0.5rem;
+  color: var(--color-iron);
+  outline: none;
   width: 100%;
+  box-sizing: border-box;
+}
+
+/* Textarea cu resize vertical */
+.add-org-form textarea {
   min-height: 80px;
   resize: vertical;
-  /* păstrează newline și sparge cuvinte foarte lungi */
-  white-space: pre-wrap;
-  word-break: break-word;
+}
+
+
+/* text și checkbox pe același rând, text la stânga */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer; /* ca label-ul să fie clickabil */
+}
+
+/* păstrează dimensiunea naturală a checkbox-ului */
+.checkbox-container input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }

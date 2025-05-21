@@ -1,118 +1,129 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Services.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MobID.MainGateway.Controllers
+namespace MobID.MainGateway.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class UserController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+
+    public UserController(IUserService userService)
+        => _userService = userService;
+
+    /// <summary>
+    /// Crează un utilizator nou.
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(UserDto), 201)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult<UserDto>> CreateUserAsync(
+        [FromBody] UserAddReq req,
+        CancellationToken ct)
     {
-        private readonly IUserService _userService;
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
-        public UserController(IUserService userService)
-        {
-            _userService = userService;
-        }
+        var dto = await _userService.CreateUserAsync(req, ct);
+        return CreatedAtAction(
+            nameof(GetUserByIdAsync),
+            new { userId = dto.Id },
+            dto);
+    }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddUser([FromBody] Models.Dtos.Req.UserAddReq request, CancellationToken ct)
-        {
-            try
-            {
-                var user = await _userService.AddUser(request, ct);
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Obține detaliile unui utilizator după ID.
+    /// </summary>
+    [HttpGet("{userId:guid}")]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult<UserDto>> GetUserByIdAsync(
+        Guid userId,
+        CancellationToken ct)
+    {
+        var dto = await _userService.GetUserByIdAsync(userId, ct);
+        return dto == null
+            ? NotFound()
+            : Ok(dto);
+    }
 
-        [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteUser(Guid userId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _userService.DeleteUser(userId, ct);
-                return success ? NoContent() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Listează utilizatorii paginat.
+    /// </summary>
+    [HttpGet("paged")]
+    [ProducesResponseType(typeof(PagedResponse<UserDto>), 200)]
+    public async Task<ActionResult<PagedResponse<UserDto>>> GetUsersPagedAsync(
+        [FromQuery] PagedRequest req,
+        CancellationToken ct)
+    {
+        var page = await _userService.GetUsersPagedAsync(req, ct);
+        return Ok(page);
+    }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(Guid userId, CancellationToken ct)
-        {
-            try
-            {
-                var user = await _userService.GetUserById(userId, ct);
-                return user == null ? NotFound() : Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Dezactivează (soft-delete) un utilizator.
+    /// </summary>
+    [HttpDelete("{userId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeactivateUserAsync(
+        Guid userId,
+        CancellationToken ct)
+    {
+        var success = await _userService.DeactivateUserAsync(userId, ct);
+        return success ? NoContent() : NotFound();
+    }
 
-        [HttpGet("paged")]
-        public async Task<IActionResult> GetUsersPaged([FromQuery] Models.Dtos.PagedRequest request, CancellationToken ct)
-        {
-            try
-            {
-                var pagedUsers = await _userService.GetUsersPaged(request, ct);
-                return Ok(pagedUsers);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Atribuie un rol unui utilizator.
+    /// </summary>
+    [HttpPost("{userId:guid}/roles/{roleId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> AssignRoleAsync(
+        Guid userId,
+        Guid roleId,
+        CancellationToken ct)
+    {
+        var success = await _userService.AssignRoleToUserAsync(userId, roleId, ct);
+        if (!success)
+            return BadRequest(new { message = "Nu s-a putut atribui rolul (poate există deja sau date invalide)." });
+        return NoContent();
+    }
 
-        [HttpPost("assignRole")]
-        public async Task<IActionResult> AssignRoleToUser([FromQuery] Guid userId, [FromQuery] Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _userService.AssignRoleToUser(userId, roleId, ct);
-                return success ? Ok() : BadRequest("Atribuire nereușită sau rol deja atribuit.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Înlătură un rol de la un utilizator.
+    /// </summary>
+    [HttpDelete("{userId:guid}/roles/{roleId:guid}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> RemoveRoleAsync(
+        Guid userId,
+        Guid roleId,
+        CancellationToken ct)
+    {
+        var success = await _userService.RemoveRoleFromUserAsync(userId, roleId, ct);
+        return success ? NoContent() : NotFound();
+    }
 
-        [HttpPost("removeRole")]
-        public async Task<IActionResult> RemoveRoleFromUser([FromQuery] Guid userId, [FromQuery] Guid roleId, CancellationToken ct)
-        {
-            try
-            {
-                bool success = await _userService.RemoveRoleFromUser(userId, roleId, ct);
-                return success ? Ok() : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("{userId}/roles")]
-        public async Task<IActionResult> GetUserRoles(Guid userId, CancellationToken ct)
-        {
-            try
-            {
-                var roles = await _userService.GetUserRoles(userId, ct);
-                return Ok(roles);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Listează rolurile unui utilizator.
+    /// </summary>
+    [HttpGet("{userId:guid}/roles")]
+    [ProducesResponseType(typeof(List<string>), 200)]
+    public async Task<ActionResult<List<string>>> GetUserRolesAsync(
+        Guid userId,
+        CancellationToken ct)
+    {
+        var roles = await _userService.GetUserRolesAsync(userId, ct);
+        return Ok(roles);
     }
 }

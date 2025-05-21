@@ -1,9 +1,14 @@
-﻿namespace MobID.MainGateway.Models.Dtos.Req
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MobID.MainGateway.Models.Dtos.Req;
+
+public class OrganizationUpdateReq
 {
-    public class OrganizationUpdateReq
-    {
-        public Guid OrganizationId { get; set; }
-        public string? Name { get; set; }
-        public Guid? OwnerId { get; set; }
-    }
+    [Required]
+    public Guid OrganizationId { get; set; }
+
+    [MinLength(2), MaxLength(100)]
+    public string? Name { get; set; }
+
+    public Guid? OwnerId { get; set; }
 }

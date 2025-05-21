@@ -1,13 +1,12 @@
 ﻿using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Dtos.Rsp;
 
-namespace MobID.MainGateway.Services.Interfaces
+namespace MobID.MainGateway.Services.Interfaces;
+
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        Task<UserLoginRsp> Login(UserLoginReq request, CancellationToken ct = default);
-        Task<UserLoginRsp> RefreshToken(string refreshToken, CancellationToken ct = default);
-        Task RevokeToken(string refreshToken, CancellationToken ct = default);
-        Task<UserRegisterRsp> Register(UserRegisterReq request, CancellationToken ct = default);
-    }
+    Task<UserLoginRsp> LoginAsync(UserLoginReq request, CancellationToken ct = default);
+    Task<UserLoginRsp> RefreshTokenAsync(string refreshToken, CancellationToken ct = default);
+    Task RevokeTokenAsync(string refreshToken, CancellationToken ct = default);
+    Task<UserRegisterRsp> RegisterAsync(UserRegisterReq request, CancellationToken ct = default);
 }

@@ -22,24 +22,25 @@ const periodOptions = [
 ];
 
 export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
-  const [step, setStep]               = useState(Steps.SELECT_TYPE);
-  const [types, setTypes]             = useState([]);
-  const [selectedType, setSelectedType] = useState(null);
-  const [loadingTypes, setLoadingTypes] = useState(false);
-  const [error, setError]             = useState("");
+  const [step,               setStep]               = useState(Steps.SELECT_TYPE);
+  const [types,              setTypes]              = useState([]);
+  const [selectedType,       setSelectedType]       = useState(null);
+  const [loadingTypes,       setLoadingTypes]       = useState(false);
+  const [error,              setError]              = useState("");
 
   // câmpuri comune
-  const [expirationDate, setExpirationDate]       = useState("");
-  const [description, setDescription]             = useState("");
-  const [restrictToMembers, setRestrictToMembers] = useState(false);
-  const [scanMode, setScanMode]                   = useState(scanModeOptions[0]);
+  const [name,               setName]               = useState("");
+  const [description,        setDescription]        = useState("");
+  const [expirationDate,     setExpirationDate]     = useState("");
+  const [restrictToMembers,  setRestrictToMembers]  = useState(false);
+  const [scanMode,           setScanMode]           = useState(scanModeOptions[0]);
 
   // câmpuri dinamice
-  const [maxUses, setMaxUses]                       = useState("");
-  const [maxUsersPerPass, setMaxUsersPerPass]       = useState("");
-  const [monthlyLimit, setMonthlyLimit]             = useState("");
-  const [subscriptionPeriod, setSubscriptionPeriod] = useState(periodOptions[0]);
-  const [usesPerPeriod, setUsesPerPeriod]           = useState("");
+  const [maxUses,                  setMaxUses]                  = useState("");
+  const [maxUsersPerPass,          setMaxUsersPerPass]          = useState("");
+  const [monthlyLimit,             setMonthlyLimit]             = useState("");
+  const [subscriptionPeriod,       setSubscriptionPeriod]       = useState(periodOptions[0]);
+  const [usesPerPeriod,            setUsesPerPeriod]            = useState("");
 
   useEffect(() => {
     (async () => {
@@ -60,6 +61,10 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
   }, []);
 
   const next = () => {
+    if (!name.trim()) {
+      setError("Completează numele accesului.");
+      return;
+    }
     if (!selectedType) {
       setError("Selectează un tip de acces.");
       return;
@@ -69,7 +74,6 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
   };
 
   const toPreview = () => {
-    // validări dynamice înainte de preview
     if (selectedType.name === "OneUse" && !maxUsersPerPass) {
       setError("Completează numărul maxim de utilizatori / scanare.");
       return;
@@ -98,8 +102,9 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
   const handleSubmit = async () => {
     const payload = {
       organizationId,
-      accessTypeId: selectedType.value,
+      name,
       description,
+      accessTypeId: selectedType.value,
       expirationDate: expirationDate || null,
       restrictToOrganizationMembers: restrictToMembers,
       scanMode: scanMode.value,
@@ -128,13 +133,11 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {/* ocolim închiderea când dăm click în interior */}
       <div className="modal-content preview-modal" onClick={e => e.stopPropagation()}>
         {step !== Steps.PREVIEW && (
           <button className="modal-close" onClick={onClose}>×</button>
         )}
 
-        {/* Titlu dinamic */}
         <h3 className={step === Steps.PREVIEW ? "preview-header" : ""}>
           {step === Steps.SELECT_TYPE
             ? "Alege Tip Acces"
@@ -145,10 +148,21 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
 
         {error && <p className="error">{error}</p>}
 
-        {/* Pasul 1: select type */}
+        {/* Pasul 1: nume + select type */}
         {step === Steps.SELECT_TYPE && (
-          <>
+          <div className="add-org-form">
+            <label htmlFor="accessName">Nume Acces</label>
+            <input
+              id="accessName"
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Introdu numele accesului..."
+            />
+
+            <label htmlFor="accessTypeSelect">Alege Tip Acces</label>
             <Select
+              inputId="accessTypeSelect"
               options={types}
               isLoading={loadingTypes}
               value={selectedType}
@@ -158,16 +172,19 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               classNamePrefix="org-select"
               noOptionsMessage={() => "Niciun tip găsit"}
             />
+
             <div className="form-actions">
               <button type="button" onClick={next}>Următor</button>
               <button type="button" onClick={onClose}>Anulează</button>
             </div>
-          </>
+          </div>
         )}
 
         {/* Pasul 2: configure */}
         {step === Steps.CONFIGURE && (
           <div className="add-org-form">
+            <div className="access-name-subtitle">{name}</div>
+
             <label>Descriere (max 200 caractere)</label>
             <textarea
               maxLength={200}
@@ -182,13 +199,13 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               onChange={e => setExpirationDate(e.target.value)}
             />
 
-            <label>
+            <label className="checkbox-container">
+              <span>Restricționează la membri organizație</span>
               <input
                 type="checkbox"
                 checked={restrictToMembers}
                 onChange={e => setRestrictToMembers(e.target.checked)}
               />
-              {' '}Restricționează la membri organizație
             </label>
 
             <label>Mod scanare</label>
@@ -200,7 +217,6 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               classNamePrefix="org-select"
             />
 
-            {/* câmpuri dinamice */}
             {selectedType.name === "OneUse" && (
               <>
                 <label>Max utilizatori / scanare</label>
@@ -268,62 +284,36 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
         {step === Steps.PREVIEW && (
           <>
             <div className="preview-body">
-              <div className="preview-row">
-                <span className="preview-label">Tip Acces:</span>
-                <span className="preview-value">{selectedType.label}</span>
-              </div>
-              <div className="preview-row">
-                <span className="preview-label">Expirare:</span>
-                <span className="preview-value">{expirationDate || "(niciuna)"}</span>
-              </div>
-              <div className="preview-row">
-                <span className="preview-label">Restricționat:</span>
-                <span className="preview-value">{restrictToMembers ? "Da" : "Nu"}</span>
-              </div>
-              <div className="preview-row">
-                <span className="preview-label">Mod Scanare:</span>
-                <span className="preview-value">{scanMode.label}</span>
-              </div>
-              {selectedType.name === "OneUse" && (
-                <div className="preview-row">
-                  <span className="preview-label">Max utilizatori / scanare:</span>
-                  <span className="preview-value">{maxUsersPerPass}</span>
+              {[
+                ["Tip Acces", selectedType.label],
+                ["Nume Acces", name],
+                ["Expirare", expirationDate || "(niciuna)"],
+                ["Restricționat", restrictToMembers ? "Da" : "Nu"],
+                ["Mod Scanare", scanMode.label],
+                ...(selectedType.name === "OneUse"
+                  ? [["Max utilizatori/scanare", maxUsersPerPass]]
+                  : []),
+                ...(selectedType.name === "MultiUse"
+                  ? [
+                      ["Max utilizări", maxUses],
+                      ["Max utilizatori/scanare", maxUsersPerPass]
+                    ]
+                  : []),
+                ...(selectedType.name === "Subscription"
+                  ? [
+                      ["Limită/ lună", monthlyLimit],
+                      ["Perioadă", subscriptionPeriod.label],
+                      ["Utilizări/ perioadă", usesPerPeriod || "(nelimitat)"]
+                    ]
+                  : []),
+                ["Descriere", description || "(niciuna)"]
+              ].map(([label, val]) => (
+                <div className="preview-row" key={label}>
+                  <span className="preview-label">{label}:</span>
+                  <span className="preview-value">{val}</span>
                 </div>
-              )}
-              {selectedType.name === "MultiUse" && (
-                <>
-                  <div className="preview-row">
-                    <span className="preview-label">Max utilizări:</span>
-                    <span className="preview-value">{maxUses}</span>
-                  </div>
-                  <div className="preview-row">
-                    <span className="preview-label">Max utilizatori / scanare:</span>
-                    <span className="preview-value">{maxUsersPerPass}</span>
-                  </div>
-                </>
-              )}
-              {selectedType.name === "Subscription" && (
-                <>
-                  <div className="preview-row">
-                    <span className="preview-label">Limită / lună:</span>
-                    <span className="preview-value">{monthlyLimit}</span>
-                  </div>
-                  <div className="preview-row">
-                    <span className="preview-label">Perioadă:</span>
-                    <span className="preview-value">{subscriptionPeriod.label}</span>
-                  </div>
-                  <div className="preview-row">
-                    <span className="preview-label">Utilizări / perioadă:</span>
-                    <span className="preview-value">{usesPerPeriod || "(nelimitat)"}</span>
-                  </div>
-                </>
-              )}
-              <div className="preview-row">
-                <span className="preview-label">Descriere:</span>
-                <span className="preview-value">{description || "(niciuna)"}</span>
-              </div>
+              ))}
             </div>
-
             <div className="form-actions">
               <button type="button" onClick={back}>Înapoi</button>
               <button type="button" onClick={handleSubmit}>Confirmă și Salvează</button>

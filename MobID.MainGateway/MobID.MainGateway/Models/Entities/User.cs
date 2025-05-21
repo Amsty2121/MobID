@@ -17,5 +17,6 @@ namespace MobID.MainGateway.Models.Entities
         public ICollection<UserRole> UserRoles { get; set; }
         public RefreshToken RefreshToken { get; set; }
         public ICollection<OrganizationUser> OrganizationUsers { get; set; }
+        public ICollection<UserAccess> UserAccesses { get; set; }
     }
 }

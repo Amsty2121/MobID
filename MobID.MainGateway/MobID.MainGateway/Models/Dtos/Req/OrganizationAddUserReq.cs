@@ -1,8 +1,13 @@
-﻿namespace MobID.MainGateway.Models.Dtos.Req
+﻿using MobID.MainGateway.Models.Enums;
+using System.ComponentModel.DataAnnotations;
+
+namespace MobID.MainGateway.Models.Dtos.Req;
+
+public class OrganizationAddUserReq
 {
-    public class OrganizationAddUserReq
-    {
-        public Guid UserId { get; set; }
-        public string? Role { get; set; } 
-    }
+    [Required]
+    public Guid UserId { get; set; }
+
+    [EnumDataType(typeof(OrganizationUserRole))]
+    public string? Role { get; set; }
 }

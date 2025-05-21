@@ -8,7 +8,8 @@ namespace MobID.MainGateway.Configuration
         public string SecretKey { get; set; }
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public int TokenLifetime { get; set; }
+        public int TokenLifetimeDays { get; set; }
+        public int RefreshTokenLifetimeDays { get; set; }
 
         public SymmetricSecurityKey GetSymmetricSecurityKey()
         {

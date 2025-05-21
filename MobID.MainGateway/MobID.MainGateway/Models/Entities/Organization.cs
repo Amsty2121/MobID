@@ -13,5 +13,7 @@
         public DateTime? DeletedAt { get; set; }
 
         public ICollection<OrganizationUser> OrganizationUsers { get; set; }
+        public ICollection<OrganizationAccessShare> OrganizationAccessShares { get; set; }
+
     }
 }

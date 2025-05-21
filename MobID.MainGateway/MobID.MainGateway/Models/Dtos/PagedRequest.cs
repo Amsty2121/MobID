@@ -1,8 +1,12 @@
-﻿namespace MobID.MainGateway.Models.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MobID.MainGateway.Models.Dtos;
+
+public class PagedRequest
 {
-    public class PagedRequest
-    {
-        public int PageIndex { get; set; }
-        public int PageSize { get; set; }
-    }
+    [Range(0, int.MaxValue)]
+    public int PageIndex { get; set; }
+
+    [Range(1, 5000)]
+    public int PageSize { get; set; }
 }

@@ -1,222 +1,210 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using MobID.MainGateway.Models.Dtos;
+﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Models.Enums;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 
-namespace MobID.MainGateway.Services
+namespace MobID.MainGateway.Services;
+
+public class OrganizationService : IOrganizationService
 {
-    public class OrganizationService : IOrganizationService
+    private readonly IGenericRepository<Organization> _orgRepo;
+    private readonly IGenericRepository<OrganizationUser> _orgUserRepo;
+    private readonly IGenericRepository<User> _userRepo;
+    private readonly IGenericRepository<Access> _accessRepo;
+    private readonly IGenericRepository<UserAccess> _uaRepo;
+
+    public OrganizationService(
+        IGenericRepository<Organization> orgRepo,
+        IGenericRepository<OrganizationUser> orgUserRepo,
+        IGenericRepository<User> userRepo,
+        IGenericRepository<UserAccess> uaRepo,
+        IGenericRepository<Access> accessRepo)
     {
-        private readonly IGenericRepository<Organization> _organizationRepository;
-        private readonly IGenericRepository<OrganizationUser> _organizationUserRepository;
-        private readonly IGenericRepository<User> _userRepository;
+        _orgRepo = orgRepo;
+        _orgUserRepo = orgUserRepo;
+        _userRepo = userRepo;
+        _uaRepo = uaRepo;
+        _accessRepo = accessRepo;
+    }
 
-        public OrganizationService(
-            IGenericRepository<Organization> organizationRepository,
-            IGenericRepository<OrganizationUser> organizationUserRepository,
-            IGenericRepository<User> userRepository)
+    /// <inheritdoc/>
+    public async Task<OrganizationDto> CreateOrganizationAsync(
+        OrganizationCreateReq request,
+        CancellationToken ct = default)
+    {
+        if (await _orgRepo.FirstOrDefault(o => o.Name == request.Name, ct) != null)
+            throw new InvalidOperationException($"Organization '{request.Name}' exists.");
+
+        var owner = await _userRepo.GetById(request.OwnerId, ct)
+                    ?? throw new InvalidOperationException("Owner not found.");
+
+        var org = new Organization
         {
-            _organizationRepository = organizationRepository;
-            _organizationUserRepository = organizationUserRepository;
-            _userRepository = userRepository;
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            OwnerId = request.OwnerId,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _orgRepo.Add(org, ct);
+
+        // add owner as member
+        await AddUserToOrganizationAsync(org.Id,
+            new OrganizationAddUserReq { UserId = request.OwnerId, Role = OrganizationUserRole.Owner.ToString() },
+            ct);
+
+        return new OrganizationDto(org);
+    }
+
+    /// <inheritdoc/>
+    public async Task<OrganizationDto?> GetOrganizationByIdAsync(Guid organizationId, CancellationToken ct = default)
+    {
+        var org = await _orgRepo.GetByIdWithInclude(organizationId, ct, o => o.Owner);
+        return org == null ? null : new OrganizationDto(org);
+    }
+
+    /// <inheritdoc/>
+    public async Task<PagedResponse<OrganizationDto>> GetOrganizationsPagedAsync(
+        PagedRequest request,
+        CancellationToken ct = default)
+    {
+        var all = (await _orgRepo.GetWhereWithInclude(
+                        o => o.DeletedAt == null, ct, o => o.Owner))
+                  .ToList();
+        var total = all.Count;
+        var page = all
+            .Skip(request.PageIndex * request.PageSize)
+            .Take(request.PageSize)
+            .Select(o => new OrganizationDto(o))
+            .ToList();
+
+        return new PagedResponse<OrganizationDto>(
+            request.PageIndex,
+            request.PageSize,
+            total,
+            page);
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<OrganizationDto>> GetAllOrganizationsAsync(CancellationToken ct = default)
+    {
+        var list = await _orgRepo.GetWhereWithInclude(o => o.DeletedAt == null, ct, o => o.Owner);
+        return list.Select(o => new OrganizationDto(o)).ToList();
+    }
+
+    /// <inheritdoc/>
+    public async Task<OrganizationDto> UpdateOrganizationAsync(
+        OrganizationUpdateReq request,
+        CancellationToken ct = default)
+    {
+        var org = await _orgRepo.GetById(request.OrganizationId, ct)
+                  ?? throw new InvalidOperationException("Organization not found.");
+
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            if (await _orgRepo.FirstOrDefault(
+                    o => o.Name == request.Name && o.Id != request.OrganizationId, ct) != null)
+                throw new InvalidOperationException($"Organization '{request.Name}' exists.");
+            org.Name = request.Name;
         }
 
-        public async Task<OrganizationDto> CreateOrganization(OrganizationCreateReq request, CancellationToken ct = default)
+        org.UpdatedAt = DateTime.UtcNow;
+        await _orgRepo.Update(org, ct);
+        return new OrganizationDto(org);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> DeactivateOrganizationAsync(Guid organizationId, CancellationToken ct = default)
+    {
+        var org = await _orgRepo.GetById(organizationId, ct);
+        if (org == null) return false;
+        org.DeletedAt = DateTime.UtcNow;
+        await _orgRepo.Update(org, ct);
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> AddUserToOrganizationAsync(
+        Guid organizationId,
+        OrganizationAddUserReq request,
+        CancellationToken ct = default)
+    {
+        var org = await _orgRepo.GetById(organizationId, ct)
+                   ?? throw new InvalidOperationException("Organization not found.");
+        var user = await _userRepo.GetById(request.UserId, ct)
+                   ?? throw new InvalidOperationException("User not found.");
+
+        if (await _orgUserRepo.FirstOrDefault(
+                ou => ou.OrganizationId == organizationId && ou.UserId == request.UserId, ct) != null)
+            return false;
+
+        // parse role or default to Member
+        var role = Enum.TryParse<OrganizationUserRole>(request.Role, out var r)
+                       ? r
+                       : OrganizationUserRole.Member;
+
+        var orgUser = new OrganizationUser
         {
-            // 1. Nume unic
-            if (await _organizationRepository.FirstOrDefault(o => o.Name == request.Name, ct) != null)
-                throw new InvalidOperationException($"O organizație cu numele '{request.Name}' există deja.");
+            Id = Guid.NewGuid(),
+            OrganizationId = organizationId,
+            UserId = request.UserId,
+            Role = request.Role != null
+                             ? Enum.Parse<OrganizationUserRole>(request.Role)
+                             : OrganizationUserRole.Member,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _orgUserRepo.Add(orgUser, ct);
 
-            // 2. Proprietar valid
-            var owner = await _userRepository.GetById(request.OwnerId, ct);
-            if (owner == null)
-                throw new InvalidOperationException($"Utilizatorul cu ID '{request.OwnerId}' nu există.");
-
-            // 3. Creare organizație
-            var organization = new Organization
-            {
-                Id = Guid.NewGuid(),
-                Name = request.Name,
-                OwnerId = request.OwnerId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            await _organizationRepository.Add(organization, ct);
-
-            // 4. Adăugăm owner ca membru cu rol Owner
-            await AddUserToOrganization(
-                organization.Id,
-                organization.OwnerId,
-                OrganizationUserRole.Owner,
+        var accesses = await _accessRepo.GetWhere(
+            a => a.OrganizationId == organizationId && a.DeletedAt == null,
+            ct);
+        foreach (var a in accesses)
+        {
+            // skip duplicates
+            var dup = await _uaRepo.FirstOrDefault(x =>
+                x.UserId == request.UserId &&
+                x.AccessId == a.Id && x.DeletedAt == null,
                 ct);
+            if (dup != null) continue;
 
-            return new OrganizationDto(organization);
-        }
-
-        public async Task<OrganizationDto?> GetOrganizationById(Guid organizationId, CancellationToken ct = default)
-        {
-            var org = await _organizationRepository.GetByIdWithInclude(
-                organizationId, ct, o => o.OrganizationUsers);
-            return org == null ? null : new OrganizationDto(org);
-        }
-
-        public async Task<List<OrganizationDto>> GetAllOrganizations(CancellationToken ct = default)
-        {
-            var orgs = await _organizationRepository.GetWhereWithInclude(o => o.DeletedAt == null, ct, x => x.Owner);
-            return orgs.Select(o => new OrganizationDto(o)).ToList();
-        }
-
-        public async Task<bool> AddUserToOrganization(
-            Guid organizationId,
-            Guid userId,
-            OrganizationUserRole role = OrganizationUserRole.Member,
-            CancellationToken ct = default)
-        {
-            // 1. Organizație existență
-            var org = await _organizationRepository.GetById(organizationId, ct);
-            if (org == null)
-                throw new InvalidOperationException($"Organizația cu ID '{organizationId}' nu există.");
-
-            // 2. Utilizator existență
-            var user = await _userRepository.GetById(userId, ct);
-            if (user == null)
-                throw new InvalidOperationException($"Utilizatorul cu ID '{userId}' nu există.");
-
-            // 3. Verificăm duplicat
-            var existing = await _organizationUserRepository.FirstOrDefault(
-                ou => ou.OrganizationId == organizationId && ou.UserId == userId, ct);
-            if (existing != null)
-                return false;
-
-            // 4. Creăm membership
-            var orgUser = new OrganizationUser
+            var ua = new UserAccess
             {
                 Id = Guid.NewGuid(),
-                OrganizationId = organizationId,
-                UserId = userId,
-                Role = role,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UserId = request.UserId,
+                AccessId = a.Id,
+                GrantedByUserId = orgUser.UserId,
+                GrantType = AccessGrantType.OrgMembership,
+                CreatedAt = DateTime.UtcNow
             };
-            await _organizationUserRepository.Add(orgUser, ct);
-            return true;
+            await _uaRepo.Add(ua, ct);
         }
 
-        public async Task<bool> RemoveUserFromOrganization(Guid organizationId, Guid userId, CancellationToken ct = default)
-        {
-            var orgUser = await _organizationUserRepository.FirstOrDefault(
-                ou => ou.OrganizationId == organizationId && ou.UserId == userId, ct);
-            if (orgUser == null)
-                return false;
+        return true;
+    }
 
-            orgUser.DeletedAt = DateTime.UtcNow;
-            await _organizationUserRepository.Update(orgUser, ct);
-            return true;
-        }
+    /// <inheritdoc/>
+    public async Task<bool> RemoveUserFromOrganizationAsync(
+        Guid organizationId,
+        Guid userId,
+        CancellationToken ct = default)
+    {
+        var ou = await _orgUserRepo.FirstOrDefault(
+            x => x.OrganizationId == organizationId && x.UserId == userId, ct);
+        if (ou == null) return false;
+        ou.DeletedAt = DateTime.UtcNow;
+        await _orgUserRepo.Update(ou, ct);
+        return true;
+    }
 
-        public async Task<List<OrganizationUserDto>> GetUsersForOrganization(Guid organizationId, CancellationToken ct = default)
-        {
-            var orgUsers = await _organizationUserRepository.GetWhereWithInclude(
-                ou => ou.OrganizationId == organizationId && ou.DeletedAt == null,
-                ct,
-                ou => ou.User);
-            return orgUsers.Select(ou => new OrganizationUserDto(ou)).ToList();
-        }
-
-        public async Task<PagedResponse<OrganizationDto>> GetOrganizationsPaged(PagedRequest pagedRequest, CancellationToken ct = default)
-        {
-            int offset = pagedRequest.PageIndex * pagedRequest.PageSize;
-            var allOrgs = (await _organizationRepository.GetWhereWithInclude(
-                                o => o.DeletedAt == null,
-                                ct,
-                                o => o.Owner))
-                          .ToList();
-            int total = allOrgs.Count;
-            var page = allOrgs
-                        .Skip(offset)
-                        .Take(pagedRequest.PageSize)
-                        .Select(o => new OrganizationDto(o))
-                        .ToList();
-            return new PagedResponse<OrganizationDto>(
-                pagedRequest.PageIndex,
-                pagedRequest.PageSize,
-                total,
-                page);
-        }
-
-        public async Task<bool> DeleteOrganization(Guid organizationId, CancellationToken ct = default)
-        {
-            var org = await _organizationRepository.GetById(organizationId, ct);
-            if (org == null)
-                return false;
-
-            org.DeletedAt = DateTime.UtcNow;
-            await _organizationRepository.Update(org, ct);
-            return true;
-        }
-
-        public async Task<OrganizationDto> UpdateOrganization(OrganizationUpdateReq request, CancellationToken ct = default)
-        {
-            var org = await _organizationRepository.GetById(request.OrganizationId, ct);
-            if (org == null)
-                throw new InvalidOperationException("Organizație inexistentă.");
-
-            // Validăm unicitatea numelui
-            if (!string.IsNullOrWhiteSpace(request.Name))
-            {
-                var duplicate = await _organizationRepository.FirstOrDefault(
-                    o => o.Name == request.Name && o.Id != request.OrganizationId, ct);
-                if (duplicate != null)
-                    throw new InvalidOperationException($"Există deja o organizație cu numele '{request.Name}'.");
-                org.Name = request.Name;
-            }
-
-            // Validăm owner nou, dacă e specificat
-            if (request.OwnerId.HasValue)
-            {
-                var newOwner = await _userRepository.GetById(request.OwnerId.Value, ct);
-                if (newOwner == null)
-                    throw new InvalidOperationException($"Utilizatorul cu ID '{request.OwnerId}' nu există.");
-                org.OwnerId = request.OwnerId.Value;
-
-                // Actualizăm rolul vechiului owner la Member
-                var oldOwner = await _organizationUserRepository.FirstOrDefault(
-                    ou => ou.OrganizationId == org.Id && ou.UserId != request.OwnerId.Value, ct);
-                if (oldOwner != null)
-                {
-                    oldOwner.Role = OrganizationUserRole.Member;
-                    await _organizationUserRepository.Update(oldOwner, ct);
-                }
-
-                // Adăugăm noul owner ca Owner, dacă nu există deja
-                var existingNewOwner = await _organizationUserRepository.FirstOrDefault(
-                    ou => ou.OrganizationId == org.Id && ou.UserId == request.OwnerId.Value, ct);
-                if (existingNewOwner != null)
-                {
-                    existingNewOwner.Role = OrganizationUserRole.Owner;
-                    await _organizationUserRepository.Update(existingNewOwner, ct);
-                }
-                else
-                {
-                    await AddUserToOrganization(
-                        org.Id,
-                        request.OwnerId.Value,
-                        OrganizationUserRole.Owner,
-                        ct);
-                }
-            }
-
-            org.UpdatedAt = DateTime.UtcNow;
-            await _organizationRepository.Update(org, ct);
-
-            return new OrganizationDto(org);
-        }
+    /// <inheritdoc/>
+    public async Task<List<OrganizationUserDto>> GetUsersForOrganizationAsync(
+        Guid organizationId,
+        CancellationToken ct = default)
+    {
+        var list = await _orgUserRepo.GetWhereWithInclude(
+            ou => ou.OrganizationId == organizationId && ou.DeletedAt == null,
+            ct, ou => ou.User);
+        return list.Select(ou => new OrganizationUserDto(ou)).ToList();
     }
 }

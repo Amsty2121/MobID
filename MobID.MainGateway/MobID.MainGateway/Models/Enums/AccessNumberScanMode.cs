@@ -2,6 +2,6 @@
 
 public enum AccessNumberScanMode
 {
-    SingleScan,
-    MultiScan
+    SingleScan = 0,
+    MultiScan = 1
 }

@@ -141,12 +141,13 @@ namespace MobID.MainGateway.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccessTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    AccessTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     ScanMode = table.Column<int>(type: "integer", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
                     MaxUses = table.Column<int>(type: "integer", nullable: true),
                     MaxUsersPerPass = table.Column<int>(type: "integer", nullable: true),
                     MonthlyLimit = table.Column<int>(type: "integer", nullable: true),
@@ -211,6 +212,47 @@ namespace MobID.MainGateway.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrganizationAccessShares",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SourceOrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TargetOrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccessId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrganizationAccessShares", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrganizationAccessShares_Accesses_AccessId",
+                        column: x => x.AccessId,
+                        principalTable: "Accesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrganizationAccessShares_Organizations_SourceOrganizationId",
+                        column: x => x.SourceOrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrganizationAccessShares_Organizations_TargetOrganizationId",
+                        column: x => x.TargetOrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrganizationAccessShares_Users_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "QrCodes",
                 columns: table => new
                 {
@@ -234,17 +276,54 @@ namespace MobID.MainGateway.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserAccesses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccessId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GrantedByUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GrantedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    GrantType = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAccesses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAccesses_Accesses_AccessId",
+                        column: x => x.AccessId,
+                        principalTable: "Accesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserAccesses_Users_GrantedByUserId",
+                        column: x => x.GrantedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserAccesses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Scans",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    AccessId = table.Column<Guid>(type: "uuid", nullable: false),
                     ScannedById = table.Column<Guid>(type: "uuid", nullable: false),
+                    QrCodeId = table.Column<Guid>(type: "uuid", nullable: false),
                     ScannedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    QrCodeId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    AccessId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -253,13 +332,13 @@ namespace MobID.MainGateway.Migrations
                         name: "FK_Scans_Accesses_AccessId",
                         column: x => x.AccessId,
                         principalTable: "Accesses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Scans_QrCodes_QrCodeId",
                         column: x => x.QrCodeId,
                         principalTable: "QrCodes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Scans_Users_ScannedById",
                         column: x => x.ScannedById,
@@ -294,8 +373,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Email", "PasswordHash", "UpdatedAt", "Username" },
                 values: new object[,]
                 {
-                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
-                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$qkZT3DSsQUqFYBDNMip8O.im1FXoKx.Sa8h6qAHaei676e6XKwZ7m", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
+                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
                 });
 
             migrationBuilder.InsertData(
@@ -303,8 +382,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "RoleId", "UserId", "CreatedAt", "DeletedAt", "Id", "IsActive", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8193) },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 11, 20, 14, 13, 561, DateTimeKind.Utc).AddTicks(8199) }
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7812) },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7824) }
                 });
 
             migrationBuilder.CreateIndex(
@@ -321,6 +400,26 @@ namespace MobID.MainGateway.Migrations
                 name: "IX_Accesses_OrganizationId",
                 table: "Accesses",
                 column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationAccessShares_AccessId",
+                table: "OrganizationAccessShares",
+                column: "AccessId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationAccessShares_CreatedBy",
+                table: "OrganizationAccessShares",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationAccessShares_SourceOrganizationId",
+                table: "OrganizationAccessShares",
+                column: "SourceOrganizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationAccessShares_TargetOrganizationId",
+                table: "OrganizationAccessShares",
+                column: "TargetOrganizationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Organizations_OwnerId",
@@ -364,6 +463,21 @@ namespace MobID.MainGateway.Migrations
                 column: "ScannedById");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserAccesses_AccessId",
+                table: "UserAccesses",
+                column: "AccessId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAccesses_GrantedByUserId",
+                table: "UserAccesses",
+                column: "GrantedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAccesses_UserId",
+                table: "UserAccesses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 table: "UserRoles",
                 column: "RoleId");
@@ -373,6 +487,9 @@ namespace MobID.MainGateway.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "OrganizationAccessShares");
+
+            migrationBuilder.DropTable(
                 name: "OrganizationUsers");
 
             migrationBuilder.DropTable(
@@ -380,6 +497,9 @@ namespace MobID.MainGateway.Migrations
 
             migrationBuilder.DropTable(
                 name: "Scans");
+
+            migrationBuilder.DropTable(
+                name: "UserAccesses");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
