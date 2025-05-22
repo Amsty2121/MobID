@@ -115,14 +115,14 @@ namespace MobID.MainGateway.Repo
                 .HasQueryFilter(s => s.DeletedAt == null);
 
             // Soft Delete: Query Filter pentru DeletedAt
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            /*foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (entityType.ClrType.GetProperty("DeletedAt") != null)
                 {
                     modelBuilder.Entity(entityType.ClrType)
                         .HasQueryFilter(ConvertFilterExpression(entityType.ClrType));
                 }
-            }
+            }*/
 
             // Seed Data pentru AccessType
             modelBuilder.Entity<AccessType>().HasData(

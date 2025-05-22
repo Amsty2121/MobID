@@ -22,7 +22,7 @@ export default function AddMemberModal({ organizationId, onSuccess, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // load existing members so we can exclude them
+  // încărcăm membrii existenți ca să-i excludem
   useEffect(() => {
     (async () => {
       try {
@@ -34,7 +34,7 @@ export default function AddMemberModal({ organizationId, onSuccess, onClose }) {
     })();
   }, [organizationId]);
 
-  // load all users
+  // încărcăm toți utilizatorii
   useEffect(() => {
     (async () => {
       try {
@@ -48,7 +48,7 @@ export default function AddMemberModal({ organizationId, onSuccess, onClose }) {
     })();
   }, []);
 
-  // filter out existing members
+  // filtrăm utilizatorii care nu sunt deja membri
   const userOptions = allUsers
     .filter(u => !existingMemberIds.has(u.id))
     .map(u => ({
@@ -71,6 +71,7 @@ export default function AddMemberModal({ organizationId, onSuccess, onClose }) {
         role:   selectedRole.value
       });
       onSuccess();
+      onClose();
     } catch (err) {
       setError("Nu am putut adăuga membrul: " + err.message);
     }

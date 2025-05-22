@@ -41,9 +41,14 @@ export default function OrganizationMembers({ organizationId, organizationName }
   };
 
   const confirmRemove = async () => {
-    await removeUserFromOrganization(organizationId, toDelete.userId);
-    setShowDelete(false);
-    fetchMembers();
+    try {
+      await removeUserFromOrganization(organizationId, toDelete.userId);
+      setShowDelete(false);
+      fetchMembers();
+    } catch {
+      setError("Nu am putut elimina membrul.");
+      setShowDelete(false);
+    }
   };
 
   const memberCols = [
@@ -56,7 +61,11 @@ export default function OrganizationMembers({ organizationId, organizationName }
   const membersWithActions = members.map(m => ({
     ...m,
     actions: (
-      <button className="icon-btn" onClick={() => handleRemove(m)} title="Exclude">
+      <button
+        className="icon-btn"
+        onClick={() => handleRemove(m)}
+        title="Exclude"
+      >
         <FaTrash />
       </button>
     )
@@ -94,7 +103,7 @@ export default function OrganizationMembers({ organizationId, organizationName }
           onClose={() => setShowAdd(false)}
         />
       )}
-      {showDelete && (
+      {showDelete && toDelete && (
         <DeleteMemberModal
           member={toDelete}
           onConfirm={confirmRemove}

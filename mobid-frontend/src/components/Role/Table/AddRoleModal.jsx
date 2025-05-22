@@ -1,8 +1,8 @@
-// src/components/Role/AddRoleModal.jsx
+// src/components/Role/Table/AddRoleModal.jsx
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import { addRole } from "../../api/roleApi";
-import "./Role.css";
+import { addRole } from "../../../api/roleApi";
+import "../Role.css";
 
 const AddRoleModal = ({ onSuccess, onClose }) => {
   const [name, setName] = useState("");

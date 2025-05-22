@@ -1,7 +1,7 @@
-// src/components/Role/DeleteRoleModal.jsx
+// src/components/Role/Table/DeleteRoleModal.jsx
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import "./Role.css";
+import "../Role.css";
 
 const DeleteRoleModal = ({ role, onConfirm, onCancel }) => {
   return (

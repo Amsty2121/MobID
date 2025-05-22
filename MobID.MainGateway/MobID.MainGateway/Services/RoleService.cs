@@ -3,6 +3,7 @@ using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
 using MobID.MainGateway.Models.Dtos;
+using MobID.MainGateway.Models.Dtos.Req;
 
 namespace MobID.MainGateway.Services;
 
@@ -20,11 +21,34 @@ public class RoleService : IRoleService
     }
 
     /// <inheritdoc/>
-    public async Task<RoleDto> CreateRoleAsync(string name, string description, CancellationToken ct = default)
+    public async Task<RoleDto> CreateRoleAsync(
+    RoleCreateReq req,
+    CancellationToken ct = default)
     {
-        var r = new Role { Id = Guid.NewGuid(), Name = name, Description = description, CreatedAt = DateTime.UtcNow };
-        await _roleRepo.Add(r, ct);
-        return new RoleDto(r);
+        var existing = await _roleRepo.FirstOrDefault(r => r.Name == req.Name, ct);
+
+        if (existing != null)
+        {
+            if (existing.DeletedAt == null)
+                throw new InvalidOperationException($"Role '{req.Name}' already exists.");
+            
+            existing.DeletedAt = null;
+            existing.Description = req.Description;
+            existing.UpdatedAt = DateTime.UtcNow;
+            await _roleRepo.Update(existing, ct);
+            return new RoleDto(existing);
+        }
+
+        var role = new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = req.Name,
+            Description = req.Description,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _roleRepo.Add(role, ct);
+        return new RoleDto(role);
     }
 
     /// <inheritdoc/>
@@ -66,7 +90,7 @@ public class RoleService : IRoleService
     {
         var r = await _roleRepo.GetById(roleId, ct);
         if (r == null) return false;
-        r.DeletedAt = DateTime.UtcNow;
+        r.DeletedAt = r.UpdatedAt = DateTime.UtcNow;
         await _roleRepo.Update(r, ct);
         return true;
     }

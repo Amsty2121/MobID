@@ -1,8 +1,8 @@
-// src/components/User/AddUserModal.jsx
+// src/components/User/Table/AddUserModal.jsx
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import { addUser } from "../../api/userApi";
-import "./User.css";
+import { createUser } from "../../../api/userApi";
+import "../User.css";
 
 const AddUserModal = ({ onSuccess, onClose }) => {
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ const AddUserModal = ({ onSuccess, onClose }) => {
     e.preventDefault();
     setError("");
     try {
-      await addUser({ email, username, password });
+      await createUser({ email, username, password });
       onSuccess();   // reîmprospătează lista
       onClose();
     } catch {

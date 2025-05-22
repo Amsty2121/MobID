@@ -22,30 +22,36 @@ public class UserService : IUserService
     /// <inheritdoc/>
     public async Task<UserDto> CreateUserAsync(UserAddReq request, CancellationToken ct = default)
     {
-        var u = new User
+        var existing = await _userRepo.FirstOrDefault(
+            u => u.Email == request.Email && u.DeletedAt == null,
+            ct);
+        if (existing != null)
+            throw new InvalidOperationException($"User with email '{request.Email}' already exist.");
+
+        var user = new User
         {
             Id = Guid.NewGuid(),
             Email = request.Email,
             Username = request.Username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
-        await _userRepo.Add(u, ct);
+        await _userRepo.Add(user, ct);
 
-        // assign default SimpleUser role
         var defaultRoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        var ur = new UserRole
+        var userRole = new UserRole
         {
             Id = Guid.NewGuid(),
-            UserId = u.Id,
+            UserId = user.Id,
             RoleId = defaultRoleId,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
-        await _userRoleRepo.Add(ur, ct);
+        await _userRoleRepo.Add(userRole, ct);
 
-        u.UserRoles = new List<UserRole> { ur };
-        return new UserDto(u, new[] { "SimpleUser" });
+        return new UserDto(user, new[] { "SimpleUser" });
     }
 
     /// <inheritdoc/>
@@ -72,7 +78,7 @@ public class UserService : IUserService
         foreach (var u in pageEntities)
         {
             var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == u.Id, ct, r => r.Role);
-            dtos.Add(new UserDto(u, roles.Select(r => r.Role.Name).ToList()));
+            dtos.Add(new UserDto(u, roles.Where(ur => ur.Role.DeletedAt == null).Select(r => r.Role.Name).ToList()));
         }
 
         return new PagedResponse<UserDto>(request.PageIndex, request.PageSize, total, dtos);
@@ -121,6 +127,6 @@ public class UserService : IUserService
     {
         if (!await _userRepo.IsIdPresent(userId)) return new List<string>();
         var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == userId, ct, r => r.Role);
-        return roles.Select(r => r.Role.Name).ToList();
+        return roles.Where(ur => ur.Role.DeletedAt == null).Select(r => r.Role.Name).ToList();
     }
 }

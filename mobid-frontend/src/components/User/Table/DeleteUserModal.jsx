@@ -1,7 +1,7 @@
-// src/components/User/DeleteUserModal.jsx
+// src/components/User/Table/DeleteUserModal.jsx
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import "./User.css";
+import "../User.css";
 
 const DeleteUserModal = ({ user, onConfirm, onCancel }) => {
   return (

@@ -27,17 +27,10 @@ public class RoleController : ControllerBase
         [FromBody] RoleCreateReq req,
         CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         try
         {
-            var dto = await _roleService.CreateRoleAsync(req.Name, req.Description, ct);
-            return CreatedAtAction(
-                nameof(GetRoleByIdAsync),
-                new { roleId = dto.Id },
-                dto
-            );
+            var dto = await _roleService.CreateRoleAsync(req, ct);
+            return Ok(dto);
         }
         catch (Exception ex)
         {
@@ -76,7 +69,7 @@ public class RoleController : ControllerBase
     /// <summary>
     /// Listează toate rolurile.
     /// </summary>
-    [HttpGet]
+    [HttpGet("all")]
     [ProducesResponseType(typeof(List<RoleDto>), 200)]
     public async Task<ActionResult<List<RoleDto>>> GetAllRolesAsync(
         CancellationToken ct)

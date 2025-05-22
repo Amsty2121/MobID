@@ -32,11 +32,7 @@ public class OrganizationController : ControllerBase
         try
         {
             var dto = await _orgService.CreateOrganizationAsync(req, ct);
-            return CreatedAtAction(
-                nameof(GetOrganizationByIdAsync),
-                new { organizationId = dto.Id },
-                dto
-            );
+            return Ok(dto);
         }
         catch (Exception ex)
         {
@@ -162,9 +158,6 @@ public class OrganizationController : ControllerBase
         [FromBody] OrganizationAddUserReq req,
         CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         try
         {
             var success = await _orgService.AddUserToOrganizationAsync(organizationId, req, ct);

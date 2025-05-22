@@ -29,14 +29,8 @@ public class UserController : ControllerBase
         [FromBody] UserAddReq req,
         CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         var dto = await _userService.CreateUserAsync(req, ct);
-        return CreatedAtAction(
-            nameof(GetUserByIdAsync),
-            new { userId = dto.Id },
-            dto);
+        return Ok(dto);
     }
 
     /// <summary>

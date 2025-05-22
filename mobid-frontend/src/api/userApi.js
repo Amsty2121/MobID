@@ -1,12 +1,12 @@
 // src/api/userApi.js
 import api from "./api";
 
-export async function addUser(userAddReq) {
-  const { data } = await api.post("/User/add", userAddReq);
+export async function createUser(userAddReq) {
+  const { data } = await api.post("/User", userAddReq);
   return data;
 }
 
-export async function deleteUser(userId) {
+export async function deactivateUser(userId) {
   return api.delete(`/User/${userId}`);
 }
 
@@ -16,18 +16,19 @@ export async function getUserById(userId) {
 }
 
 export async function getUsersPaged({ pageIndex, pageSize }) {
-  const { data } = await api.get("/User/paged", { params: { pageIndex, pageSize } });
+  const { data } = await api.get("/User/paged", {
+    params: { pageIndex, pageSize }
+  });
   return data;
 }
 
 export async function assignRoleToUser(userId, roleId) {
-  const { data } = await api.post("/User/assignRole", null, { params: { userId, roleId } });
+  const { data } = await api.post(`/User/${userId}/roles/${roleId}`);
   return data;
 }
 
 export async function removeRoleFromUser(userId, roleId) {
-  const { data } = await api.post("/User/removeRole", null, { params: { userId, roleId } });
-  return data;
+  return api.delete(`/User/${userId}/roles/${roleId}`);
 }
 
 export async function getUserRoles(userId) {

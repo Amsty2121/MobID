@@ -17,7 +17,7 @@ const Organization = () => {
   const [organizations, setOrganizations]     = useState([]);
   const [totalCount, setTotalCount]           = useState(0);
   const [currentPage, setCurrentPage]         = useState(0);
-  const [limit, setLimit]                     = useState(5);
+  const [limit, setLimit]                     = useState(10);
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState("");
 

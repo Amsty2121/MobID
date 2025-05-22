@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MobID.MainGateway.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20250521205210_Initial")]
+    [Migration("20250521220900_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -420,7 +420,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK",
+                            PasswordHash = "$2a$11$i14tRs4zJB6DC5cvJWqj1OBq2p/iGzgY51xI8Qb7WxNd0Xt5Twida",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "admin"
                         },
@@ -429,7 +429,7 @@ namespace MobID.MainGateway.Migrations
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK",
+                            PasswordHash = "$2a$11$i14tRs4zJB6DC5cvJWqj1OBq2p/iGzgY51xI8Qb7WxNd0Xt5Twida",
                             UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Username = "user"
                         });
@@ -514,7 +514,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7812)
+                            UpdatedAt = new DateTime(2025, 5, 21, 22, 8, 59, 931, DateTimeKind.Utc).AddTicks(9981)
                         },
                         new
                         {
@@ -523,7 +523,7 @@ namespace MobID.MainGateway.Migrations
                             CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Id = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7824)
+                            UpdatedAt = new DateTime(2025, 5, 21, 22, 8, 59, 931, DateTimeKind.Utc).AddTicks(9987)
                         });
                 });
 

@@ -373,8 +373,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "Id", "CreatedAt", "DeletedAt", "Email", "PasswordHash", "UpdatedAt", "Username" },
                 values: new object[,]
                 {
-                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
-                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$16vvsxzhiE0KIxnOzzbE8ehOrB06RfKblUCDrPlrAVmgtXuwf9rEK", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "admin@example.com", "$2a$11$i14tRs4zJB6DC5cvJWqj1OBq2p/iGzgY51xI8Qb7WxNd0Xt5Twida", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin" },
+                    { new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "user@example.com", "$2a$11$i14tRs4zJB6DC5cvJWqj1OBq2p/iGzgY51xI8Qb7WxNd0Xt5Twida", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "user" }
                 });
 
             migrationBuilder.InsertData(
@@ -382,8 +382,8 @@ namespace MobID.MainGateway.Migrations
                 columns: new[] { "RoleId", "UserId", "CreatedAt", "DeletedAt", "Id", "IsActive", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7812) },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 20, 52, 9, 991, DateTimeKind.Utc).AddTicks(7824) }
+                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 22, 8, 59, 931, DateTimeKind.Utc).AddTicks(9981) },
+                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"), new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, new Guid("00000000-0000-0000-0000-000000000000"), true, new DateTime(2025, 5, 21, 22, 8, 59, 931, DateTimeKind.Utc).AddTicks(9987) }
                 });
 
             migrationBuilder.CreateIndex(
