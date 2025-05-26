@@ -1,0 +1,27 @@
+/* src/styles/components/modal/modal-buttons.css */
+
+.modal__button--yes,
+.modal__button--no {
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.75rem;
+  border: 1px solid var(--color-primary);
+  color: #fff;
+}
+
+.modal__button--yes {
+  background-color: var(--color-primary);
+}
+.modal__button--no {
+  background: none;
+  color: var(--color-primary);
+}
+
+.modal__button--yes:hover {
+  background-color: var(--color-primary-hover);
+}
+.modal__button--no:hover {
+  background-color: var(--color-primary-hover);
+  color: #fff;
+}

@@ -1,7 +1,7 @@
 // src/components/User/User.jsx
 import React from "react";
 import UserTable from "./Table/UserTable";
-import "./User.css";
+import "../../styles/components/user.css";
 
 export default function User() {
   return (

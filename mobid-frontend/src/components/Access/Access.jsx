@@ -1,13 +1,10 @@
 // src/components/Access/Access.jsx
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
-import { FaTrash } from "react-icons/fa";
-import GenericTable from "../GenericTable/GenericTable";
-import AddAccessModal from "./AddAccessModal";
-import AccessDetailsModal from "./AccessDetailsModal";
 import AccessQRCodes from "./AccessQRCodes";
 import { getOrganizationsPaged } from "../../api/organizationApi";
-import { getAccessesForOrganization, deactivateAccess } from "../../api/accessApi";
+import { getAccessesForOrganization } from "../../api/accessApi";
+import AccessTable from "./TableAccess/AccessTable";
 import "./Access.css";
 
 export default function Access() {
@@ -17,12 +14,7 @@ export default function Access() {
   const [selectedAccess, setSelectedAccess] = useState(null);
 
   const [loadingOrgs, setLoadingOrgs] = useState(false);
-  const [loadingAccesses, setLoadingAccesses] = useState(false);
   const [error, setError] = useState("");
-
-  const [showAddAccess, setShowAddAccess] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [accessToView, setAccessToView] = useState(null);
 
   // 1️⃣ Încarcă organizațiile
   useEffect(() => {
@@ -47,7 +39,7 @@ export default function Access() {
     fetchOrgs();
   }, []);
 
-  // 2️⃣ Când selectăm o organizație, încarcă accesele
+  // 2️⃣ Când selectăm o organizație, încarcă accesele pentru QR
   useEffect(() => {
     if (!selectedOrg) {
       setAccesses([]);
@@ -55,38 +47,15 @@ export default function Access() {
       return;
     }
     const fetchAccesses = async () => {
-      setLoadingAccesses(true);
       try {
         const data = await getAccessesForOrganization(selectedOrg.value);
         setAccesses(data);
       } catch {
         setError("Eroare la încărcarea acceselor.");
-      } finally {
-        setLoadingAccesses(false);
       }
     };
     fetchAccesses();
   }, [selectedOrg]);
-
-  // Dezactivează un acces
-  const handleDeactivate = async row => {
-    await deactivateAccess(row.id);
-    const fresh = await getAccessesForOrganization(selectedOrg.value);
-    setAccesses(fresh);
-    // dacă era deschisă detalierea pentru acest acces, o închidem
-    if (accessToView?.id === row.id) {
-      setAccessToView(null);
-      setShowDetails(false);
-    }
-  };
-
-  const columns = [
-    { header: "ID", accessor: "id" },
-    { header: "Nume", accessor: "name" },
-    { header: "Tip", accessor: "accessType" },
-    { header: "Activ", accessor: "isActive" },
-    { header: "Expiră", accessor: "expirationDateTime" },
-  ];
 
   return (
     <div className="access-page">
@@ -103,15 +72,13 @@ export default function Access() {
           onChange={opt => {
             setSelectedOrg(opt);
             setSelectedAccess(null);
-            setAccessToView(null);
-            setShowDetails(false);
           }}
           placeholder="Selectează organizație..."
           noOptionsMessage={() => "Nu s-au găsit organizații"}
           formatOptionLabel={({ name, id }) => (
             <div className="org-option">
               <div className="org-option-name"><strong>Name:</strong> {name}</div>
-              <div className="org-option-id">Id: {id}</div>
+              <div className="org-option-id"><strong>Id:</strong> {id}</div>
             </div>
           )}
         />
@@ -119,36 +86,10 @@ export default function Access() {
 
       {/* Tabel Accese */}
       {selectedOrg && (
-        <>
-          <h2 className="access-heading">
-            Accese pentru „{selectedOrg.name}”
-          </h2>
-          {loadingAccesses
-            ? <p>Se încarcă accesele...</p>
-            : (
-              <GenericTable
-                title=""
-                columns={columns}
-                filterColumns={["name", "accessType"]}
-                data={accesses}
-                onAdd={() => setShowAddAccess(true)}
-                showAddOption
-                showEditOption={false}
-                showDeleteOption
-                onDelete={handleDeactivate}
-                onRowClick={row => {
-                  setAccessToView(row);
-                  setShowDetails(true);
-                }}
-                currentPage={0}
-                totalCount={accesses.length}
-                pageSize={accesses.length}
-                onPageChange={() => {}}
-                onPageSizeChange={() => {}}
-              />
-            )
-          }
-        </>
+        <AccessTable
+          organizationId={selectedOrg.value}
+          organizationName={selectedOrg.name}
+        />
       )}
 
       {/* Select + tabel QR-Codes */}
@@ -175,27 +116,6 @@ export default function Access() {
             )}
           />
         </div>
-      )}
-
-      {/* Modal Adaugă Acces */}
-      {selectedOrg && showAddAccess && (
-        <AddAccessModal
-          organizationId={selectedOrg.value}
-          onSuccess={async () => {
-            setShowAddAccess(false);
-            const fresh = await getAccessesForOrganization(selectedOrg.value);
-            setAccesses(fresh);
-          }}
-          onClose={() => setShowAddAccess(false)}
-        />
-      )}
-
-      {/* Modal Detalii Acces */}
-      {showDetails && accessToView && (
-        <AccessDetailsModal
-          access={accessToView}
-          onClose={() => setShowDetails(false)}
-        />
       )}
 
       {/* Componentă QR-Codes */}

@@ -1,0 +1,36 @@
+/* src/styles/components/modal/modal-mui.css */
+
+.modal__content .MuiOutlinedInput-root fieldset {
+  border-color: var(--color-primary);
+}
+.modal__content .MuiOutlinedInput-root:hover fieldset,
+.modal__content .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--color-primary);
+}
+.modal__content .MuiInputLabel-root {
+  color: var(--color-primary);
+}
+.modal__content .MuiInputLabel-root.Mui-focused {
+  color: var(--color-iron) !important;
+}
+.modal__content .MuiInputBase-input {
+  color: var(--color-iron) !important;
+}
+
+.modal__content .MuiButton-contained {
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: bold;
+}
+.modal__content .MuiButton-contained:hover {
+  background-color: var(--color-primary-hover);
+}
+.modal__content .MuiButton-outlined {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: bold;
+}
+.modal__content .MuiButton-outlined:hover {
+  background-color: var(--color-primary-hover);
+  color: #fff;
+}

@@ -1,6 +1,6 @@
 // src/components/Access/GenerateQrModal.jsx
 import React, { useState } from "react";
-import { generateQrCode } from "../../api/qrCodeApi";
+import { createQrCode } from "../../api/qrCodeApi";
 import "./Access.css";
 
 export default function GenerateQrModal({ accessId, onSuccess, onClose }) {
@@ -9,7 +9,7 @@ export default function GenerateQrModal({ accessId, onSuccess, onClose }) {
   const handleGenerate = async () => {
     setEroare("");
     try {
-      await generateQrCode(accessId);
+      await createQrCode(accessId);
       onSuccess();
     } catch (err) {
       setEroare("Nu am putut genera codul QR: " + err.message);

@@ -33,17 +33,10 @@ public class QrCodeController : ControllerBase
         [FromBody] QrCodeGenerateReq req,
         CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         try
         {
-            var dto = await _qrService.CreateQrCodeAsync(req.AccessId, ct);
-            return CreatedAtAction(
-                nameof(GetQrCodeByIdAsync),
-                new { qrCodeId = dto.Id },
-                dto
-            );
+            var dto = await _qrService.CreateQrCodeAsync(req, ct);
+            return Ok(dto);
         }
         catch (Exception ex)
         {
@@ -65,26 +58,6 @@ public class QrCodeController : ControllerBase
         {
             var dto = await _qrService.GetQrCodeByIdAsync(qrCodeId, ct);
             return dto == null ? NotFound() : Ok(dto);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Listează toate codurile QR generate pentru un anumit access.
-    /// </summary>
-    [HttpGet("access/{accessId:guid}")]
-    [ProducesResponseType(typeof(List<QrCodeDto>), 200)]
-    public async Task<ActionResult<List<QrCodeDto>>> GetQrCodesForAccessAsync(
-        Guid accessId,
-        CancellationToken ct)
-    {
-        try
-        {
-            var list = await _qrService.GetQrCodesForAccessAsync(accessId, ct);
-            return Ok(list);
         }
         catch (Exception ex)
         {

@@ -1,3 +1,5 @@
+/* src/components/Organization/Organization.css */
+
 /* ===========================================
    ORGANIZATION PAGE STYLES
    =========================================== */
@@ -16,39 +18,52 @@
   color: var(--color-primary);
 }
 
+.org-partners-container {
+  padding: 1rem;
+}
+
+/* strong-ul din titlu să fie portocaliu */
+.org-partners-container .org-partners-title strong {
+  color: var(--color-primary);
+}
+
 /* ===========================================
    REACT-SELECT DARK THEME (prefix: org-select)
    =========================================== */
 
+.org-select {
+  padding: 1rem;
+}
+
 /* Wrapper pentru centrare select */
 .org-select-wrapper {
-  width: 300px;
-  margin: 1.5rem auto;
+  width: 400px;
+  max-width: 100%;    /* ca să nu spargă layout-ul pe mobil */
+  margin: 1rem auto;
 }
 
 /* Control (input + indicator) */
 .org-select__control {
+  width: 100% !important; /* umple wrapper-ul */
   background-color: var(--color-tuna-light) !important;
   border: 1px solid var(--color-primary) !important;
   box-shadow: none !important;
 }
-.org-select__control:hover {
-  border-color: var(--color-primary) !important;
-}
+.org-select__control:hover,
 .org-select__control--is-focused {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 1px var(--color-primary) !important;
 }
 
-/* Input text & single value */
-.org-select__input {
-  color: var(--color-iron) !important;
+/* Input text & placeholder */
+.org-select__input input,
+.org-select__single-value,
+.org-select__placeholder {
+  color: var(--color-primary) !important;
+  text-align: left !important;
 }
 
-.org-select__single-value {
-  color: var(--color-primary) !important;
-}
-.org-select__placeholder {
+.org-select__input {
   color: var(--color-primary) !important;
 }
 
@@ -56,6 +71,7 @@
 .org-select__dropdown-indicator {
   color: var(--color-iron) !important;
 }
+
 .org-select__dropdown-indicator:hover {
   color: var(--color-primary) !important;
 }
@@ -65,32 +81,30 @@
   display: none !important;
 }
 
-/* Menu (listă opțiuni) */
+/* Menu (listă de opțiuni) */
 .org-select__menu {
+  width: 100% !important;
+  box-sizing: border-box;
   background-color: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
 }
+
 /* Fiecare opțiune */
 .org-select__option {
   background-color: var(--color-tuna-light) !important;
   color: var(--color-iron) !important;
-}
-.org-select__option--is-focused {
-  background-color: var(--color-tuna) !important;
-  color: var(--color-iron) !important;
+  text-align: left !important;
 }
 
-/* FormatOptionLabel content */
-.org-option {
-  line-height: 1.2;
+.org-select__option--is-selected {
+  background-color: var(--color-primary) !important;
+  color: var(--color-shark) !important;
 }
-.org-option-name {
-  font-weight: 500;
-  color: var(--color-iron);
-}
-.org-option-id {
-  font-size: 0.85em;
-  color: var(--color-bombay);
+
+.org-select__option:hover,
+.org-select__option--is-focused {
+  background-color: var(--color-primary) !important;  /* fundal portocaliu */
+  color: var(--color-shark) !important;               /* text deschis */
 }
 
 /* ===========================================
@@ -148,26 +162,18 @@
   outline: none;
 }
 
-/* Butoane din formă */
-.form-actions {
+/* ===========================================
+   Generic checkbox + text inline
+   =========================================== */
+.checkbox-container {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
-}
-.form-actions button {
-  width: 100%;
-  background-color: var(--color-primary);
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  padding: 0.6rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-.form-actions button:hover {
-  background-color: var(--color-primary-hover);
+.checkbox-container input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }
 
 /* ===========================================
@@ -217,4 +223,164 @@
 }
 .add-org-icon:hover {
   background-color: rgba(255, 152, 0, 0.2);
+}
+
+/* ===========================================
+   ORGANIZATION TABS (actualizări)
+   =========================================== */
+
+/* Wrapper-ul care conține TabList: adaugă linia portocalie sub taburi */
+.org-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* Fiecare Tab */
+.MuiTab-root {
+  text-transform: none; /* păstrează capitalizarea normală */
+  border: 1px solid var(--color-primary);
+  margin: 0 0.5rem;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+}
+
+/* Tab-uri neneselectate: border portocaliu și text portocaliu */
+.MuiTab-root:not(.Mui-selected) {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Tab-ul selectat: fundal portocaliu + text alb */
+.MuiTab-root.Mui-selected {
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+/* Elimină sublinierea implicită a Tabs */
+.MuiTabs-indicator {
+  display: none;
+}
+
+/* Elimină conturul alb la focus (rămâne doar ripple-ul) */
+.MuiTab-root:focus,
+.Mui-focusVisible {
+  outline: none;
+}
+
+
+/* ===========================================
+   ENHANCED TRANSFER LIST STYLE
+   =========================================== */
+
+/* ✅ Container de transfer */
+.org-transfer-container {
+  display: flex;
+  justify-content: center;
+  background-color: var(--color-tuna-light);
+  border-radius: 8px;
+  padding: 1rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  max-width: 615px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* ✅ Butoanele din mijloc */
+.org-transfer-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.org-transfer-actions .MuiButton-outlined {
+  background-color: var(--color-tuna);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.org-transfer-actions .MuiButton-outlined:hover {
+  background-color: var(--color-primary);
+}
+
+/* ✅ Container listă */
+.org-transfer-list.MuiPaper-root {
+  width: 250px;
+  height: 300px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-tuna);
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ✅ Headerul listei */
+.org-transfer-header {
+  background-color: var(--color-primary);
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 700;
+  color: white;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  font-size: 1rem;
+}
+
+.org-transfer-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ✅ Text item din listă */
+.org-transfer-list .MuiListItemText-root span {
+  color: var(--color-iron);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.MuiCheckbox-root.Mui-checked {
+  color: var(--color-primary) !important;
+}
+
+/* ✅ Checkbox BIFAT din LISTĂ (default - primary) */
+.org-transfer-list .MuiListItem-root .MuiCheckbox-root.Mui-checked {
+  color: var(--color-primary) !important;
+}
+
+/* ✅ Checkbox BIFAT din LISTĂ (default - primary) */
+.org-transfer-list .MuiListItem-root .MuiCheckbox-root:not(.Mui-checked) {
+  color: var(--color-primary) !important;
+}
+
+/* ✅ Checkbox BIFAT din HEADER */
+.org-transfer-header .MuiCheckbox-root.Mui-checked {
+  color: var(--color-tuna) !important;
+}
+
+/* ✅ Checkbox NEBIFAT din HEADER - tuna pentru contur */
+.org-transfer-header .MuiCheckbox-root:not(.Mui-checked) .MuiSvgIcon-root {
+  color: var(--color-tuna) !important;
+}
+.org-transfer-header .MuiCheckbox-root:not(.Mui-checked) svg path {
+  stroke: var(--color-tuna) !important;
+}
+
+.org-transfer-header {
+  color: var(--color-shark) !important;
+}
+
+/* păstrează în continuare count-ul în iron */
+.org-transfer-header .org-transfer-count {
+  color: var(--color-chark) !important;
 }

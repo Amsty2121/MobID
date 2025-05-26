@@ -9,8 +9,7 @@ public interface IUserAccessService
     Task<bool> GrantAccessToUserAsync(
             UserGrantAccessReq req,
             Guid grantedByUserId,
-            CancellationToken ct = default,
-            AccessGrantType grantType = AccessGrantType.DirectGrant);
+            CancellationToken ct = default);
 
     Task<bool> RevokeAccessFromUserAsync(
             UserGrantAccessReq req,

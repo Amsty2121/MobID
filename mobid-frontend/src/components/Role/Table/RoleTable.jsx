@@ -4,23 +4,23 @@ import { getRolesPaged, deleteRole } from "../../../api/roleApi";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddRoleModal from "./AddRoleModal";
 import DeleteRoleModal from "./DeleteRoleModal";
-import "../Role.css";
+import "../../../styles/components/role.css";
 
 export default function RoleTable() {
   const DEFAULT_PAGE_SIZE = 10;
 
-  const [roles, setRoles]             = useState([]);
-  const [totalCount, setTotalCount]   = useState(0);
+  const [roles, setRoles] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize]       = useState(DEFAULT_PAGE_SIZE);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [showAddModal, setShowAddModal]       = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [roleToDelete, setRoleToDelete]       = useState(null);
+  const [roleToDelete, setRoleToDelete] = useState(null);
 
-  // Previne fetch dublu în StrictMode
+  // Prevent double-fetch under StrictMode
   const didFetchRef = useRef(false);
 
   const fetchRoles = useCallback(async () => {
@@ -63,11 +63,11 @@ export default function RoleTable() {
 
   return (
     <>
-      {loading && <p>Se încarcă...</p>}
+      {loading && <p className="loading">Se încarcă...</p>}
       {error   && <p className="error">{error}</p>}
-    
+
       <GenericTable
-        title='Roluri'
+        title="Roluri"
         columns={columns}
         filterColumns={filterCols}
         data={roles}

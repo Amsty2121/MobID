@@ -1,4 +1,5 @@
 ﻿using MobID.MainGateway.Models.Dtos;
+using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Repo.Interfaces;
 using MobID.MainGateway.Services.Interfaces;
@@ -22,12 +23,21 @@ public class QrCodeService : IQrCodeService
     }
 
     /// <inheritdoc/>
-    public async Task<QrCodeDto> CreateQrCodeAsync(Guid accessId, CancellationToken ct = default)
+    public async Task<QrCodeDto> CreateQrCodeAsync(QrCodeGenerateReq req, CancellationToken ct = default)
     {
-        var access = await _accessRepo.GetById(accessId, ct)
-                   ?? throw new InvalidOperationException("Access not found.");
-        var qr = new QrCode { Id = Guid.NewGuid(), AccessId = accessId, CreatedAt = DateTime.UtcNow };
+        var qr = new QrCode
+        {
+            Id = Guid.NewGuid(),
+            AccessId = req.AccessId,
+            Type = req.Type,
+            Description = req.Description ?? $"QR generat la {DateTime.UtcNow:yyyy-MM-dd HH:mm}",
+            ExpiresAt = req.ExpiresAt,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
         await _qrRepo.Add(qr, ct);
+
         return new QrCodeDto(qr);
     }
 
@@ -36,13 +46,6 @@ public class QrCodeService : IQrCodeService
     {
         var qr = await _qrRepo.GetById(qrCodeId, ct);
         return qr == null ? null : new QrCodeDto(qr);
-    }
-
-    /// <inheritdoc/>
-    public async Task<List<QrCodeDto>> GetQrCodesForAccessAsync(Guid accessId, CancellationToken ct = default)
-    {
-        var qrs = await _qrRepo.GetWhere(q => q.AccessId == accessId && q.DeletedAt == null, ct);
-        return qrs.Select(q => new QrCodeDto(q)).ToList();
     }
 
     /// <inheritdoc/>
@@ -79,7 +82,7 @@ public class QrCodeService : IQrCodeService
            (access.ExpirationDateTime.HasValue && access.ExpirationDateTime < DateTime.UtcNow))
             return false;
 
-        if (access.RestrictToOrganizationMembers)
+        if (access.IsRestrictedToOrgMembers)
         {
             var member = await _orgUserRepo.FirstOrDefault(
                 ou => ou.OrganizationId == access.OrganizationId && ou.UserId == scanningUserId, ct);

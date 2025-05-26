@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MobID.MainGateway.Configuration;
+using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Models.Entities;
@@ -84,7 +85,7 @@ public class AuthService : IAuthService
     }
 
     /// <inheritdoc/>
-    public async Task<UserRegisterRsp> RegisterAsync(UserRegisterReq request, CancellationToken ct = default)
+   /* public async Task<UserRegisterRsp> RegisterAsync(UserRegisterReq request, CancellationToken ct = default)
     {
         if (await _userRepo.FirstOrDefault(u => u.Email == request.Email, ct) != null)
             throw new InvalidOperationException("Email already in use.");
@@ -112,6 +113,40 @@ public class AuthService : IAuthService
         }
 
         return new UserRegisterRsp(user, roles.Select(r => r.Name).ToList());
+    } */
+    
+    public async Task<UserRegisterRsp> RegisterAsync(UserRegisterReq request, CancellationToken ct = default)
+    {
+        var existing = await _userRepo.FirstOrDefault(
+            u => u.Email == request.Email && u.DeletedAt == null,
+            ct);
+        if (existing != null)
+            throw new InvalidOperationException($"User with email '{request.Email}' already exist.");
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = request.Email,
+            Username = request.Username,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        await _userRepo.Add(user, ct);
+
+        var defaultRoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        var userRole = new UserRole
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            RoleId = defaultRoleId,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        await _userRoleRepo.Add(userRole, ct);
+
+        return new UserRegisterRsp(user, new[] { "SimpleUser" });
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────

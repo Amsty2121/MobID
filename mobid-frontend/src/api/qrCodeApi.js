@@ -2,32 +2,50 @@
 import api from "./api";
 
 /**
- * Generează un QR code pentru un acces.
+ * Generează un cod QR nou
  * @param {string} accessId
+ * @param {string} [description]
+ * @returns {Promise<QrCodeDto>}
  */
-export async function generateQrCode(accessId) {
-  // ATENȚIE: pe backend generator-ul așteaptă accessId ca query string, nu în body
-  const { data } = await api.post(
-    "/QrCode/generate",
-    null,
-    { params: { accessId } }
-  );
-  return data;
+export async function createQrCode(accessId, description) {
+  const res = await api.post("/api/qrcode", { accessId, description });
+  return res.data;
 }
 
 /**
- * Obține toate codurile QR asociate unui acces.
+ * Listează QR‐urile asociate unui access
  * @param {string} accessId
+ * @returns {Promise<QrCodeDto[]>}
  */
 export async function getQrCodesForAccess(accessId) {
-  const { data } = await api.get(`/QrCode/access/${accessId}`);
-  return data;
+  const res = await api.get(`/api/qrcode/access/${accessId}`);
+  return res.data;
 }
 
 /**
- * Dezactivează un cod QR.
+ * Deactivează (soft‐delete) un QR
  * @param {string} qrCodeId
  */
 export async function deactivateQrCode(qrCodeId) {
-  return api.delete(`/QrCode/${qrCodeId}`);
+  await api.delete(`/api/qrcode/${qrCodeId}`);
+}
+
+/**
+ * Validează un QR
+ * @param {string} qrCodeId
+ * @returns {Promise<{ isValid: boolean }>}
+ */
+export async function validateQrCode(qrCodeId) {
+  const res = await api.post(`/api/qrcode/${qrCodeId}/validate`);
+  return res.data;
+}
+
+/**
+ * Obține un QR după ID
+ * @param {string} qrCodeId
+ * @returns {Promise<QrCodeDto>}
+ */
+export async function getQrCodeById(qrCodeId) {
+  const res = await api.get(`/api/qrcode/${qrCodeId}`);
+  return res.data;
 }

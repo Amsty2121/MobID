@@ -1,0 +1,138 @@
+/* src/styles/components/generic-table.css */
+
+.generic-table {
+  padding: 1rem;
+  position: relative;
+  color: var(--color-iron);
+}
+
+.generic-table__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.generic-table__container {
+  background-color: var(--color-tuna-light);
+  border-radius: 6px;
+  padding: 1rem;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.generic-table__filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.generic-table__filter {
+  border: 1px solid var(--color-regent-gray);
+  background-color: transparent;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  width: 300px;
+}
+
+.generic-table__filter input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-iron);
+  width: 100%;
+  font-size: 1rem;
+}
+
+.generic-table__add-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255,152,0,0.1);
+  border: 1px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease;
+}
+.generic-table__add-icon:hover {
+  background-color: rgba(255,152,0,0.2);
+}
+
+.generic-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  background-color: var(--color-tuna);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.generic-table__table thead {
+  background-color: var(--color-primary);
+  color: var(--color-shark);
+}
+.generic-table__table th,
+.generic-table__table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #444;
+}
+
+.generic-table__actions-col {
+  width: 120px;
+  text-align: left;
+  justify-content: left;
+  gap: 0.5rem;
+}
+
+.generic-table__icon-btn {
+  background: none;
+  border: none;
+  color: var(--color-iron);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.generic-table__icon-btn:hover {
+  color: var(--color-primary-hover);
+}
+
+.generic-table__row--clickable:hover {
+  background-color: var(--color-tuna-light);
+  cursor: pointer;
+}
+
+/* Pagination */
+.generic-table__pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.generic-table__pagination-left,
+.generic-table__pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.generic-table__pagination-left button {
+  background-color: var(--color-primary);
+  border: none;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.generic-table__pagination-left button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+.generic-table__pagination-right select {
+  background-color: var(--color-tuna);
+  border: 1px solid var(--color-regent-gray);
+  color: var(--color-iron);
+  padding: 0.3rem;
+  border-radius: 4px;
+}

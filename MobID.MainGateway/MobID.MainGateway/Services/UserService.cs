@@ -129,4 +129,6 @@ public class UserService : IUserService
         var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == userId, ct, r => r.Role);
         return roles.Where(ur => ur.Role.DeletedAt == null).Select(r => r.Role.Name).ToList();
     }
+
+
 }

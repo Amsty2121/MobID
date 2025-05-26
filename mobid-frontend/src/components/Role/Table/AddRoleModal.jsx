@@ -1,10 +1,12 @@
 // src/components/Role/Table/AddRoleModal.jsx
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import { addRole } from "../../../api/roleApi";
-import "../Role.css";
+import "../../../styles/components/modal/index.css";
 
-const AddRoleModal = ({ onSuccess, onClose }) => {
+export default function AddRoleModal({ onSuccess, onClose }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -14,46 +16,54 @@ const AddRoleModal = ({ onSuccess, onClose }) => {
     setError("");
     try {
       await addRole(name, description);
-      onSuccess();        // container‑ul poate reîmprospăta lista
+      onSuccess();
       onClose();
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Nu am putut adăuga rolul.");
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="modal-close" onClick={onClose}><FaTimes/></button>
-        <h3>Adaugă Rol Nou</h3>
-        {error && <p className="error">{error}</p>}
-        <form onSubmit={handleSubmit} className="add-role-form">
-          <label htmlFor="roleName">Nume Rol</label>
-          <input
-            id="roleName"
-            type="text"
+    <div className="modal__overlay">
+      <div className="modal__content">
+        <button className="modal__close" onClick={onClose}>
+          <FaTimes />
+        </button>
+
+        <h3 className="modal__title">Adaugă Rol Nou</h3>
+
+        {error && <div className="modal__error">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="modal__form">
+          <TextField
+            label="Nume Rol *"
+            variant="outlined"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             required
+            fullWidth
           />
 
-          <label htmlFor="roleDesc">Descriere</label>
-          <input
-            id="roleDesc"
-            type="text"
+          <TextField
+            label="Descriere"
+            variant="outlined"
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
+            fullWidth
           />
-
-          <div className="form-actions">
-            <button type="submit">Salvează</button>
-            <button type="button" onClick={onClose}>Anulează</button>
+          <div className="modal__actions">
+            <button type="submit" className="modal__button--yes">
+              Salvează
+            </button>
+            <button
+              type="button"
+              className="modal__button--no"
+              onClick={onClose}>
+              Anulează
+            </button>
           </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default AddRoleModal;
+}

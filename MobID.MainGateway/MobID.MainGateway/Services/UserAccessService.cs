@@ -30,8 +30,7 @@ public class UserAccessService : IUserAccessService
     public async Task<bool> GrantAccessToUserAsync(
         UserGrantAccessReq req,
         Guid grantedByUserId,
-        CancellationToken ct = default,
-        AccessGrantType grantType = AccessGrantType.DirectGrant)
+        CancellationToken ct = default)
     {
         // 1. Validări de existență
         var user   = await _userRepo.GetById(req.TargetUserId, ct)
@@ -52,8 +51,6 @@ public class UserAccessService : IUserAccessService
             Id               = Guid.NewGuid(),
             UserId           = req.TargetUserId,
             AccessId         = req.AccessId,
-            GrantedByUserId  = grantedByUserId,
-            GrantType        = grantType,
             CreatedAt        = DateTime.UtcNow
         };
         await _uaRepo.Add(ua, ct);
@@ -88,7 +85,7 @@ public class UserAccessService : IUserAccessService
             ua => ua.Access,
             ua => ua.Access.Organization,
             ua => ua.Access.AccessType,
-            ua => ua.Access.Creator,
+            ua => ua.Access.CreatedByUser,
             ua => ua.Access.QrCodes);
 
         return relations.Select(r => new AccessDto(r.Access)).ToList();
@@ -106,7 +103,7 @@ public class UserAccessService : IUserAccessService
             ua => ua.Access,
             ua => ua.Access.Organization,
             ua => ua.Access.AccessType,
-            ua => ua.Access.Creator,
+            ua => ua.Access.CreatedByUser,
             ua => ua.Access.QrCodes)).ToList();
 
         var total = allRels.Count;

@@ -1,24 +1,20 @@
 // src/components/User/Table/UserTable.jsx
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  getUsersPaged,
-  deactivateUser
-} from "../../../api/userApi";
+import { getUsersPaged, deactivateUser } from "../../../api/userApi";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddUserModal from "./AddUserModal";
 import EditUserRolesModal from "./EditUserRolesModal";
 import DeleteUserModal from "./DeleteUserModal";
+import "../../../styles/components/user.css";
 
 export default function UserTable() {
   const DEFAULT_PAGE_SIZE = 10;
-
-  const [users, setUsers]                 = useState([]);
-  const [totalCount, setTotalCount]       = useState(0);
-  const [currentPage, setCurrentPage]     = useState(0);
-  const [pageSize, setPageSize]           = useState(DEFAULT_PAGE_SIZE);
-  const [loading, setLoading]             = useState(false);
-  const [error, setError]                 = useState("");
+  const [users, setUsers]             = useState([]);
+  const [totalCount, setTotalCount]   = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize]       = useState(DEFAULT_PAGE_SIZE);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
 
   const [showAddModal, setShowAddModal]           = useState(false);
   const [showDeleteModal, setShowDeleteModal]     = useState(false);
@@ -26,7 +22,6 @@ export default function UserTable() {
   const [showEditRolesModal, setShowEditRolesModal] = useState(false);
   const [userToEditRoles, setUserToEditRoles]     = useState(null);
 
-  // Previne apel dublu în StrictMode
   const didFetchRef = useRef(false);
 
   const fetchUsers = useCallback(async () => {
@@ -49,7 +44,7 @@ export default function UserTable() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleDeleteClick = (row) => {
+  const handleDeleteClick = row => {
     setUserToDelete(row);
     setShowDeleteModal(true);
   };
@@ -63,12 +58,11 @@ export default function UserTable() {
     }
   };
 
-  const handleEditRoles = (row) => {
+  const handleEditRoles = row => {
     setUserToEditRoles(row);
     setShowEditRolesModal(true);
   };
 
-  // Transformăm lista de utilizatori pentru afișare
   const data = users.map(u => ({
     ...u,
     roles: Array.isArray(u.roles) ? u.roles.join(", ") : ""
@@ -84,7 +78,7 @@ export default function UserTable() {
 
   return (
     <>
-      {loading && <p>Se încarcă...</p>}
+      {loading && <p className="loading">Se încarcă...</p>}
       {error   && <p className="error">{error}</p>}
 
       <GenericTable

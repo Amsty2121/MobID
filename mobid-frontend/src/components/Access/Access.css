@@ -1,63 +1,108 @@
 /* src/components/Access/Access.css */
-
 /* ===========================================
-   ACCESS PAGE LAYOUT
+   QR PREVIEW MODAL (scoped)
    =========================================== */
-.access-page {
-  padding: 1rem;
+.qr-modal-overlay, .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal-content, .modal-content {
+  background: var(--color-tuna);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
   color: var(--color-iron);
 }
-.access-heading {
-  margin: 1.5rem 0 1rem;
-  font-size: 1.5rem;
-  text-align: center;
+
+.modal-content h3 {
+  margin-bottom: 1rem;
   color: var(--color-primary);
-}
-.access-select-wrapper {
-  width: 300px;
-  margin: 1rem auto;
-}
-
-/* ===========================================
-   REACT-SELECT DARK THEME (prefix: org-select)
-   =========================================== */
-.org-select__control {
-  background: var(--color-tuna-light) !important;
-  border: 1px solid var(--color-primary) !important;
-  box-shadow: none !important;
-}
-.org-select__control:hover,
-.org-select__control--is-focused {
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 1px var(--color-primary) !important;
-}
-.org-select__input input,
-.org-select__single-value,
-.org-select__placeholder {
-  color: var(--color-primary) !important;
-}
-.org-select__dropdown-indicator {
-  color: var(--color-iron) !important;
-}
-.org-select__dropdown-indicator:hover {
-  color: var(--color-primary) !important;
-}
-.org-select__indicator-separator { display: none !important; }
-.org-select__menu {
-  background: var(--color-tuna-light) !important;
-  color: var(--color-iron) !important;
-}
-.org-select__option {
-  background: var(--color-tuna-light) !important;
-  color: var(--color-iron) !important;
-}
-.org-select__option--is-focused {
-  background: var(--color-tuna) !important;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  white-space: pre-wrap;
 }
 
-/* ===========================================
-   GENERIC TABLE BUTTONS
-   =========================================== */
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.form-actions button:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Download button */
+.download-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.download-btn:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* QR frame + footer */
+.qr-design-frame {
+  background: #fff;
+  border: 5px solid var(--color-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  margin: 0 auto;
+}
+.qr-design-frame .qr-code-wrap {
+  padding: 1rem;
+  background: #fff;
+}
+.qr-design-frame .qr-footer {
+  background: var(--color-primary);
+  padding: 0.5rem;
+}
+.qr-design-frame .qr-footer-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Generic icon-buttons */
 .icon-btn {
   background: none;
   border: none;
@@ -67,121 +112,4 @@
 }
 .icon-btn:hover {
   color: var(--color-primary);
-}
-
-/* ===========================================
-   ACCESS DETAILS / PREVIEW MODAL
-   =========================================== */
-.details-modal { width: 500px; }
-.details-title {
-  margin-bottom: 1rem;
-  color: var(--color-primary);
-  font-size: 1.5rem;
-  text-align: center;
-}
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-.details-item {
-  background: var(--color-tuna-light);
-  padding: 0.75rem;
-  border-radius: 6px;
-}
-.details-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: var(--color-iron);
-  font-size: 0.9rem;
-}
-.details-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-shark);
-}
-.details-desc {
-  font-size: 0.8rem;
-  color: var(--color-bombay);
-}
-
-.preview-modal {
-  width: 400px;
-  max-width: 90%;
-  border-radius: 8px;
-}
-.preview-header {
-  background: var(--color-primary);
-  color: #fff;
-  padding: 1rem;
-  font-size: 1.25rem;
-  text-align: center;
-}
-.preview-body {
-  background: var(--color-tuna);
-  padding: 1rem;
-  color: var(--color-iron);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.preview-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
-}
-.preview-label {
-  flex: 0 0 150px;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-.preview-value {
-  flex: 1 1 auto;
-  color: var(--color-regent-gray);
-}
-
-/* ===========================================
-   FORM (Pasul 1 & 2)
-   =========================================== */
-.add-org-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.add-org-form label {
-  font-weight: 500;
-}
-
-/* Stil comun pentru toate input-urile și textarea */
-.add-org-form input,
-.add-org-form textarea {
-  background: var(--color-tuna-light);
-  border: 1px solid var(--color-regent-gray);
-  border-radius: 4px;
-  padding: 0.5rem;
-  color: var(--color-iron);
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Textarea cu resize vertical */
-.add-org-form textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-
-/* text și checkbox pe același rând, text la stânga */
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer; /* ca label-ul să fie clickabil */
-}
-
-/* păstrează dimensiunea naturală a checkbox-ului */
-.checkbox-container input[type="checkbox"] {
-  width: auto;
-  margin: 0;
 }

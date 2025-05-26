@@ -160,3 +160,29 @@
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
+
+/* ===========================================
+   Butonul Register / Back to Login
+   =========================================== */
+.content button.register-button {
+  margin-top: 0.5rem;
+  width: 100%;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background-color: var(--color-tuna-light);
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.content button.register-button:hover {
+  background-color: var(--color-primary-hover);
+  color: #fff;
+}
+
+/* Asigură-te că există variabila pentru hover */
+:root {
+  --color-primary-hover: #e68a00; /* sau ce nuanță preferi */
+}

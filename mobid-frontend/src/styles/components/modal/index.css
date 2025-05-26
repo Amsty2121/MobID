@@ -1,0 +1,8 @@
+/* src/styles/components/modal/index.css */
+
+@import "./modal-layout.css";
+@import "./modal-form.css";
+@import "./modal-buttons.css";
+@import "./modal-mui.css";
+@import "./modal-react-select.css";
+@import "./modal-typography.css";

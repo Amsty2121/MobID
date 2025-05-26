@@ -2,7 +2,6 @@
 using MobID.MainGateway.Models.Entities;
 using System.Linq.Expressions;
 using System;
-using System.Linq;
 
 namespace MobID.MainGateway.Repo
 {
@@ -26,218 +25,212 @@ namespace MobID.MainGateway.Repo
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ─── UserRole: cheie compusă, restrict delete ─────────────────────
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Role)
                 .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId);
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // ─── OrganizationUser: restrict delete ───────────────────────────
+            modelBuilder.Entity<OrganizationUser>()
+                .HasOne(ou => ou.User)
+                .WithMany(u => u.OrganizationUsers)
+                .HasForeignKey(ou => ou.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrganizationUser>()
+                .HasOne(ou => ou.Organization)
+                .WithMany(o => o.OrganizationUsers)
+                .HasForeignKey(ou => ou.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ─── Access ↔ Organization & CreatedByUser ────────────────────────
             modelBuilder.Entity<Access>()
                 .HasOne(a => a.Organization)
                 .WithMany()
-                .HasForeignKey(a => a.OrganizationId);
+                .HasForeignKey(a => a.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Access>()
-                .HasOne(a => a.Creator)
+                .HasOne(a => a.CreatedByUser)
                 .WithMany()
-                .HasForeignKey(a => a.CreatedBy);
+                .HasForeignKey(a => a.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ─── QrCode ↔ Access: restrict delete ────────────────────────────
             modelBuilder.Entity<QrCode>()
-                .HasOne(qr => qr.Access)
+                .HasOne(q => q.Access)
                 .WithMany(a => a.QrCodes)
-                .HasForeignKey(qr => qr.AccessId);
-            modelBuilder.Entity<Scan>()
-                .HasOne(s => s.QrCode)
-                .WithMany()
-                .HasForeignKey(s => s.QrCodeId)
-                .IsRequired(false);
-            modelBuilder.Entity<Scan>()
-               .HasOne(s => s.QrCode)
-               .WithMany(q => q.Scans)                
-               .HasForeignKey(s => s.QrCodeId)
-               .IsRequired()                          
-               .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(q => q.AccessId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<QrCode>()
                 .HasQueryFilter(q => q.DeletedAt == null);
+
+            // ─── Scan ↔ QrCode: cascade delete on QR removal, restrict otherwise ─
             modelBuilder.Entity<Scan>()
-              .HasQueryFilter(s => s.DeletedAt == null);
+                .HasOne(s => s.QrCode)
+                .WithMany(q => q.Scans)
+                .HasForeignKey(s => s.QrCodeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Scan>()
+                .HasQueryFilter(s => s.DeletedAt == null);
 
+            // ─── RefreshToken ↔ User: restrict delete ─────────────────────────
             modelBuilder.Entity<RefreshToken>()
-                .HasQueryFilter(rt => rt.User.DeletedAt == null);
+                .HasOne(rt => rt.User)
+                .WithOne(u => u.RefreshToken)
+                .HasForeignKey<RefreshToken>(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<UserAccess>(ent =>
-            {
-                ent.HasOne(ua => ua.User)
-                        .WithMany(u => u.UserAccesses)
-                        .HasForeignKey(ua => ua.UserId);
-                
-                ent.HasOne(ua => ua.Access)
-                        .WithMany(a => a.UserAccesses)
-                        .HasForeignKey(ua => ua.AccessId);
-                
-                ent.HasOne(ua => ua.GrantedByUser)
-                        .WithMany()              // nu punem back-ref la granted-by
-                        .HasForeignKey(ua => ua.GrantedByUserId);
-                
-                ent.Property(ua => ua.GrantType)
-                        .HasConversion<string>();  // stocăm enum-ul ca text
-                   });
+            // ─── UserAccess: restrict delete ─────────────────────────────────
+            modelBuilder.Entity<UserAccess>()
+                .HasOne(ua => ua.User)
+                .WithMany(u => u.UserAccesses)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<UserAccess>()
+                .HasOne(ua => ua.Access)
+                .WithMany(a => a.UserAccesses)
+                .HasForeignKey(ua => ua.AccessId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // ─── OrganizationAccessShare ────────────────────────────────────
             modelBuilder.Entity<OrganizationAccessShare>()
                 .HasOne(s => s.SourceOrganization)
-                .WithMany() // nu va exista colecția inversă pe Organization
+                .WithMany()
                 .HasForeignKey(s => s.SourceOrganizationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrganizationAccessShare>()
                 .HasOne(s => s.TargetOrganization)
-                .WithMany(o => o.OrganizationAccessShares) // trebuie adăugat ICollection în Organization
+                .WithMany(o => o.OrganizationAccessShares)
                 .HasForeignKey(s => s.TargetOrganizationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrganizationAccessShare>()
                 .HasOne(s => s.Access)
-                .WithMany(a => a.OrganizationAccessShares) // adaugă colecția în Access
+                .WithMany(a => a.OrganizationAccessShares)
                 .HasForeignKey(s => s.AccessId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrganizationAccessShare>()
                 .HasOne(s => s.Creator)
-                .WithMany() // nu avem colecția inversă
+                .WithMany()
                 .HasForeignKey(s => s.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Soft-delete filter
             modelBuilder.Entity<OrganizationAccessShare>()
                 .HasQueryFilter(s => s.DeletedAt == null);
 
-            // Soft Delete: Query Filter pentru DeletedAt
-            /*foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                if (entityType.ClrType.GetProperty("DeletedAt") != null)
-                {
-                    modelBuilder.Entity(entityType.ClrType)
-                        .HasQueryFilter(ConvertFilterExpression(entityType.ClrType));
-                }
-            }*/
-
-            // Seed Data pentru AccessType
+            // ─── Seed AccessType ─────────────────────────────────────────────
             modelBuilder.Entity<AccessType>().HasData(
                 new AccessType
                 {
-                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    Name = "OneUse",
-                    Description = "One time usage access",
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"),
+                    Name = "LimitedUse",
+                    Description = "Acces cu limită totală de utilizări",
                     IsLimitedUse = true,
                     IsSubscription = false,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 new AccessType
                 {
-                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                    Name = "MultiUse",
-                    Description = "Multiple usage access",
-                    IsLimitedUse = true,
-                    IsSubscription = false,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                },
-                new AccessType
-                {
-                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002"),
                     Name = "Subscription",
-                    Description = "Subscription access",
+                    Description = "Acces în abonament pe perioade",
                     IsLimitedUse = false,
                     IsSubscription = true,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 new AccessType
                 {
-                    Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003"),
                     Name = "IdentityConfirm",
-                    Description = "Identity confirmation access",
+                    Description = "Confirmare unică de identitate per utilizator",
                     IsLimitedUse = false,
                     IsSubscription = false,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             );
 
-            // Seed Data pentru Role
+            // ─── Seed Role ───────────────────────────────────────────────────
             modelBuilder.Entity<Role>().HasData(
                 new Role
                 {
                     Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                     Name = "Admin",
                     Description = "Administrator role",
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 new Role
                 {
                     Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                     Name = "OrgUser",
                     Description = "Organization user role",
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 new Role
                 {
                     Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
                     Name = "SimpleUser",
                     Description = "Simple user role",
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             );
 
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword("Qwerty1!");
-
+            // ─── Seed Users & UserRole ───────────────────────────────────────
+            var pwd = BCrypt.Net.BCrypt.HashPassword("Qwerty1!");
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                     Email = "admin@example.com",
                     Username = "admin",
-                    PasswordHash = passwordHash,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    PasswordHash = pwd,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 new User
                 {
                     Id = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                     Email = "user@example.com",
                     Username = "user",
-                    PasswordHash = passwordHash,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    UpdatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    PasswordHash = pwd,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             );
-
-            // Seed Data pentru UserRole (Admin primește rol Admin; User primește rol SimpleUser)
             modelBuilder.Entity<UserRole>().HasData(
                 new UserRole
                 {
+                    Id = Guid.Parse("11111111-2222-3333-4444-555555555555"),
                     UserId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                     RoleId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                    IsActive = true,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    IsActive = true
                 },
                 new UserRole
                 {
+                    Id = Guid.Parse("66666666-7777-8888-9999-aaaaaaaaaaaa"),
                     UserId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                     RoleId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                    IsActive = true,
-                    CreatedAt = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    IsActive = true
                 }
             );
         }
 
+        // Utility pentru filtre soft-delete (dacă vrei să-l reactivezi)
         private static LambdaExpression ConvertFilterExpression(Type entityType)
         {
             var param = Expression.Parameter(entityType, "e");

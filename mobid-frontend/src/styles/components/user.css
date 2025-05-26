@@ -1,0 +1,91 @@
+/* src/styles/components/user.css */
+.user-page {
+  padding: 1rem;
+  position: relative;
+  color: var(--color-iron);
+}
+.user-heading {
+  margin: 0 0 1rem 0;
+  font-size: var(--heading-font-size);
+  color: var(--color-primary);
+  text-align: center;
+}
+.add-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.add-user-form label {
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+.add-user-form input {
+  background-color: var(--color-tuna-light);
+  border: 1px solid var(--color-regent-gray);
+  color: var(--color-iron);
+  border-radius: 4px;
+  padding: 0.5rem;
+  outline: none;
+}
+.user-form .form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.user-form .form-actions .btn--primary {
+  width: 100%;
+}
+.error {
+  color: #ff5555;
+  margin: 0.5rem 0;
+}
+.role-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style-type: disc;
+}
+.role-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+}
+.remove-role-btn {
+  background-color: #ff5555;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+.remove-role-btn:hover {
+  background-color: #e04545;
+}
+.add-role-btn {
+  background-color: #55cc55;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+.add-role-btn:hover {
+  background-color: #45b045;
+}
+
+/* ─── Loading & Error în pagina User ─────────────────────────────────── */
+.loading {
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: var(--color-iron);
+}
+.error {
+  color: #ff5555;
+  margin: 0.5rem 0;
+}

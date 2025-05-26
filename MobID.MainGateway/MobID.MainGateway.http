@@ -1,0 +1,6 @@
+@MobID.MainGateway_HostAddress = http://localhost:5287
+
+GET {{MobID.MainGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

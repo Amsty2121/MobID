@@ -3,56 +3,50 @@
 import api from "./api";
 
 /**
- * Creează un acces nou.
- * @param {{ organizationId: string, accessTypeId: string, expirationDate?: string }} req
+ * Creează un nou access.
+ * @param {Object} req – AccessCreateReq
+ * @returns {Promise<AccessDto>}
  */
 export async function createAccess(req) {
-    const { data } = await api.post("/Access/create", req);
-    return data;
-  }
-  
-  export async function getAccessById(accessId) {
-    const { data } = await api.get(`/Access/${accessId}`);
-    return data;
-  }
-  
-  export async function getAccessesForOrganization(orgId) {
-    const { data } = await api.get(`/Access/organization/${orgId}`);
-    return data;
-  }
-  
-  export async function getAccessesPaged({ pageIndex, pageSize }) {
-    const { data } = await api.get("/Access/paged", { params: { pageIndex, pageSize } });
-    return data;
-  }
-  
-  export async function deactivateAccess(accessId) {
-    return api.delete(`/Access/${accessId}`);
-  }
-
-
-export async function getAccessTypes() {
-  const { data } = await api.get("/AccessType/All");
-  return data;
+  const res = await api.post("/api/access", req);
+  return res.data;
 }
 
 /**
- * Obține o listă paginată de tipuri de acces.
- * @param {{ pageIndex: number, pageSize: number }} pagedRequest
+ * Obține toate accesele unei organizații.
+ * @param {string} orgId
+ * @param {boolean} includeShared – dacă luăm și accesele partajate
+ * @returns {Promise<AccessDto[]>}
  */
-export async function getAccessTypesPaged({ pageIndex, pageSize }) {
-  const { data } = await api.get("/AccessType/paged", {
-    params: { pageIndex, pageSize },
+export async function getAccessesForOrganization(orgId, includeShared = false) {
+  const res = await api.get(`/api/access/organization/${orgId}`, {
+    params: { includeShared }
   });
-  return data;
+  return res.data;
 }
 
 /**
- * Obține un tip de acces după ID.
- * @param {string} typeId
+ * Obține o pagină de accese (toate).
+ * @param {number} pageIndex
+ * @param {number} pageSize
+ * @param {boolean} includeShared
  */
-export async function getAccessTypeById(typeId) {
-  const { data } = await api.get(`/AccessType/${typeId}`);
-  return data;
+export async function getAccessesPaged(pageIndex, pageSize, includeShared = false) {
+  const res = await api.get("/api/access", {
+    params: { pageIndex, pageSize, includeShared }
+  });
+  return res.data; // { items: AccessDto[], totalCount, ... }
 }
 
+/**
+ * Șterge (soft-delete) un access.
+ * @param {string} accessId
+ */
+export async function deactivateAccess(accessId) {
+  await api.delete(`/api/access/${accessId}`);
+}
+
+export async function getAllAccessTypes() {
+  const res = await api.get("/api/accesstype/all");
+  return res.data;
+}

@@ -13,8 +13,4 @@ public class UserRegisterReq
 
     [Required, MinLength(6), MaxLength(100)]
     public string Password { get; set; }
-
-    [Required, MinLength(1)]
-    [ValidRoles(ErrorMessage = "One or more roles are invalid.")]
-    public ICollection<string> Roles { get; set; }
 }

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+// src/components/GenericTable/GenericTable.jsx
+import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash, FaEdit } from "react-icons/fa";
-import "./GenericTable.css";
+import "../../styles/components/generic-table.css";
 
-const GenericTable = ({
+export default function GenericTable({
   title,
   columns,
   filterColumns,
@@ -13,37 +14,31 @@ const GenericTable = ({
   showDeleteOption,
   onEdit,
   showEditOption,
-  onRowClick,           // nou
+  onRowClick,
   currentPage,
   totalCount,
   pageSize,
   onPageChange,
   onPageSizeChange,
-}) => {
+}) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(data || []);
-
-  useEffect(() => {
-    if (!data) return setFilteredData([]);
+  const filteredData = useMemo(() => {
     const lower = searchTerm.toLowerCase();
-    setFilteredData(
-      data.filter(row =>
-        filterColumns.some(col => {
-          const cell = row[col];
-          return cell && cell.toString().toLowerCase().includes(lower);
-        })
+    return (data || []).filter(row =>
+      filterColumns.some(col =>
+        row[col]?.toString().toLowerCase().includes(lower)
       )
     );
-  }, [searchTerm, data, filterColumns]);
+  }, [data, searchTerm, filterColumns]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="generic-table-page">
-      <h2 className="role-heading">{title}</h2>
-      <div className="role-table-container">
-        <div className="filter-plus-row">
-          <div className="filter-container">
+    <div className="generic-table">
+      <h2 className="generic-table__title">{title}</h2>
+      <div className="generic-table__container">
+        <div className="generic-table__filter-row">
+          <div className="generic-table__filter">
             <input
               type="text"
               placeholder="Filtrează..."
@@ -52,23 +47,25 @@ const GenericTable = ({
             />
           </div>
           {showAddOption && (
-            <div className="add-role-icon" onClick={onAdd} title="Adaugă">
+            <div
+              className="generic-table__add-icon"
+              onClick={onAdd}
+              title="Adaugă"
+            >
               <FaPlus />
             </div>
           )}
         </div>
 
         {filteredData.length === 0 ? (
-          <p className="no-results">Nu există date pentru filtrul curent.</p>
+          <p className="generic-table__message">Nu există date.</p>
         ) : (
-          <table className="role-table">
+          <table className="generic-table__table">
             <thead>
               <tr>
-                {columns.map((col, i) => (
-                  <th key={i}>{col.header}</th>
-                ))}
+                {columns.map((col, i) => <th key={i}>{col.header}</th>)}
                 {(showEditOption || showDeleteOption) && (
-                  <th className="actions-col">Acțiuni</th>
+                  <th className="generic-table__actions-col">Acțiuni</th>
                 )}
               </tr>
             </thead>
@@ -76,18 +73,21 @@ const GenericTable = ({
               {filteredData.map((row, i) => (
                 <tr
                   key={i}
-                  className={onRowClick ? "clickable-row" : ""}
-                  onClick={() => onRowClick && onRowClick(row)}
+                  className={onRowClick ? "generic-table__row--clickable" : ""}
+                  onClick={() => onRowClick?.(row)}
                 >
                   {columns.map((col, j) => (
                     <td key={j}>{row[col.accessor]}</td>
                   ))}
                   {(showEditOption || showDeleteOption) && (
-                    <td className="actions-col" onClick={e => e.stopPropagation()}>
+                    <td
+                      className="generic-table__actions-col"
+                      onClick={e => e.stopPropagation()}
+                    >
                       {showEditOption && (
                         <button
-                          className="icon-btn"
-                          onClick={() => onEdit && onEdit(row)}
+                          className="generic-table__icon-btn"
+                          onClick={() => onEdit(row)}
                           title="Editează"
                         >
                           <FaEdit />
@@ -95,8 +95,8 @@ const GenericTable = ({
                       )}
                       {showDeleteOption && (
                         <button
-                          className="icon-btn"
-                          onClick={() => onDelete && onDelete(row)}
+                          className="generic-table__icon-btn"
+                          onClick={() => onDelete(row)}
                           title="Șterge"
                         >
                           <FaTrash />
@@ -110,34 +110,29 @@ const GenericTable = ({
           </table>
         )}
 
-        <div className="pagination">
-          <div className="pagination-left">
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-            >
+        <div className="generic-table__pagination">
+          <div className="generic-table__pagination-left">
+            <button onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 0}>
               Anterior
             </button>
             <span>
               Pagina {currentPage + 1} din {totalPages || 1}
             </span>
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage + 1 >= totalPages}
-            >
+            <button onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage + 1 >= totalPages}>
               Următoare
             </button>
           </div>
-          <div className="pagination-right">
+          <div className="generic-table__pagination-right">
             <label htmlFor="pageSizeSelect">Pe pagină:</label>
             <select
               id="pageSizeSelect"
               value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}>
-              {[10, 20, 50, 5000].map((sz) => (
-                <option key={sz} value={sz}>
-                  {sz === 5000 ? "ALL" : sz}
-                </option>
+              onChange={e => onPageSizeChange(Number(e.target.value))}
+            >
+              {[10,20,50,5000].map(sz => (
+                <option key={sz} value={sz}>{sz===5000 ? "ALL": sz}</option>
               ))}
             </select>
             <span>Total: {totalCount}</span>
@@ -146,6 +141,4 @@ const GenericTable = ({
       </div>
     </div>
   );
-};
-
-export default GenericTable;
+}

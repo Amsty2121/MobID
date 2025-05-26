@@ -1,47 +1,29 @@
 // src/components/Layout/MainLayout.jsx
+
 import React, { useState } from "react";
 import { Outlet, useNavigate, Link } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa"; // folosim iconițe pentru meniu
-import "./MainLayout.css";
+import { FaBars, FaTimes } from "react-icons/fa";
+import "../../styles/components/layout.css"; // sau calea corectă
+import logo from "../../assets/mobid_main.png";
 
 function MainLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // Exemplu: numele utilizatorului
   const username = localStorage.getItem("username") || "User Name";
-
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("jwtToken");
-    navigate("/login");
-  };
 
   return (
     <div className="layout-container">
-      {/* Bara de meniu de sus */}
       <header className="top-bar">
-        {/* Secțiunea oranj (220px) */}
         <div className="orange-section">
-          <Link
-            to="/"
-            className="brand-text"
-            style={{ textDecoration: "none", color: "#fff" }}
-          >
-            MobID
+          <Link to="/" className="brand-img-link">
+            <img src={logo} alt="MobID Logo" />
           </Link>
         </div>
-
-        {/* Secțiunea albă (restul spațiului) */}
         <div className="white-section">
           <div className="white-left">
             <button
               className="hamburger-btn"
-              onClick={toggleSidebar}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <FaTimes /> : <FaBars />}
@@ -51,8 +33,10 @@ function MainLayout() {
             <span className="user-name">{username}</span>
             <button
               className="logout-btn"
-              onClick={handleLogout}
-              aria-label="Logout"
+              onClick={() => {
+                localStorage.removeItem("jwtToken");
+                navigate("/login");
+              }}
             >
               ⤴
             </button>
@@ -60,35 +44,19 @@ function MainLayout() {
         </div>
       </header>
 
-      {/* Container pentru sidebar + conținut */}
       <div className="content-container">
-        {/* Sidebar */}
         <aside className={`left-sidebar ${sidebarOpen ? "" : "hidden"}`}>
           <nav>
             <ul>
-              <li>
-                <Link to="/users">Utilizatori</Link>
-              </li>
-              <li>
-                <Link to="/roles">Roluri</Link>
-              </li>
-              <li>
-                <Link to="/organizations">Organizații</Link>
-              </li>
-              <li>
-                <Link to="/accesses">Accese</Link>
-              </li>
-              <li>
-                <Link to="/qrcodes">Coduri QR</Link>
-              </li>
-              <li>
-                <Link to="/scans">Scanări</Link>
-              </li>
+              <li><Link to="/users">Utilizatori</Link></li>
+              <li><Link to="/roles">Roluri</Link></li>
+              <li><Link to="/organizations">Organizații</Link></li>
+              <li><Link to="/accesses">Accese</Link></li>
+              <li><Link to="/qrcodes">Coduri QR</Link></li>
+              <li><Link to="/scans">Scanări</Link></li>
             </ul>
           </nav>
         </aside>
-
-        {/* Conținut principal */}
         <main className="main-content">
           <Outlet />
         </main>

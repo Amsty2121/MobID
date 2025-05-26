@@ -29,6 +29,7 @@ function Login() {
     try {
       const data = await loginUser({ login, password });
       localStorage.setItem("jwtToken", data.token);
+       localStorage.setItem("username", data.username);
       navigate("/");
     } catch (err) {
       setError("Incorrect username and/or password");
@@ -87,6 +88,13 @@ function Login() {
           </div>
 
           <button type="submit">Login</button>
+          <button
+            type="button"
+            className="register-button"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </button>
         </form>
       </div>
     </div>

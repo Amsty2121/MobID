@@ -1,4 +1,7 @@
-﻿using MobID.MainGateway.Models.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Models.Enums;
 
 namespace MobID.MainGateway.Models.Dtos
@@ -18,26 +21,25 @@ namespace MobID.MainGateway.Models.Dtos
         public string CreatorName { get; }
 
         public string AccessType { get; }
-        public AccessNumberScanMode ScanMode { get; }
 
-        public bool RestrictToOrganizationMembers { get; }
 
-        public int? MaxUses { get; }
-        public int? MaxUsersPerPass { get; }
-        public int? MonthlyLimit { get; }
-        public int? SubscriptionPeriodMonths { get; }
-        public int? UsesPerPeriod { get; }
+        // Limitări generale
+        public int? TotalUseLimit { get; }
+        public int? UseLimitPerPeriod { get; }
+        public TimeSpan? SubscriptionPeriod { get; }
 
         public DateTime? ExpirationDateTime { get; }
 
-        // nou
+        public bool IsRestrictedToOrgMembers { get; }
+        public bool IsRestrictedToOrganizationShare { get; }
+
         public DateTime CreatedAt { get; }
         public DateTime UpdatedAt { get; }
 
-        // existente
+        // ID-urile codurilor QR aferente
         public List<Guid> QrCodeIds { get; }
 
-        // nou: utilizatorii care au fost furnizați acest acces
+        // Utilizatorii cărora li s-a acordat acest acces
         public List<UserAccessDto> UserAccesses { get; }
 
         public AccessDto(Access a)
@@ -45,22 +47,25 @@ namespace MobID.MainGateway.Models.Dtos
             Id = a.Id;
             Name = a.Name;
             Description = a.Description;
+
             OrganizationId = a.OrganizationId;
             OrganizationName = a.Organization?.Name ?? "–";
-            IsActive = a.IsActive && a.DeletedAt == null;
-            CreatedBy = a.CreatedBy;
-            CreatorName = a.Creator?.Username ?? "–";
-            AccessType = a.AccessType?.Name ?? "–";
-            ScanMode = a.ScanMode;
-            RestrictToOrganizationMembers = a.RestrictToOrganizationMembers;
 
-            MaxUses = a.MaxUses;
-            MaxUsersPerPass = a.MaxUsersPerPass;
-            MonthlyLimit = a.MonthlyLimit;
-            SubscriptionPeriodMonths = a.SubscriptionPeriodMonths;
-            UsesPerPeriod = a.UsesPerPeriod;
+            IsActive = a.DeletedAt == null;
+
+            CreatedBy = a.CreatedByUserId;
+            CreatorName = a.CreatedByUser?.Username ?? "–";
+
+            AccessType = a.AccessType?.Name ?? "–";
+
+            TotalUseLimit = a.TotalUseLimit;
+            UseLimitPerPeriod = a.UseLimitPerPeriod;
+            SubscriptionPeriod = a.SubscriptionPeriod;
 
             ExpirationDateTime = a.ExpirationDateTime;
+
+            IsRestrictedToOrgMembers = a.IsRestrictedToOrgMembers;
+            IsRestrictedToOrganizationShare = a.IsRestrictedToOrganizationShare;
 
             CreatedAt = a.CreatedAt;
             UpdatedAt = a.UpdatedAt;

@@ -108,7 +108,7 @@ public class AuthController : ControllerBase
         try
         {
             var rsp = await _authService.RegisterAsync(request, ct);
-            return Created(string.Empty, rsp);
+            return Ok(rsp);
         }
         catch (InvalidOperationException ex)
         {

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MobID.MainGateway.Models.Entities
+﻿namespace MobID.MainGateway.Models.Entities
 {
     public class User : IBaseEntity
     {

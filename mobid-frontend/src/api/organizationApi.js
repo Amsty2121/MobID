@@ -1,57 +1,83 @@
 // src/api/organizationApi.js
 import api from "./api";
 
-// POST   /api/Organization
-export async function createOrganization(orgData) {
-  const { data } = await api.post("/Organization", orgData);
-  return data;
-}
 
-// GET    /api/Organization/{orgId}
-export async function getOrganizationById(orgId) {
-  const { data } = await api.get(`/Organization/${orgId}`);
-  return data;
-}
-
-// GET    /api/Organization/all
-export async function getAllOrganizations() {
-  const { data } = await api.get("/Organization/all");
-  return data;
-}
-
-// GET    /api/Organization/paged?pageIndex=&pageSize=
+/**
+ * Paginated fetch
+ * GET /api/organization/paged?pageIndex=0&pageSize=10
+ */
 export async function getOrganizationsPaged({ pageIndex, pageSize }) {
-  const { data } = await api.get("/Organization/paged", { params: { pageIndex, pageSize } });
-  return data;
+  const response = await api.get("/organization/paged", {
+    params: { pageIndex, pageSize }
+  });
+  return response.data;
 }
 
-// PUT    /api/Organization/update
-export async function updateOrganization(updateReq) {
-  const { data } = await api.put("/Organization/update", updateReq);
-  return data;
+/**
+ * Create new organization
+ * POST /api/organization
+ */
+export async function createOrganization(payload) {
+  const response = await api.post("/organization", payload);
+  return response.data;
 }
 
-// DELETE /api/Organization/{orgId}
-export async function deleteOrganization(orgId) {
-  return api.delete(`/Organization/${orgId}`);
+/**
+ * Update organization
+ * PATCH /api/organization
+ */
+export async function updateOrganization(payload) {
+  const response = await api.patch("/organization", payload);
+  return response.data;
 }
 
-// GET    /api/Organization/{orgId}/users
-export async function getUsersForOrganization(orgId) {
-  const { data } = await api.get(`/Organization/${orgId}/users`);
-  return data;
+/**
+ * Deactivate (soft-delete)
+ * DELETE /api/organization/{id}
+ */
+export async function deactivateOrganization(id) {
+  const response = await api.delete(`/organization/${id}`);
+  return response.data;
 }
 
-// POST   /api/Organization/{orgId}/users
-export async function addUserToOrganization(orgId, { userId, role }) {
-  const { data } = await api.post(
-    `/Organization/${orgId}/users`,
-    { userId, role }
-  );
-  return data;
+/** Obține o organizație după ID */
+export async function getOrganizationById(orgId) {
+  const res = await api.get(`/organization/${orgId}`);
+  return res.data;
 }
 
-// DELETE /api/Organization/{orgId}/removeUser/{userId}
+/** Listează toate organizațiile */
+export async function getAllOrganizations() {
+  const res = await api.get("/organization/all");
+  return res.data;
+}
+
+/** Adaugă un utilizator într-o organizație */
+export async function addUserToOrganization(orgId, req) {
+  await api.post(`/organization/${orgId}/users`, req);
+}
+
+/** Elimină un utilizator din organizație */
 export async function removeUserFromOrganization(orgId, userId) {
-  return api.delete(`/Organization/${orgId}/removeUser/${userId}`);
+  await api.delete(`/organization/${orgId}/users/${userId}`);
+}
+
+/** Listează membrii unei organizații */
+export async function getUsersForOrganization(orgId) {
+  const res = await api.get(`/organization/${orgId}/users`);
+  return res.data;
+}
+
+/** Listează share-urile primite de organizație */
+export async function getAccessesSharedToOrganization(orgId) {
+  // ruta originală era GET api/organization/organization/{orgId},
+  // ideal ar fi să o schimbi în GET api/organization/{orgId}/shares
+  const res = await api.get(`/organization/organization/${orgId}`);
+  return res.data;
+}
+
+/** Obține toate accesele (proprii + partajate) */
+export async function getAllOrganizationAccesses(orgId) {
+  const res = await api.get(`/organization/${orgId}/all-accesses`);
+  return res.data;
 }

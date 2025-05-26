@@ -1,0 +1,58 @@
+/* src/styles/base.css */
+/* Reset & box-sizing */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+
+/* HTML & BODY */
+html {
+  font-size: var(--base-font-size);
+}
+body {
+  min-width: 320px;
+  font-family: var(--font-main);
+  line-height: 1.5;
+  color: var(--color-pale-sky);
+  background-color: var(--color-shark);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media (prefers-color-scheme: light) {
+  body {
+    color: var(--color-tuna);
+    background-color: #ffffff;
+  }
+}
+
+/* Linkuri */
+a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-tuna-light);
+}
+
+/* Butoane globale */
+button {
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.6em 1.2em;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: var(--color-primary);
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}

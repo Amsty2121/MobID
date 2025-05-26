@@ -4,16 +4,16 @@
     {
         public Guid Id { get; set; }
 
-        public string Name { get; set; } // Ex: "OneUse", "Subscription", "LimitedSubscription"
-        public string Description { get; set; } // O scurtă descriere
+        public string Name { get; set; } 
+        public string Description { get; set; } 
 
-        public bool IsLimitedUse { get; set; } // Dacă are limită de utilizări (ex: OneUse, MultiUse, LimitedSubscription)
-        public bool IsSubscription { get; set; } // Dacă este un abonament (ex: Subscription, LimitedSubscription)
+        public bool IsLimitedUse { get; set; } 
+        public bool IsSubscription { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; }
 
-        public ICollection<Access> Accesses { get; set; } // Relație one-to-many
+        public ICollection<Access> Accesses { get; set; } 
     }
 }

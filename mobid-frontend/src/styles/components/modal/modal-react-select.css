@@ -1,0 +1,87 @@
+/* src/styles/components/modal-react-select.css */
+
+/* Control (input) styling */
+.modal__react-select__control {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-tuna-light) !important;
+  min-height: 56px;
+}
+.modal__react-select__control:hover {
+  border-color: var(--color-primary-hover) !important;
+}
+
+/* Value container (selected value) */
+.modal__react-select__value-container {
+  height: 56px;
+  padding: 0 8px;
+}
+
+/* Indicators (dropdown arrow & clear) container */
+.modal__react-select__indicators {
+  height: 56px;
+}
+
+/* Single-value text */
+.modal__react-select__single-value {
+  color: var(--color-primary) !important;
+}
+
+/* Indicator separator */
+.modal__react-select__indicator-separator {
+  background-color: var(--color-primary) !important;
+}
+
+/* Dropdown & clear icons */
+.modal__react-select__dropdown-indicator,
+.modal__react-select__clear-indicator {
+  color: var(--color-primary) !important;
+}
+
+/* Menu portal overrides */
+.modal__react-select__menu {
+  background-color: var(--color-shark) !important;
+  width: 100% !important;
+  margin-top: 0.25rem !important;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.modal__react-select__menu-list {
+  padding: 0 !important;
+}
+
+/* ─── OPTION RESET & HOVER STATES ──────────────────────────────── */
+
+/* Base option: transparent so it inherits the menu bg */
+.modal__react-select__option {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem;
+  background-color: transparent !important;
+}
+
+/* Option text lines */
+.modal__react-select__option-label {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.modal__react-select__option-id {
+  color: var(--color-iron);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Clear any persistent focus/selected background */
+.modal__react-select__option--is-focused,
+.modal__react-select__option--is-focused:hover,
+.modal__react-select__option--is-selected {
+  background-color: transparent !important;
+}
+
+/* Hover state: primary-hover bg + shark text */
+.modal__react-select__option:hover {
+  background-color: var(--color-primary-hover) !important;
+}
+.modal__react-select__option:hover .modal__react-select__option-label,
+.modal__react-select__option:hover .modal__react-select__option-id {
+  color: var(--color-shark) !important;
+}
