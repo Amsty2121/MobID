@@ -33,13 +33,10 @@ namespace MobID.MainGateway.Controllers
             [FromBody] AccessCreateReq req,
             CancellationToken ct)
         {
-            if (!ModelState.IsValid)
-                return ValidationProblem(ModelState);
-
             try
             {
                 var dto = await _accessService.CreateAccessAsync(req, UserId, ct);
-                return CreatedAtAction(nameof(GetByIdAsync), new { accessId = dto.Id }, dto);
+                return Ok(dto);
             }
             catch (Exception ex)
             {

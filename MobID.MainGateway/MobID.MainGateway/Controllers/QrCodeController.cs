@@ -125,4 +125,14 @@ public class QrCodeController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpGet("access/{accessId:guid}")]
+    [ProducesResponseType(typeof(List<QrCodeDto>), 200)]
+    public async Task<ActionResult<List<QrCodeDto>>> GetQrCodesForAccessAsync(
+    Guid accessId,
+    CancellationToken ct = default)
+    {
+        var qrs = await _qrService.GetQrCodesForAccessAsync(accessId, ct);
+        return Ok(qrs);
+    }
 }

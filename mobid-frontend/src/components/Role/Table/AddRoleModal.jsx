@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { addRole } from "../../../api/roleApi";
+import { createRole } from "../../../api/roleApi";
 import "../../../styles/components/modal/index.css";
 
 export default function AddRoleModal({ onSuccess, onClose }) {
@@ -15,7 +15,7 @@ export default function AddRoleModal({ onSuccess, onClose }) {
     e.preventDefault();
     setError("");
     try {
-      await addRole(name, description);
+      await createRole(name, description);
       onSuccess();
       onClose();
     } catch {

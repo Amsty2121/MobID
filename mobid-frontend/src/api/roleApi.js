@@ -1,31 +1,40 @@
 // src/api/roleApi.js
+
 import api from "./api";
 
-export async function getRolesPaged({ pageIndex, pageSize }) {
-  const { data } = await api.get("/Role/paged", { params: { pageIndex, pageSize } });
+/** Creează un rol nou. */
+export async function createRole(req) {
+  const { data } = await api.post("/role", req);
   return data;
 }
 
-export async function addRole(name, description) {
-  const { data } = await api.post("/Role", { name, description });
-  return data;
-}
-
-export async function deleteRole(roleId) {
-  return api.delete(`/Role/${roleId}`);
-}
-
+/** Obține un rol după ID. */
 export async function getRoleById(roleId) {
-  const { data } = await api.get(`/Role/${roleId}`);
+  const { data } = await api.get(`/role/${roleId}`);
   return data;
 }
 
+/** Obține un rol după nume. */
 export async function getRoleByName(roleName) {
-  const { data } = await api.get(`/Role/byname/${roleName}`);
+  const { data } = await api.get(`/role/by-name/${roleName}`);
   return data;
 }
 
+/** Listează toate rolurile. */
 export async function getAllRoles() {
-  const { data } = await api.get("/Role/all");
+  const { data } = await api.get("/role/all");
   return data;
+}
+
+/** Listează rolurile paginat. */
+export async function getRolesPaged({ pageIndex, pageSize }) {
+  const { data } = await api.get("/role/paged", {
+    params: { pageIndex, pageSize }
+  });
+  return data; // PagedResponse<RoleDto>
+}
+
+/** Dezactivează (soft-delete) un rol. */
+export async function deactivateRole(roleId) {
+  await api.delete(`/role/${roleId}`);
 }

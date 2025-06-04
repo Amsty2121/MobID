@@ -1,6 +1,10 @@
-/* src/styles/components/modal-react-select.css */
+/* src/styles/components/modal/modal-react-select.css */
 
-/* Control (input) styling */
+/* ─────────────────────────────────────────────────────
+   React-Select Overrides for modal__react-select
+   ───────────────────────────────────────────────────── */
+
+/* Control (input) */
 .modal__react-select__control {
   border-color: var(--color-primary) !important;
   background-color: var(--color-tuna-light) !important;
@@ -10,56 +14,38 @@
   border-color: var(--color-primary-hover) !important;
 }
 
-/* Value container (selected value) */
-.modal__react-select__value-container {
-  height: 56px;
-  padding: 0 8px;
-}
-
-/* Indicators (dropdown arrow & clear) container */
-.modal__react-select__indicators {
-  height: 56px;
-}
-
-/* Single-value text */
-.modal__react-select__single-value {
-  color: var(--color-primary) !important;
-}
-
-/* Indicator separator */
-.modal__react-select__indicator-separator {
-  background-color: var(--color-primary) !important;
-}
-
-/* Dropdown & clear icons */
+/* Value container & indicatori */
+.modal__react-select__value-container { height: 56px; padding: 0 8px; }
+.modal__react-select__indicators { height: 56px; }
+.modal__react-select__single-value { color: var(--color-primary) !important; }
+.modal__react-select__indicator-separator { background-color: var(--color-primary) !important; }
 .modal__react-select__dropdown-indicator,
-.modal__react-select__clear-indicator {
-  color: var(--color-primary) !important;
-}
+.modal__react-select__clear-indicator { color: var(--color-primary) !important; }
 
-/* Menu portal overrides */
+/* Portal menu (fixed, peste tot) */
 .modal__react-select__menu {
   background-color: var(--color-shark) !important;
   width: 100% !important;
   margin-top: 0.25rem !important;
   border-radius: 4px;
-  overflow: hidden;
+  max-height: 400px !important;   /* limită înălțime */
+  overflow-y: auto !important;    /* scroll doar aici */
+  z-index: 9999 !important;
 }
 .modal__react-select__menu-list {
   padding: 0 !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  z-index: 9999 !important;
 }
 
-/* ─── OPTION RESET & HOVER STATES ──────────────────────────────── */
-
-/* Base option: transparent so it inherits the menu bg */
+/* Opțiuni pe două rânduri */
 .modal__react-select__option {
   display: flex;
   flex-direction: column;
   padding: 0.5rem 1rem;
   background-color: transparent !important;
 }
-
-/* Option text lines */
 .modal__react-select__option-label {
   color: var(--color-primary);
   font-weight: 600;
@@ -70,14 +56,13 @@
   margin-top: 0.25rem;
 }
 
-/* Clear any persistent focus/selected background */
+/* Reset focus/selected background */
 .modal__react-select__option--is-focused,
-.modal__react-select__option--is-focused:hover,
 .modal__react-select__option--is-selected {
   background-color: transparent !important;
 }
 
-/* Hover state: primary-hover bg + shark text */
+/* Hover state */
 .modal__react-select__option:hover {
   background-color: var(--color-primary-hover) !important;
 }

@@ -2,51 +2,51 @@
 
 import api from "./api";
 
-/**
- * Creează un nou access.
- * @param {Object} req – AccessCreateReq
- * @returns {Promise<AccessDto>}
- */
+/** Creează un nou access. */
 export async function createAccess(req) {
-  const res = await api.post("/api/access", req);
-  return res.data;
+  const { data } = await api.post("/access", req);
+  return data;
 }
 
-/**
- * Obține toate accesele unei organizații.
- * @param {string} orgId
- * @param {boolean} includeShared – dacă luăm și accesele partajate
- * @returns {Promise<AccessDto[]>}
- */
-export async function getAccessesForOrganization(orgId, includeShared = false) {
-  const res = await api.get(`/api/access/organization/${orgId}`, {
-    params: { includeShared }
+/** Obține un access după ID. */
+export async function getAccessById(accessId) {
+  const { data } = await api.get(`/access/${accessId}`);
+  return data;
+}
+
+/** Listează toate accesele cu paginare. */
+export async function getAccessesPaged({ pageIndex, pageSize }) {
+  const { data } = await api.get("/access", {
+    params: { pageIndex, pageSize }
   });
-  return res.data;
+  return data; // PagedResponse<AccessDto>
 }
 
-/**
- * Obține o pagină de accese (toate).
- * @param {number} pageIndex
- * @param {number} pageSize
- * @param {boolean} includeShared
- */
-export async function getAccessesPaged(pageIndex, pageSize, includeShared = false) {
-  const res = await api.get("/api/access", {
-    params: { pageIndex, pageSize, includeShared }
-  });
-  return res.data; // { items: AccessDto[], totalCount, ... }
+/** Listează accesele proprii ale unei organizații. */
+export async function getAccessesForOrganization(orgId) {
+  const { data } = await api.get(`/organization/${orgId}/accesses`);
+  return data;
 }
 
-/**
- * Șterge (soft-delete) un access.
- * @param {string} accessId
- */
+/** Listează accesele partajate către o organizație. */
+export async function getAccessesSharedToOrganization(orgId) {
+  const { data } = await api.get(`/organization/${orgId}/accesses/shared`);
+  return data;
+}
+
+/** Listează toate accesele (proprii + partajate) ale organizației. */
+export async function getAllOrganizationAccesses(orgId) {
+  const { data } = await api.get(`/organization/${orgId}/accesses/all`);
+  return data;
+}
+
+/** Dezactivează (soft-delete) un access. */
 export async function deactivateAccess(accessId) {
-  await api.delete(`/api/access/${accessId}`);
+  await api.delete(`/access/${accessId}`);
 }
 
+/** Listează toate tipurile de acces */
 export async function getAllAccessTypes() {
-  const res = await api.get("/api/accesstype/all");
+  const res = await api.get("/accesstype/all");
   return res.data;
 }

@@ -1,7 +1,7 @@
 // src/components/Organization/Organization.jsx
 import React, { useState, useCallback } from "react";
 import OrganizationTable from "./TableOrganization/OrganizationTable";
-import OrganizationMemberTable from "./OrganizationMemberTable";
+import OrganizationMemberTable from "./TableOrganizationMembers/OrganizationMemberTable";
 import OrganizationPartners from "./OrganizationPartners";
 import AccessTable from "../Access/TableAccess/AccessTable";
 import { TabContext, TabList, TabPanel } from "@mui/lab";

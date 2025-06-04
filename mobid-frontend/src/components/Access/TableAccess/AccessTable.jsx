@@ -1,26 +1,29 @@
 // src/components/Access/TableAccess/AccessTable.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import "../../../styles/components/access.css";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddAccessModal from "./AddAccessModal";
 import AccessDetailsModal from "./AccessDetailsModal";
 import DeleteAccessModal from "./DeleteAccessModal";
 import {
   getAccessesForOrganization,
-  deactivateAccess,
+  deactivateAccess
 } from "../../../api/accessApi";
 
 export default function AccessTable({ organizationId, organizationName }) {
-  const [accesses, setAccesses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const [showAdd, setShowAdd] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+  const [accesses, setAccesses]       = useState([]);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
+  const [showAdd, setShowAdd]         = useState(false);
+  const [showEdit, setShowEdit]       = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [showDelete, setShowDelete]   = useState(false);
+  const [selected, setSelected]       = useState(null);
 
-  const fetch = async () => {
+  // Prevent double-fetch under StrictMode
+  const didFetchRef = useRef(false);
+
+  const fetchAccesses = async () => {
     setLoading(true);
     setError("");
     try {
@@ -34,35 +37,35 @@ export default function AccessTable({ organizationId, organizationName }) {
   };
 
   useEffect(() => {
-    if (organizationId) fetch();
+    if (!organizationId) return;
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
+    fetchAccesses();
   }, [organizationId]);
 
-  const columns = [
-    { header: "ID", accessor: "id" },
-    { header: "Nume", accessor: "name" },
-    { header: "Tip", accessor: "accessType" },
-    { header: "Max Total", accessor: "totalUseLimit" },
-    { header: "Per perioadă", accessor: "useLimitPerPeriod" },
-    { header: "Durată", accessor: "subscriptionPeriod" },
-    { header: "Expiră", accessor: "expirationDateTime" },
-    { header: "Activ", accessor: "isActive" },
-  ];
+  const handleDelete = row => {
+    setSelected(row);
+    setShowDelete(true);
+  };
 
-  const rows = accesses.map(a => ({
-    ...a,
-    actions: (
-      <button
-        className="icon-btn"
-        onClick={e => {
-          e.stopPropagation();
-          setSelected(a);
-          setShowDelete(true);
-        }}
-      >
-        🗑
-      </button>
-    )
-  }));
+  const confirmDelete = async () => {
+    await deactivateAccess(selected.id);
+    setShowDelete(false);
+    // force a fresh fetch next time
+    didFetchRef.current = false;
+    fetchAccesses();
+  };
+
+  const columns = [
+    { header: "ID",           accessor: "id" },
+    { header: "Nume",         accessor: "name" },
+    { header: "Tip",          accessor: "accessType" },
+    { header: "Max Total",    accessor: "totalUseLimit" },
+    { header: "Per perioadă", accessor: "useLimitPerPeriod" },
+    { header: "Durată",       accessor: "subscriptionPeriod" },
+    { header: "Expiră",       accessor: "expirationDateTime" },
+    { header: "Activ",        accessor: "isActive" },
+  ];
 
   return (
     <>
@@ -78,45 +81,53 @@ export default function AccessTable({ organizationId, organizationName }) {
         <GenericTable
           columns={columns}
           filterColumns={["name", "accessType"]}
-          data={rows}
+          data={accesses}
           onAdd={() => setShowAdd(true)}
           showAddOption
           showEditOption
           onEdit={row => { setSelected(row); setShowEdit(true); }}
-          showDeleteOption={false}
+          showDeleteOption
+          onDelete={handleDelete}
           onRowClick={row => { setSelected(row); setShowDetails(true); }}
         />
       )}
 
-      {/* Add / Edit / Details / Delete Modals */}
       {showAdd && (
         <AddAccessModal
           organizationId={organizationId}
-          onSuccess={() => { setShowAdd(false); fetch(); }}
+          onSuccess={() => {
+            setShowAdd(false);
+            // allow re-fetch in effect
+            didFetchRef.current = false;
+            fetchAccesses();
+          }}
           onClose={() => setShowAdd(false)}
         />
       )}
+
       {showEdit && selected && (
-        <EditAccessModal
+        <AddAccessModal
           access={selected}
-          onSuccess={() => { setShowEdit(false); fetch(); }}
+          onSuccess={() => {
+            setShowEdit(false);
+            didFetchRef.current = false;
+            fetchAccesses();
+          }}
           onClose={() => setShowEdit(false)}
         />
       )}
+
       {showDetails && selected && (
         <AccessDetailsModal
           access={selected}
           onClose={() => setShowDetails(false)}
         />
       )}
+
       <DeleteAccessModal
         open={showDelete}
         accessName={selected?.name}
-        onConfirm={async () => {
-          await deactivateAccess(selected.id);
-          setShowDelete(false);
-          fetch();
-        }}
+        onConfirm={confirmDelete}
         onCancel={() => setShowDelete(false)}
       />
     </>

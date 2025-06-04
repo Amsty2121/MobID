@@ -1,5 +1,5 @@
 // src/components/Organization/OrganizationPartners.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Select from "react-select";
 import {
   Box,
@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { getAccessesForOrganization } from "../../api/accessApi";
 import {
-  getSharesForOrganization,
+  getSharedAccessesBetweenOrganizations,
   shareAccessWithOrganization,
   revokeSharedAccess
 } from "../../api/accessShareApi";
@@ -25,48 +25,53 @@ const not = (a, b) => a.filter(x => !b.some(y => y.id === x.id));
 const intersection = (a, b) => a.filter(x => b.some(y => y.id === x.id));
 
 export default function OrganizationPartners({ organizationId, organizationName }) {
-  const [allOrgs, setAllOrgs] = useState([]);
+  const [allOrgs,   setAllOrgs]   = useState([]);
   const [targetOrg, setTargetOrg] = useState(null);
-  const [left, setLeft] = useState([]);
-  const [right, setRight] = useState([]);
-  const [checked, setChecked] = useState([]);
+  const [left,      setLeft]      = useState([]); // toate accesele org curente
+  const [right,     setRight]     = useState([]); // accesele deja partajate cu targetOrg
+  const [checked,   setChecked]   = useState([]);
 
-  useEffect(() => {
-    (async () => {
-      const accesses = await getAccessesForOrganization(organizationId);
-      setLeft(accesses);
-    })();
-  }, [organizationId]);
-
+  // 1️⃣ Încarcă lista organizațiilor
   useEffect(() => {
     (async () => {
       const orgs = await getAllOrganizations();
       setAllOrgs(
         orgs
           .filter(o => o.id !== organizationId)
-          .map(o => ({
-            value: o.id,
-            label: o.name,
-            name: o.name,
-            id: o.id
-          }))
+          .map(o => ({ value: o.id, label: o.name, id: o.id, name: o.name }))
       );
     })();
   }, [organizationId]);
 
-  useEffect(() => {
-    if (!targetOrg) {
-      setRight([]);
-      return;
-    }
-    (async () => {
-      const shares = await getSharesForOrganization(targetOrg.value);
-      const sharedIds = shares.map(s => s.accessId);
-      setRight(left.filter(a => sharedIds.includes(a.id)));
-    })();
-  }, [targetOrg, left]);
+  // 2️⃣ Funcție de (re)încărcare left + right
+  const refreshData = useCallback(async () => {
+    // left = toate accesele organizației curente
+    const accesses = await getAccessesForOrganization(organizationId);
+    setLeft(accesses);
 
-  const leftChecked = intersection(checked, not(left, right));
+    // right = share‐urile dintre cele două org
+    if (targetOrg) {
+      const shares = await getSharedAccessesBetweenOrganizations(
+        organizationId,
+        targetOrg.value
+      );
+      const sharedIds = shares.map(s => s.accessId);
+      setRight(accesses.filter(a => sharedIds.includes(a.id)));
+    } else {
+      setRight([]);
+    }
+
+    // resetează selecțiile
+    setChecked([]);
+  }, [organizationId, targetOrg]);
+
+  // 3️⃣ Rulează la schimbarea organizației curente sau a targetOrg
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
+  const leftOnly  = not(left, right);
+  const leftChecked  = intersection(checked, leftOnly);
   const rightChecked = intersection(checked, right);
 
   const handleToggle = item => {
@@ -77,62 +82,23 @@ export default function OrganizationPartners({ organizationId, organizationName 
     );
   };
 
-  const refreshRight = async () => {
-    const shares = await getSharesForOrganization(targetOrg.value);
-    const sharedIds = shares.map(s => s.accessId);
-    setRight(left.filter(a => sharedIds.includes(a.id)));
-    setChecked([]);
-  };
-
-  const handleAllRight = async () => {
+  const handleShare = async items => {
     if (!targetOrg) return;
-    for (const acc of not(left, right)) {
+    for (const acc of items) {
       await shareAccessWithOrganization(acc.id, organizationId, targetOrg.value);
     }
-    await refreshRight();
+    await refreshData();
   };
 
-  const handleCheckedRight = async () => {
-    if (!targetOrg) return;
-    for (const acc of leftChecked) {
-      await shareAccessWithOrganization(acc.id, organizationId, targetOrg.value);
-    }
-    await refreshRight();
-  };
-
-  const handleCheckedLeft = async () => {
-    for (const acc of rightChecked) {
+  const handleRevoke = async items => {
+    for (const acc of items) {
       await revokeSharedAccess(acc.id, organizationId, targetOrg.value);
     }
-    await refreshRight();
-  };
-
-  const handleRevokeAll = async () => {
-    for (const acc of right) {
-      await revokeSharedAccess(acc.id, organizationId, targetOrg.value);
-    }
-    await refreshRight();
-  };
-
-  const handleShareAllAccesses = async () => {
-    if (!targetOrg) return;
-    for (const acc of left) {
-      await shareAccessWithOrganization(acc.id, organizationId, targetOrg.value);
-    }
-    await refreshRight();
-  };
-
-  const handleTakeAllAccesses = async () => {
-    if (!targetOrg) return;
-    const theirAccesses = await getAccessesForOrganization(targetOrg.value);
-    for (const acc of theirAccesses) {
-      await shareAccessWithOrganization(acc.id, targetOrg.value, organizationId);
-    }
-    await refreshRight();
+    await refreshData();
   };
 
   const customList = (title, items) => {
-    const allSelected = items.length > 0 && intersection(checked, items).length === items.length;
+    const allSelected     = items.length > 0 && intersection(checked, items).length === items.length;
     const partialSelected = intersection(checked, items).length > 0 && !allSelected;
 
     const handleToggleAll = () => {
@@ -160,28 +126,25 @@ export default function OrganizationPartners({ organizationId, organizationName 
           </Box>
         </Box>
         <List dense component="div" role="list">
-          {items.map(item => {
-            const labelId = `transfer-item-${item.id}`;
-            return (
-              <ListItem
-                key={item.id}
-                role="listitem"
-                component="li"
-                onClick={() => handleToggle(item)}
-                sx={{ cursor: "pointer" }}
-              >
-                <ListItemIcon>
-                  <Checkbox
-                    checked={checked.some(x => x.id === item.id)}
-                    tabIndex={-1}
-                    disableRipple
-                    inputProps={{ "aria-labelledby": labelId }}
-                  />
-                </ListItemIcon>
-                <ListItemText id={labelId} primary={item.name} />
-              </ListItem>
-            );
-          })}
+          {items.map(item => (
+            <ListItem
+              key={item.id}
+              role="listitem"
+              component="li"
+              onClick={() => handleToggle(item)}
+              sx={{ cursor: "pointer" }}
+            >
+              <ListItemIcon>
+                <Checkbox
+                  checked={checked.some(x => x.id === item.id)}
+                  tabIndex={-1}
+                  disableRipple
+                  inputProps={{ "aria-labelledby": `transfer-item-${item.id}` }}
+                />
+              </ListItemIcon>
+              <ListItemText id={`transfer-item-${item.id}`} primary={item.name} />
+            </ListItem>
+          ))}
         </List>
       </Paper>
     );
@@ -212,18 +175,38 @@ export default function OrganizationPartners({ organizationId, organizationName 
 
       {targetOrg && (
         <Box className="org-transfer-container">
-          {customList("Disponibile", not(left, right))}
+          {customList("Disponibile", leftOnly)}
           <Box className="org-transfer-actions">
-            <Button variant="outlined" size="small" onClick={handleAllRight} disabled={!not(left, right).length}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleShare(leftOnly)}
+              disabled={!leftOnly.length}
+            >
               &gt;&gt;
             </Button>
-            <Button variant="outlined" size="small" onClick={handleCheckedRight} disabled={!leftChecked.length}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleShare(leftChecked)}
+              disabled={!leftChecked.length}
+            >
               &gt;
             </Button>
-            <Button variant="outlined" size="small" onClick={handleCheckedLeft} disabled={!rightChecked.length}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleRevoke(rightChecked)}
+              disabled={!rightChecked.length}
+            >
               &lt;
             </Button>
-            <Button variant="outlined" size="small" onClick={handleRevokeAll} disabled={!right.length}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleRevoke(right)}
+              disabled={!right.length}
+            >
               &lt;&lt;
             </Button>
           </Box>

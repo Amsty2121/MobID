@@ -1,51 +1,38 @@
-// src/api/qrCodeApi.js
 import api from "./api";
 
-/**
- * Generează un cod QR nou
- * @param {string} accessId
- * @param {string} [description]
- * @returns {Promise<QrCodeDto>}
- */
-export async function createQrCode(accessId, description) {
-  const res = await api.post("/api/qrcode", { accessId, description });
-  return res.data;
+/** Generează un cod QR nou. */
+export async function createQrCode(req) {
+  const { data } = await api.post("/qrcode", req);
+  return data;
 }
 
-/**
- * Listează QR‐urile asociate unui access
- * @param {string} accessId
- * @returns {Promise<QrCodeDto[]>}
- */
-export async function getQrCodesForAccess(accessId) {
-  const res = await api.get(`/api/qrcode/access/${accessId}`);
-  return res.data;
-}
-
-/**
- * Deactivează (soft‐delete) un QR
- * @param {string} qrCodeId
- */
-export async function deactivateQrCode(qrCodeId) {
-  await api.delete(`/api/qrcode/${qrCodeId}`);
-}
-
-/**
- * Validează un QR
- * @param {string} qrCodeId
- * @returns {Promise<{ isValid: boolean }>}
- */
-export async function validateQrCode(qrCodeId) {
-  const res = await api.post(`/api/qrcode/${qrCodeId}/validate`);
-  return res.data;
-}
-
-/**
- * Obține un QR după ID
- * @param {string} qrCodeId
- * @returns {Promise<QrCodeDto>}
- */
+/** Obține un cod QR după ID. */
 export async function getQrCodeById(qrCodeId) {
-  const res = await api.get(`/api/qrcode/${qrCodeId}`);
-  return res.data;
+  const { data } = await api.get(`/qrcode/${qrCodeId}`);
+  return data;
+}
+
+/** Listează QR-urile asociate unui access. */
+export async function getQrCodesForAccess(accessId) {
+  const { data } = await api.get(`/qrcode/access/${accessId}`);
+  return data;
+}
+
+/** Listează QR-urile paginat. */
+export async function getQrCodesPaged({ pageIndex, pageSize }) {
+  const { data } = await api.get("/qrcode/paged", {
+    params: { pageIndex, pageSize }
+  });
+  return data;
+}
+
+/** Validează un cod QR. */
+export async function validateQrCode(qrCodeId) {
+  const { data } = await api.post(`/qrcode/${qrCodeId}/validate`);
+  return data; // { isValid: boolean }
+}
+
+/** Dezactivează (soft-delete) un cod QR. */
+export async function deactivateQrCode(qrCodeId) {
+  await api.delete(`/qrcode/${qrCodeId}`);
 }

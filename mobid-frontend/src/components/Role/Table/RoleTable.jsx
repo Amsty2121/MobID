@@ -1,6 +1,6 @@
 // src/components/Role/Table/RoleTable.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getRolesPaged, deleteRole } from "../../../api/roleApi";
+import { getRolesPaged } from "../../../api/roleApi";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddRoleModal from "./AddRoleModal";
 import DeleteRoleModal from "./DeleteRoleModal";
@@ -48,12 +48,6 @@ export default function RoleTable() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = async () => {
-    await deleteRole(roleToDelete.id);
-    setShowDeleteModal(false);
-    fetchRoles();
-  };
-
   const columns = [
     { header: "ID",        accessor: "id" },
     { header: "Nume",      accessor: "name" },
@@ -92,7 +86,10 @@ export default function RoleTable() {
       {showDeleteModal && roleToDelete && (
         <DeleteRoleModal
           role={roleToDelete}
-          onConfirm={confirmDelete}
+          onSuccess={() => {
+            setShowDeleteModal(false);
+            fetchRoles();
+          }}
           onCancel={() => setShowDeleteModal(false)}
         />
       )}

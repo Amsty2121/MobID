@@ -4,27 +4,22 @@ import { FaTimes } from "react-icons/fa";
 import TextField from "@mui/material/TextField";
 import Select from "react-select";
 import { getUsersForOrganization } from "../../../api/organizationApi";
-// importăm stilurile comune pentru modale (layout, buttons, forms, MUI overrides, react-select, etc.)
+// stilurile comune pentru modal + overrides MUI
 import "../../../styles/components/modal/index.css";
 
 export default function EditOrganizationModal({ organization, onSubmit, onClose }) {
   const [newName, setNewName]        = useState("");
   const [members, setMembers]        = useState([]);
-  const [selectedOwner, setSelectedOwner] = useState(null);
+  const [selectedOwner, setSelected] = useState(null);
   const [loading, setLoading]        = useState(true);
   const [error, setError]            = useState("");
   const didFetch = useRef(false);
 
   useEffect(() => {
-    // initialize form fields
+    // initialize form cu datele organizației
     setNewName(organization.name);
     setError("");
-    setSelectedOwner({
-      value: organization.ownerId,
-      label: organization.ownerName,
-      id: organization.ownerId,
-      username: organization.ownerName
-    });
+    setSelected({ value: organization.ownerId, label: organization.ownerName });
 
     if (didFetch.current) return;
     didFetch.current = true;
@@ -36,7 +31,7 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
           opts.map(m => ({
             value: m.userId,
             label: m.userName,
-            id: m.userId,
+            id:    m.userId,
             username: m.userName
           }))
         );
@@ -83,40 +78,35 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
           />
 
           <Select
+            className="modal__react-select"
+            classNamePrefix="modal__react-select"
             options={members}
             isLoading={loading}
             value={selectedOwner}
-            onChange={setSelectedOwner}
+            onChange={setSelected}
             placeholder="Alege proprietar…"
-            className="modal__react-select"
-            classNamePrefix="modal__react-select"
-            formatOptionLabel={({ username, id }) => (
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontWeight: 600, color: "var(--color-primary)" }}>
-                  Name: {username}
+            noOptionsMessage={() => "Niciun membru găsit"}
+            formatOptionLabel={({ label, value }) => (
+              <div className="modal__react-select__option">
+                <span className="modal__react-select__option-label">
+                  Name: {label}
                 </span>
-                <span style={{
-                  color: "var(--color-iron)",
-                  fontSize: "0.85rem",
-                  marginTop: 4
-                }}>
-                  Id: {id}
+                <span className="modal__react-select__option-id">
+                  Id: {value}
                 </span>
               </div>
             )}
-            theme={theme => ({
-              ...theme,
-              borderRadius: 4,
-              colors: {
-                ...theme.colors,
-                primary25: "var(--color-primary-hover)",
-                primary:   "var(--color-primary)"
-              }
-            })}
+            // portal și poziționare fixă
+            menuPortalTarget={document.body}
+            menuPosition="fixed"
+            // asigurăm z-index mare și scroll doar pe listă
             styles={{
-              control: base => ({ ...base, minHeight: 56 }),
-              valueContainer: base => ({ ...base, height: 56, padding: "0 8px" }),
-              indicatorsContainer: base => ({ ...base, height: 56 }),
+              menuPortal: base => ({ ...base, zIndex: 9999 }),
+              menuList:   base => ({
+                ...base,
+                maxHeight: "400px",
+                overflowY: "auto"
+              })
             }}
           />
 

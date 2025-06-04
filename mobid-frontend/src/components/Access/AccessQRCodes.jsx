@@ -8,12 +8,12 @@ import { QRCodeSVG } from "qrcode.react";
 import "./Access.css";
 
 export default function AccessQRCodes({ access }) {
-  const [qrCodes, setQrCodes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showGenQr, setShowGenQr] = useState(false);
-  const [previewQr, setPreviewQr] = useState(null);
-  const [qrToDelete, setQrToDelete] = useState(null);
+  const [qrCodes, setQrCodes]         = useState([]);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
+  const [showGenQr, setShowGenQr]     = useState(false);
+  const [previewQr, setPreviewQr]     = useState(null);
+  const [qrToDelete, setQrToDelete]   = useState(null);
 
   const fetchQrs = async () => {
     setLoading(true);
@@ -56,12 +56,12 @@ export default function AccessQRCodes({ access }) {
   };
 
   const columns = [
-    { header: "ID", accessor: "id" },
+    { header: "ID",        accessor: "id" },
     { header: "Descriere", accessor: "description" },
-    { header: "Tip", accessor: "type" },
-    { header: "Expiră", accessor: "expiresAt" },
-    { header: "Creat", accessor: "createdAt" },
-    { header: "Acțiuni", accessor: "actions" }
+    { header: "Tip",       accessor: "type" },
+    { header: "Expiră",    accessor: "expiresAt" },
+    { header: "Creat",     accessor: "createdAt" },
+    { header: "Acțiuni",   accessor: "actions" }
   ];
 
   const dataWithActions = qrCodes.map(q => ({
@@ -107,20 +107,23 @@ export default function AccessQRCodes({ access }) {
       {showGenQr && (
         <GenerateQrModal
           accessId={access.id}
-          onSuccess={() => {
-            setShowGenQr(false);
-            fetchQrs();
-          }}
+          onSuccess={() => { setShowGenQr(false); fetchQrs(); }}
           onClose={() => setShowGenQr(false)}
         />
       )}
 
       {/* Modal de preview */}
       {previewQr && (
-        <div className="qr-modal-overlay">
-          <div className="qr-modal-content">
+        <div
+          className="qr-modal-overlay"
+          onClick={() => setPreviewQr(null)}
+        >
+          <div
+            className="qr-modal-content"
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="qr-modal-title">
-              Invitation QR for Access<br/>{previewQr.description}
+              {previewQr.name}
             </h3>
             <div className="qr-design-frame">
               <div className="qr-code-wrap">
@@ -129,8 +132,8 @@ export default function AccessQRCodes({ access }) {
                   value={previewQr.qrEncodedText}
                   size={200}
                   includeMargin={false}
-                  bgColor="var(--color-tuna-light)"
-                  fgColor="var(--color-primary)"
+                  bgColor="#fff"
+                  fgColor="var(--color-tuna-light)"
                 />
               </div>
               <div className="qr-footer">

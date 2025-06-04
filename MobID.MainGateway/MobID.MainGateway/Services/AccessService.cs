@@ -50,24 +50,40 @@ public class AccessService : IAccessService
         // 2️⃣ Validări pe bază de AccessType
         if (type.IsLimitedUse)
         {
-            // similar fostului LimitedUse
             if (!req.TotalUseLimit.HasValue || req.TotalUseLimit <= 0)
-                throw new InvalidOperationException("TotalUseLimit (>0) este necesar pentru acest tip de acces.");
+                req.TotalUseLimit = 1;
         }
         else if (type.IsSubscription)
         {
-            // similar fostului Subscription
             if (!req.SubscriptionPeriod.HasValue || req.SubscriptionPeriod.Value <= TimeSpan.Zero)
                 throw new InvalidOperationException("SubscriptionPeriod (>0) este necesar pentru acest tip de acces.");
-            // req.UseLimitPerPeriod poate fi null = nelimitat
         }
         else
         {
-            // echivalent IdentityConfirm → forțăm 1 singură utilizare per user
+            // OneUse / IdentityConfirm
             req.TotalUseLimit = 1;
         }
 
-        // 3️⃣ Restul validărilor (organizație, permisiuni) rămâne neschimbat...
+        // 2.5️⃣ Verificăm unicitatea numelui în cadrul organizației
+        var duplicate = await _accessRepo.FirstOrDefault(
+            a => a.OrganizationId == req.OrganizationId
+              && a.Name.Trim().ToLower() == req.Name.Trim().ToLower()
+              && a.DeletedAt == null,
+            ct);
+        if (duplicate != null)
+            throw new InvalidOperationException($"Există deja un access cu numele '{req.Name}' în organizația dată.");
+
+        // 3️⃣ Validări organizație + permisiuni
+        var org = await _orgRepo.GetById(req.OrganizationId, ct)
+                  ?? throw new InvalidOperationException("Organization not found.");
+        var isMember = await _orgUserRepo
+            .FirstOrDefault(ou =>
+                ou.OrganizationId == org.Id &&
+                ou.UserId == creatorId &&
+                ou.DeletedAt == null,
+                ct) != null;
+        if (!isMember)
+            throw new UnauthorizedAccessException("Nu ai dreptul să creezi un Access pentru această organizație.");
 
         // 4️⃣ Construim entitatea și salvăm în tranzacție
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -75,27 +91,23 @@ public class AccessService : IAccessService
         var access = new Access
         {
             Id = Guid.NewGuid(),
-            Name = req.Name,
+            Name = req.Name.Trim(),
             Description = req.Description,
-            OrganizationId = req.OrganizationId,
+            OrganizationId = org.Id,
             AccessTypeId = type.Id,
-
-            // limite:
             TotalUseLimit = req.TotalUseLimit,
             UseLimitPerPeriod = type.IsSubscription ? req.UseLimitPerPeriod : null,
             SubscriptionPeriod = type.IsSubscription ? req.SubscriptionPeriod : null,
-
             ExpirationDateTime = req.ExpirationDate,
             IsRestrictedToOrgMembers = req.RestrictToOrgMembers,
             IsRestrictedToOrganizationShare = req.RestrictToOrganizationShare,
-
             CreatedByUserId = creatorId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
         await _accessRepo.Add(access, ct);
 
-        // Adăugăm QR de invitație
+        // 5️⃣ Adăugăm QR de invitație
         var inviteQr = new QrCode
         {
             Id = Guid.NewGuid(),
@@ -111,6 +123,7 @@ public class AccessService : IAccessService
         scope.Complete();
         return new AccessDto(access);
     }
+
 
 
 
@@ -153,13 +166,5 @@ public class AccessService : IAccessService
             .ToList();
 
         return new PagedResponse<AccessDto>(req.PageIndex, req.PageSize, total, items);
-    }
-
-
-    /// <inheritdoc/>
-    public async Task<List<QrCodeDto>> GetQrCodesForAccessAsync(Guid accessId, CancellationToken ct = default)
-    {
-        var qrs = await _qrCodeRepo.GetWhere(q => q.AccessId == accessId && q.DeletedAt == null, ct);
-        return qrs.Select(q => new QrCodeDto(q)).ToList();
     }
 }

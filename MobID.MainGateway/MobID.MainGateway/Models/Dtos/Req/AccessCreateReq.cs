@@ -22,13 +22,13 @@ public class AccessCreateReq
     /// Pentru Subscription, poate fi null = nelimitat.
     /// </summary>
     [Range(1, int.MaxValue, ErrorMessage = "TotalUseLimit must be at least 1 when specified.")]
-    public int? TotalUseLimit { get; set; }
+    public int? TotalUseLimit { get; set; } = 1;
 
     /// <summary>
     /// Pentru Subscription: numărul de scanări per perioadă (>=1) sau null = nelimitat.
     /// </summary>
     [Range(1, int.MaxValue, ErrorMessage = "UseLimitPerPeriod must be at least 1 when specified.")]
-    public int? UseLimitPerPeriod { get; set; }
+    public int? UseLimitPerPeriod { get; set; } = 1;
 
     /// <summary>
     /// Pentru Subscription: durata perioadei (ex: TimeSpan.FromDays(7), FromMonths(1), etc.).

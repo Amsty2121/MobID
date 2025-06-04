@@ -1,26 +1,25 @@
 // src/components/Access/TableAccess/DeleteAccessModal.jsx
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import "../../Access/Access.css";
+import "../../../styles/components/modal/index.css";
 
 export default function DeleteAccessModal({ open, accessName, onConfirm, onCancel }) {
   if (!open) return null;
   return (
-    <div className="modal-overlay" onClick={onCancel}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onCancel}>
+    <div className="modal__overlay" onClick={onCancel}>
+      <div className="modal__content" onClick={e => e.stopPropagation()}>
+        <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3>Confirmă dezactivarea</h3>
-        <p>
-          Ești sigur că vrei să dezactivezi accesul{" "}
-          <strong>{accessName}</strong>?
+        <h3 className="modal__title">Confirmă Dezactivarea</h3>
+        <p className="modal__message">
+          Ești sigur că vrei să dezactivezi accesul <strong>{accessName}</strong>?
         </p>
-        <div className="form-actions">
-          <button type="button" onClick={onConfirm}>
+        <div className="modal__actions">
+          <button className="modal__button--yes" onClick={onConfirm}>
             Dezactivează
           </button>
-          <button type="button" onClick={onCancel}>
+          <button className="modal__button--no" onClick={onCancel}>
             Anulează
           </button>
         </div>

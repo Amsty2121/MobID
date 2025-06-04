@@ -1,9 +1,25 @@
-/* src/components/User/Table/DeleteUserModal.jsx */
-import React from "react";
+import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { deactivateUser } from "../../../api/userApi";
 import "../../../styles/components/modal/index.css";
 
-const DeleteUserModal = ({ user, onConfirm, onCancel }) => {
+export default function DeleteUserModal({ user, onSuccess, onCancel }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      await deactivateUser(user.id);
+      onSuccess();    // anunță UserTable să reîncarce lista
+    } catch {
+      setError("Nu am putut șterge utilizatorul.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="modal__overlay">
       <div className="modal__content">
@@ -11,21 +27,29 @@ const DeleteUserModal = ({ user, onConfirm, onCancel }) => {
           <FaTimes />
         </button>
         <h3 className="modal__title">Confirmă Ștergerea</h3>
+        {error && <p className="modal__error">{error}</p>}
         <p className="modal__message">
-          Ești sigur că vrei să ștergi utilizatorul{" "}
-          <strong>{user?.username}</strong>?
+          Ești sigur că vrei să ștergi utilizatorul <strong>{user.username}</strong>?
         </p>
         <div className="modal__actions">
-          <button className="modal__button--yes" onClick={onConfirm}>
-            Șterge
+          <button
+            type="button"
+            className="modal__button--yes"
+            onClick={handleConfirm}
+            disabled={loading}
+          >
+            {loading ? "Șterg..." : "Șterge"}
           </button>
-          <button className="modal__button--no" onClick={onCancel}>
+          <button
+            type="button"
+            className="modal__button--no"
+            onClick={onCancel}
+            disabled={loading}
+          >
             Anulează
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default DeleteUserModal;
+}

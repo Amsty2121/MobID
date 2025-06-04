@@ -91,4 +91,13 @@ public class QrCodeService : IQrCodeService
 
         return true;
     }
+
+
+    /// <inheritdoc/>
+    public async Task<List<QrCodeDto>> GetQrCodesForAccessAsync(Guid accessId, CancellationToken ct = default)
+    {
+        var qrs = await _qrRepo.GetWhere(q => q.AccessId == accessId && q.DeletedAt == null, ct);
+        return qrs.Select(q => new QrCodeDto(q)).ToList();
+    }
+
 }

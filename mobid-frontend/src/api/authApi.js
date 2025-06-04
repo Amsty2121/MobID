@@ -1,29 +1,30 @@
 // src/api/authApi.js
+
 import api from "./api";
 
 export async function loginUser(payload) {
-  const res = await api.post("/api/auth/login", payload);
-  return res.data; // { id, username, token, refreshToken }
+  const { data } = await api.post("/auth/login", payload);
+  return data; // UserLoginRsp
 }
 
 export async function registerUser(payload) {
-  const res = await api.post("/api/auth/register", payload);
-  return res.data;
+  const { data } = await api.post("/auth/register", payload);
+  return data; // UserRegisterRsp
 }
 
 export async function refreshToken(refreshToken) {
-  const res = await api.post("/api/auth/refresh", null, {
+  const { data } = await api.post("/auth/refresh", null, {
     params: { refreshToken }
   });
-  return res.data;
+  return data;
 }
 
 export async function revokeToken(refreshToken) {
-  await api.post("/api/auth/revoke", null, {
+  await api.post("/auth/revoke", null, {
     params: { refreshToken }
   });
 }
 
 export async function verifyToken() {
-  await api.get("/api/auth/token-verify");
+  await api.get("/auth/token-verify");
 }

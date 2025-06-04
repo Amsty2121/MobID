@@ -109,7 +109,10 @@ export default function UserTable() {
       {showDeleteModal && userToDelete && (
         <DeleteUserModal
           user={userToDelete}
-          onConfirm={confirmDelete}
+          onSuccess={() => {
+            setShowDeleteModal(false);
+            fetchUsers();
+          }}
           onCancel={() => setShowDeleteModal(false)}
         />
       )}

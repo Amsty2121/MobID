@@ -1,9 +1,30 @@
 // src/components/Role/Table/DeleteRoleModal.jsx
-import React from "react";
+import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { deactivateRole } from "../../../api/roleApi";
 import "../../../styles/components/modal/index.css";
 
-const DeleteRoleModal = ({ role, onConfirm, onCancel }) => {
+export default function DeleteRoleModal({ 
+  role, 
+  onSuccess,    // callback apelat după ștergere cu succes
+  onCancel 
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      await deactivateRole(role.id);
+      onSuccess();    // anunță RoleTable să reîncarce lista
+    } catch {
+      setError("Nu am putut şterge rolul.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="modal__overlay">
       <div className="modal__content">
@@ -11,22 +32,24 @@ const DeleteRoleModal = ({ role, onConfirm, onCancel }) => {
           <FaTimes />
         </button>
         <h3 className="modal__title">Confirmă Ștergerea</h3>
+        {error && <p className="modal__error">{error}</p>}
         <p className="modal__message">
-          Ești sigur că vrei să ștergi rolul{" "}
-          <strong>{role?.name}</strong>?
+          Ești sigur că vrei să ştergi rolul <strong>{role.name}</strong>?
         </p>
         <div className="modal__actions">
           <button
             type="button"
             className="modal__button--yes"
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={loading}
           >
-            Șterge
+            {loading ? "Şterg..." : "Şterge"}
           </button>
           <button
             type="button"
             className="modal__button--no"
             onClick={onCancel}
+            disabled={loading}
           >
             Anulează
           </button>
@@ -34,6 +57,4 @@ const DeleteRoleModal = ({ role, onConfirm, onCancel }) => {
       </div>
     </div>
   );
-};
-
-export default DeleteRoleModal;
+}

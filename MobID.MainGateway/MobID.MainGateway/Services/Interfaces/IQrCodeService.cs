@@ -11,4 +11,6 @@ public interface IQrCodeService
 
     Task<bool> DeactivateQrCodeAsync(Guid qrCodeId, CancellationToken ct = default);
     Task<bool> ValidateQrCodeAsync(Guid qrCodeId, Guid scanningUserId, CancellationToken ct = default);
+
+    Task<List<QrCodeDto>> GetQrCodesForAccessAsync(Guid accessId, CancellationToken ct = default);
 }

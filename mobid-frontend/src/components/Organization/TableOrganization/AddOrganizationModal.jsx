@@ -25,7 +25,7 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
         (res.items || []).map(u => ({
           value: u.id,
           label: u.username,
-          id:    u.id,
+          id:       u.id,
           username: u.username
         }))
       );
@@ -94,21 +94,12 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
                 </span>
               </div>
             )}
-
-            /* —–––––––––––––––––––––––––––––––––––––––––––––––––––––—
-               ➊ scoate meniul în portal, peste orice z-index
-            —–––––––––––––––––––––––––––––––––––––––––––––––––––––— */
             menuPortalTarget={document.body}
-            menuPosition="fixed"
             styles={{
-              // ➋ se asigură că z-index-ul portalului e mai sus decât modalul
               menuPortal: base => ({ ...base, zIndex: 9999 }),
-
-              // ➌ poți controla înălțimea maximă a listei dropdown
-              menu: base => ({ ...base, maxHeight: 200 }),
-
-              // restul stilurilor rămân la fel
+              menu:       base => ({ ...base, position: 'absolute' })
             }}
+            menuPosition="fixed"
           />
 
           <div className="modal__actions">

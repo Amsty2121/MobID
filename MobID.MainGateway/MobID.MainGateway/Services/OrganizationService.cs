@@ -289,9 +289,10 @@ namespace MobID.MainGateway.Services
             CancellationToken ct = default)
         {
             var shares = await _shareRepo.GetWhereWithInclude(
-                s => s.SourceOrganizationId == organizationId && s.DeletedAt == null,
+                s => s.TargetOrganizationId == organizationId && s.DeletedAt == null,
                 ct,
                 s => s.Access,
+                s => s.SourceOrganization,
                 s => s.TargetOrganization
             );
             return shares
