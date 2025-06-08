@@ -17,7 +17,6 @@
   background-color: var(--color-tuna-light);
   border-radius: 6px;
   padding: 1rem;
-  width: 100%;
   overflow-x: auto;
 }
 

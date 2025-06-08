@@ -25,6 +25,14 @@ namespace MobID.MainGateway.Repo
             return _context.Set<T>().FirstOrDefaultAsync(predicate, ct);
         }
 
+        public async Task<T?> FirstOrDefaultWithInclude(Expression<Func<T, bool>> predicate, CancellationToken ct = default, params Expression<Func<T, object>>[] includeProperties)
+        {
+
+            var query = IncludeProperties(ct, includeProperties);
+
+            return await query.FirstOrDefaultAsync(predicate, ct);
+        }
+
         public async Task<int> Add(T entity, CancellationToken ct = default)
         {
             await _context.Set<T>().AddAsync(entity, ct);

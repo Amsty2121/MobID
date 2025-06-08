@@ -1,5 +1,4 @@
-﻿using System.Transactions;
-using MobID.MainGateway.Models.Dtos;
+﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Models.Enums;
@@ -11,160 +10,202 @@ namespace MobID.MainGateway.Services;
 public class AccessService : IAccessService
 {
     private readonly IGenericRepository<Access> _accessRepo;
-    private readonly IGenericRepository<User> _userRepo;
-    private readonly IGenericRepository<Organization> _orgRepo;
     private readonly IGenericRepository<AccessType> _accessTypeRepo;
+    private readonly IGenericRepository<Organization> _orgRepo;
     private readonly IGenericRepository<OrganizationUser> _orgUserRepo;
-    private readonly IGenericRepository<QrCode> _qrCodeRepo;
+    private readonly IGenericRepository<User> _userRepo;
 
     public AccessService(
         IGenericRepository<Access> accessRepo,
-        IGenericRepository<Organization> orgRepo,
         IGenericRepository<AccessType> accessTypeRepo,
+        IGenericRepository<Organization> orgRepo,
         IGenericRepository<OrganizationUser> orgUserRepo,
-        IGenericRepository<QrCode> qrCodeRepo,
         IGenericRepository<User> userRepo)
-
     {
         _accessRepo = accessRepo;
-        _orgRepo = orgRepo;
         _accessTypeRepo = accessTypeRepo;
+        _orgRepo = orgRepo;
         _orgUserRepo = orgUserRepo;
-        _qrCodeRepo = qrCodeRepo;
         _userRepo = userRepo;
     }
 
-    public async Task<AccessDto> CreateAccessAsync(
-    AccessCreateReq req,
-    Guid creatorId,
-    CancellationToken ct = default)
+    public async Task<AccessDto> CreateAccessAsync(AccessCreateReq req, Guid userId, CancellationToken ct = default)
     {
-        // 0️⃣ Verificăm că user-ul există
-        var user = await _userRepo.GetById(creatorId, ct)
-                   ?? throw new InvalidOperationException("User not found.");
+        // 1️⃣ Verific utilizator
+        var user = await _userRepo.GetById(userId, ct)
+                   ?? throw new InvalidOperationException("Utilizatorul nu a fost găsit.");
 
-        // 1️⃣ Încarcăm AccessType (are flag-urile IsLimitedUse / IsSubscription)
-        var type = await _accessTypeRepo.GetById(req.AccessTypeId, ct)
-                   ?? throw new InvalidOperationException("Access type not found.");
-
-        // 2️⃣ Validări pe bază de AccessType
-        if (type.IsLimitedUse)
-        {
-            if (!req.TotalUseLimit.HasValue || req.TotalUseLimit <= 0)
-                req.TotalUseLimit = 1;
-        }
-        else if (type.IsSubscription)
-        {
-            if (!req.SubscriptionPeriod.HasValue || req.SubscriptionPeriod.Value <= TimeSpan.Zero)
-                throw new InvalidOperationException("SubscriptionPeriod (>0) este necesar pentru acest tip de acces.");
-        }
-        else
-        {
-            // OneUse / IdentityConfirm
-            req.TotalUseLimit = 1;
-        }
-
-        // 2.5️⃣ Verificăm unicitatea numelui în cadrul organizației
-        var duplicate = await _accessRepo.FirstOrDefault(
-            a => a.OrganizationId == req.OrganizationId
-              && a.Name.Trim().ToLower() == req.Name.Trim().ToLower()
-              && a.DeletedAt == null,
-            ct);
-        if (duplicate != null)
-            throw new InvalidOperationException($"Există deja un access cu numele '{req.Name}' în organizația dată.");
-
-        // 3️⃣ Validări organizație + permisiuni
+        // 2️⃣ Încarc tip și organizație
+        var accessType = await _accessTypeRepo.GetById(req.AccessTypeId, ct)
+                          ?? throw new InvalidOperationException("Tipul de acces nu a fost găsit.");
         var org = await _orgRepo.GetById(req.OrganizationId, ct)
-                  ?? throw new InvalidOperationException("Organization not found.");
-        var isMember = await _orgUserRepo
-            .FirstOrDefault(ou =>
-                ou.OrganizationId == org.Id &&
-                ou.UserId == creatorId &&
-                ou.DeletedAt == null,
-                ct) != null;
-        if (!isMember)
-            throw new UnauthorizedAccessException("Nu ai dreptul să creezi un Access pentru această organizație.");
+                  ?? throw new InvalidOperationException("Organizația nu a fost găsită.");
 
-        // 4️⃣ Construim entitatea și salvăm în tranzacție
-        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        // 3️⃣ Permisiuni: doar Owner sau Admin al org
+        var rel = await _orgUserRepo.FirstOrDefault(
+            ou => ou.OrganizationId == org.Id
+               && ou.UserId == userId
+               && ou.DeletedAt == null, ct);
 
+        if (rel is null
+            || (rel.Role != OrganizationUserRole.Owner
+             && rel.Role != OrganizationUserRole.Admin))
+        {
+            throw new UnauthorizedAccessException("Nu ai dreptul să creezi acces în această organizație.");
+        }
+
+        // 4️⃣ Construiesc entitatea
         var access = new Access
         {
             Id = Guid.NewGuid(),
-            Name = req.Name.Trim(),
+            Name = req.Name,
             Description = req.Description,
             OrganizationId = org.Id,
-            AccessTypeId = type.Id,
-            TotalUseLimit = req.TotalUseLimit,
-            UseLimitPerPeriod = type.IsSubscription ? req.UseLimitPerPeriod : null,
-            SubscriptionPeriod = type.IsSubscription ? req.SubscriptionPeriod : null,
-            ExpirationDateTime = req.ExpirationDate,
-            IsRestrictedToOrgMembers = req.RestrictToOrgMembers,
-            IsRestrictedToOrganizationShare = req.RestrictToOrganizationShare,
-            CreatedByUserId = creatorId,
+            AccessTypeId = accessType.Id,
+            CreatedByUserId = userId,
+            UpdatedByUserId = userId,      
+            ExpirationDateTime = req.ExpirationDateTime,
+            RestrictToOrgMembers = req.RestrictToOrgMembers,
+            RestrictToOrgSharing = req.RestrictToOrgSharing,
+            IsMultiScan = req.IsMultiScan,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            DeletedAt = null
         };
-        await _accessRepo.Add(access, ct);
 
-        // 5️⃣ Adăugăm QR de invitație
-        var inviteQr = new QrCode
+        // 5️⃣ Reguli pe tip
+        switch (accessType.Code)
         {
-            Id = Guid.NewGuid(),
-            Description = $"Invitation QR for Access {access.Name}",
-            Type = QrCodeType.Invite,
-            AccessId = access.Id,
-            ExpiresAt = access.ExpirationDateTime,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        await _qrCodeRepo.Add(inviteQr, ct);
+            case AccessTypeCode.OneUse:
+                access.TotalUseLimit = 1;
+                break;
+            case AccessTypeCode.LimitedUse:
+                if (req.TotalUseLimit <= 0)
+                    throw new InvalidOperationException("TotalUseLimit obligatoriu pentru LimitedUse.");
+                access.TotalUseLimit = req.TotalUseLimit;
+                break;
+            case AccessTypeCode.Subscription:
+                if (req.SubscriptionPeriodMonths <= 0)
+                    throw new InvalidOperationException("SubscriptionPeriodMonths obligatoriu pentru Subscription.");
+                access.SubscriptionPeriodMonths = req.SubscriptionPeriodMonths;
+                access.UseLimitPerPeriod = req.UseLimitPerPeriod;
+                break;
+            case AccessTypeCode.Unlimited:
+                access.TotalUseLimit = null;
+                access.SubscriptionPeriodMonths = null;
+                access.UseLimitPerPeriod = null;
+                break;
+            default:
+                throw new InvalidOperationException("AccessType necunoscut.");
+        }
 
-        scope.Complete();
+        await _accessRepo.Add(access, ct);
         return new AccessDto(access);
     }
 
-
-
-
-    /// <inheritdoc/>
-    public async Task<AccessDto?> GetAccessByIdAsync(Guid accessId, CancellationToken ct = default)
+    public async Task<AccessDto?> GetByIdAsync(Guid accessId, CancellationToken ct = default)
     {
-        var a = await _accessRepo.GetByIdWithInclude(
-            accessId, ct,
+        var a = await _accessRepo.FirstOrDefaultWithInclude(
+            x => x.Id == accessId && x.DeletedAt == null, ct,
             x => x.Organization,
-            x => x.CreatedByUser,
             x => x.AccessType,
-            x => x.QrCodes);
+            x => x.CreatedByUser,
+            x => x.UpdatedByUser);
+
         return a is null ? null : new AccessDto(a);
     }
 
-    public async Task<bool> DeactivateAccessAsync(Guid accessId, CancellationToken ct = default)
+    public async Task<List<AccessDto>> GetAccessesForOrganizationAsync(Guid orgId, CancellationToken ct = default)
     {
-        var a = await _accessRepo.GetById(accessId, ct);
-        if (a == null) return false;
-        a.DeletedAt = DateTime.UtcNow;
-        await _accessRepo.Update(a, ct);
-        return true;
+        var list = await _accessRepo.GetWhereWithInclude(
+            x => x.OrganizationId == orgId && x.DeletedAt == null, ct,
+            x => x.Organization,
+            x => x.AccessType,
+            x => x.CreatedByUser,
+            x => x.UpdatedByUser);
+
+        return list.Select(a => new AccessDto(a)).ToList();
     }
 
-    /// <inheritdoc/>
-    public async Task<PagedResponse<AccessDto>> GetAccessesPagedAsync(
-        PagedRequest req,
-        CancellationToken ct = default)
+    public async Task<int> DeactivateAccessAsync(Guid accessId, Guid userId, CancellationToken ct = default)
     {
-        var all = (await _accessRepo.GetWhereWithInclude(
-                        x => x.DeletedAt == null, ct,
-                        x => x.AccessType,
-                        x => x.CreatedByUser))
-                  .ToList();
-        var total = all.Count;
-        var items = all
-            .Skip(req.PageIndex * req.PageSize)
-            .Take(req.PageSize)
-            .Select(x => new AccessDto(x))
-            .ToList();
+        var access = await _accessRepo.GetById(accessId, ct)
+                     ?? throw new InvalidOperationException("Access inexistent.");
 
-        return new PagedResponse<AccessDto>(req.PageIndex, req.PageSize, total, items);
+        // permisiuni
+        var rel = await _orgUserRepo.FirstOrDefault(
+            ou => ou.OrganizationId == access.OrganizationId
+               && ou.UserId == userId
+               && ou.DeletedAt == null, ct);
+        if (rel is null || (rel.Role != OrganizationUserRole.Owner && rel.Role != OrganizationUserRole.Admin))
+            throw new UnauthorizedAccessException();
+
+        access.DeletedAt = DateTime.UtcNow;
+        access.UpdatedAt = DateTime.UtcNow;
+        access.UpdatedByUserId = userId;
+        return await _accessRepo.Update(access, ct);
+    }
+
+    public async Task<AccessDto?> UpdateAccessAsync(AccessUpdateReq req, Guid userId, CancellationToken ct = default)
+    {
+        var access = await _accessRepo.FirstOrDefaultWithInclude(
+            x => x.Id == req.Id && x.DeletedAt == null, ct,
+            x => x.Organization,
+            x => x.AccessType,
+            x => x.CreatedByUser);
+
+        if (access == null) return null;
+
+        // permisiuni
+        var rel = await _orgUserRepo.FirstOrDefault(
+            ou => ou.OrganizationId == access.OrganizationId
+               && ou.UserId == userId
+               && ou.DeletedAt == null, ct);
+        if (rel is null || (rel.Role != OrganizationUserRole.Owner && rel.Role != OrganizationUserRole.Admin))
+            throw new UnauthorizedAccessException();
+
+        // update fields
+        access.Name = req.Name;
+        access.Description = req.Description;
+        access.ExpirationDateTime = req.ExpirationDateTime;
+        access.RestrictToOrgMembers = req.RestrictToOrgMembers;
+        access.RestrictToOrgSharing = req.RestrictToOrgSharing;
+        access.IsMultiScan = req.IsMultiScan;
+        access.UpdatedByUserId = userId;
+
+        // reguli pe tip
+        switch (access.AccessType.Code)
+        {
+            case AccessTypeCode.OneUse:
+                access.TotalUseLimit = 1;
+                access.SubscriptionPeriodMonths = null;
+                access.UseLimitPerPeriod = null;
+                break;
+            case AccessTypeCode.LimitedUse:
+                if (req.TotalUseLimit <= 0)
+                    throw new InvalidOperationException("TotalUseLimit obligatoriu pentru LimitedUse.");
+                access.TotalUseLimit = req.TotalUseLimit;
+                access.SubscriptionPeriodMonths = null;
+                access.UseLimitPerPeriod = null;
+                break;
+            case AccessTypeCode.Subscription:
+                if (req.SubscriptionPeriodMonths <= 0)
+                    throw new InvalidOperationException("SubscriptionPeriodMonths obligatoriu pentru Subscription.");
+                access.SubscriptionPeriodMonths = req.SubscriptionPeriodMonths;
+                access.UseLimitPerPeriod = req.UseLimitPerPeriod;
+                access.TotalUseLimit = null;
+                break;
+            case AccessTypeCode.Unlimited:
+                access.TotalUseLimit = null;
+                access.SubscriptionPeriodMonths = null;
+                access.UseLimitPerPeriod = null;
+                break;
+            default:
+                throw new InvalidOperationException("AccessType necunoscut.");
+        }
+
+        access.UpdatedAt = DateTime.UtcNow;
+        await _accessRepo.Update(access, ct);
+        return new AccessDto(access);
     }
 }

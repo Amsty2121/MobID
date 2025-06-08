@@ -3,10 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddMemberModal from "./AddMemberModal";
 import DeleteMemberModal from "./DeleteMemberModal";
-import {
-  getUsersForOrganization,
-} from "../../../api/organizationApi";
-import { FaTrash } from "react-icons/fa";
+import { getUsersForOrganization } from "../../../api/organizationApi";
 import "../../../styles/components/modal/index.css";
 
 export default function OrganizationMemberTable({
@@ -15,20 +12,19 @@ export default function OrganizationMemberTable({
 }) {
   const DEFAULT_PAGE_SIZE = 10;
 
-  const [members, setMembers]     = useState([]);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
-  const [showAdd, setShowAdd]     = useState(false);
-  const [showDel, setShowDel]     = useState(false);
-  const [delMember, setDelMember] = useState(null);
+  const [members, setMembers]       = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState("");
+  const [showAdd, setShowAdd]       = useState(false);
+  const [showDel, setShowDel]       = useState(false);
+  const [delMember, setDelMember]   = useState(null);
 
-  const [page, setPage]           = useState(0);
-  const [pageSize, setPageSize]   = useState(DEFAULT_PAGE_SIZE);
+  const [page, setPage]             = useState(0);
+  const [pageSize, setPageSize]     = useState(DEFAULT_PAGE_SIZE);
 
-  // guard ca să nu refetch-ăm de două ori
+  // Prevent double‐fetch
   const didFetchRef = useRef(false);
 
-  // memoize fetchMembers pentru a îl putea folosi ca dependență în useEffect
   const fetchMembers = useCallback(async () => {
     if (!organizationId) return;
     setLoading(true);
@@ -44,15 +40,14 @@ export default function OrganizationMemberTable({
     }
   }, [organizationId]);
 
-  // apelăm o singură dată fetchMembers per organizationId
   useEffect(() => {
     if (!organizationId || didFetchRef.current) return;
     didFetchRef.current = true;
     fetchMembers();
   }, [organizationId, fetchMembers]);
 
-  const handleRemoveClick = m => {
-    setDelMember(m);
+  const handleRemoveClick = member => {
+    setDelMember(member);
     setShowDel(true);
   };
 
@@ -60,25 +55,7 @@ export default function OrganizationMemberTable({
     { header: "User ID",   accessor: "userId"   },
     { header: "User Name", accessor: "userName" },
     { header: "Rol",       accessor: "role"     },
-    { header: "Acțiuni",   accessor: "actions"  }
   ];
-
-  const dataWithActions = members.map(m => ({
-    ...m,
-    actions: (
-      <button
-        className="icon-btn"
-        onClick={() => handleRemoveClick(m)}
-        title="Exclude"
-      >
-        <FaTrash />
-      </button>
-    )
-  }));
-
-  // datele paginate
-  const start    = page * pageSize;
-  const pageData = dataWithActions.slice(start, start + pageSize);
 
   return (
     <div className="org-page">
@@ -91,13 +68,14 @@ export default function OrganizationMemberTable({
           title={`Membri din „${organizationName}”`}
           columns={columns}
           filterColumns={["userName", "userId", "role"]}
-          data={pageData}
+          data={members}
           onAdd={() => setShowAdd(true)}
           showAddOption
           showEditOption={false}
-          showDeleteOption={false}
+          showDeleteOption
+          onDelete={handleRemoveClick}
           currentPage={page}
-          totalCount={dataWithActions.length}
+          totalCount={members.length}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={size => { setPageSize(size); setPage(0); }}
@@ -107,15 +85,26 @@ export default function OrganizationMemberTable({
       {showAdd && (
         <AddMemberModal
           organizationId={organizationId}
-          onSuccess={() => { setShowAdd(false); fetchMembers(); }}
+          onSuccess={() => {
+            setShowAdd(false);
+            // allow re-fetch
+            didFetchRef.current = false;
+            fetchMembers();
+          }}
           onClose={() => setShowAdd(false)}
         />
       )}
 
       {showDel && delMember && (
         <DeleteMemberModal
+          organizationId={organizationId}
           member={delMember}
-          onSuccess={() => { setShowDel(false); fetchMembers(); }}
+          onSuccess={() => {
+            setShowDel(false);
+            // refresh members
+            didFetchRef.current = false;
+            fetchMembers();
+          }}
           onCancel={() => setShowDel(false)}
         />
       )}

@@ -89,3 +89,48 @@
   color: #ff5555;
   margin: 0.5rem 0;
 }
+
+/* ===========================================
+   USER PAGE TABS
+   =========================================== */
+
+/* Wrapper for the TabList: full-width orange underline */
+.user-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* Base Tab style: uppercase, orange text, transparent background */
+.user-tabs-wrapper .MuiTab-root {
+  text-transform: uppercase;
+  padding: 0.5rem 1.5rem;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Slightly faded when not selected */
+.user-tabs-wrapper .MuiTab-root:not(.Mui-selected) {
+  opacity: 0.8;
+}
+
+/* Hide the default MUI indicator line */
+.user-tabs-wrapper .MuiTabs-indicator {
+  display: none;
+}
+
+/* Selected Tab: solid orange background, white text, lifted up 2px */
+.user-tabs-wrapper .MuiTab-root.Mui-selected {
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+  position: relative;
+  top: 2px;
+}
+
+/* Remove focus outline but keep ripple */
+.user-tabs-wrapper .MuiTab-root:focus,
+.user-tabs-wrapper .Mui-focusVisible {
+  outline: none;
+}

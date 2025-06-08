@@ -1,73 +1,77 @@
 // src/api/organizationApi.js
-
 import api from "./api";
 
-/** Creează o organizație nouă. */
-export async function createOrganization(req) {
-  const { data } = await api.post("/organization", req);
+/** Creează o organizație */
+export async function createOrganization(payload) {
+  const { data } = await api.post("/organization", payload);
   return data;
 }
 
-/** Obține o organizație după ID. */
-export async function getOrganizationById(orgId) {
-  const { data } = await api.get(`/organization/${orgId}`);
+/** Obține o organizație după ID */
+export async function getOrganizationById(id) {
+  const { data } = await api.get(`/organization/${id}`);
   return data;
 }
 
-/** Listează organizațiile paginat. */
-export async function getOrganizationsPaged({ pageIndex, pageSize }) {
-  const { data } = await api.get("/organization/paged", {
-    params: { pageIndex, pageSize }
-  });
-  return data; // PagedResponse<OrganizationDto>
+/** Actualizează o organizație */
+export async function updateOrganization(payload) {
+  const { data } = await api.patch("/organization", payload);
+  return data;
 }
 
-/** Listează toate organizațiile. */
+/** Dezactivează (soft-delete) o organizație */
+export async function deactivateOrganization(id) {
+  const response = await api.delete(`/organization/${id}`);
+  return response.status === 204;
+}
+
+/** Listează organizațiile paginat */
+export async function getOrganizationsPaged(params) {
+  const { data } = await api.get("/organization/paged", { params });
+  return data;
+}
+
+/** Listează toate organizațiile */
 export async function getAllOrganizations() {
   const { data } = await api.get("/organization/all");
   return data;
 }
 
-/** Actualizează o organizație. */
-export async function updateOrganization(req) {
-  const { data } = await api.patch("/organization", req);
-  return data;
+
+//Users
+/** Adaugă user în organizație */
+export async function addUserToOrganization(orgId, payload) {
+  const response = await api.post(`/organization/${orgId}/users`, payload);
+  return response.status === 204;
 }
 
-/** Dezactivează (soft-delete) o organizație. */
-export async function deactivateOrganization(orgId) {
-  await api.delete(`/organization/${orgId}`);
+/** Înlătură user din organizație */
+export async function removeUserFromOrganization(orgId, userId) {
+  const response = await api.delete(`/organization/${orgId}/users/${userId}`);
+  return response.status === 204;
 }
 
-/** Listează membrii unei organizații. */
+/** Obține membrii organizației */
 export async function getUsersForOrganization(orgId) {
   const { data } = await api.get(`/organization/${orgId}/users`);
   return data;
 }
 
-/** Adaugă un utilizator într-o organizație. */
-export async function addUserToOrganization(orgId, req) {
-  await api.post(`/organization/${orgId}/users`, req);
-}
 
-/** Elimină un utilizator din organizație. */
-export async function removeUserFromOrganization(orgId, userId) {
-  await api.delete(`/organization/${orgId}/users/${userId}`);
-}
-
-/** Listează accesele proprii ale organizației. */
-export async function getAccessesForOrganization(orgId) {
+//Access
+/** Accese proprii ale organizației */
+export async function getOrganizationAccesses(orgId) {
   const { data } = await api.get(`/organization/${orgId}/accesses`);
   return data;
 }
 
-/** Listează accesele partajate către organizație. */
-export async function getAccessesSharedToOrganization(orgId) {
+/** Accese partajate către organizație */
+export async function getSharedAccessesToOrganization(orgId) {
   const { data } = await api.get(`/organization/${orgId}/accesses/shared`);
   return data;
 }
 
-/** Listează toate accesele ale organizației (proprii + partajate). */
+/** Toate accesele (proprii + partajate) */
 export async function getAllOrganizationAccesses(orgId) {
   const { data } = await api.get(`/organization/${orgId}/accesses/all`);
   return data;

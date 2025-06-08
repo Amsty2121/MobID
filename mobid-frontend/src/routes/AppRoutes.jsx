@@ -19,8 +19,8 @@ const AppRoutes = () => (
       {/* Pagini protejate */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<div>Dashboard (Template)</div>} />
-        <Route path="/users" element={<User />} />
         <Route path="/roles" element={<Role />} />
+        <Route path="/users" element={<User />} />
         <Route path="/organizations" element={<Organization />} />
         <Route path="/accesses" element={<Access />} />
         <Route path="/qrcodes" element={<div>Coduri QR (Template)</div>} />

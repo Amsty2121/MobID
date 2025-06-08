@@ -3,10 +3,10 @@ import React, { useState, useCallback } from "react";
 import OrganizationTable from "./TableOrganization/OrganizationTable";
 import OrganizationMemberTable from "./TableOrganizationMembers/OrganizationMemberTable";
 import OrganizationPartners from "./OrganizationPartners";
-import AccessTable from "../Access/TableAccess/AccessTable";
+import AccessTable from "./TableOrganizationAccesses/AccessTable";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Tab } from "@mui/material";
-import "./Organization.css";
+import "../../styles/components/organization.css";
 
 export default function Organization() {
   const [selectedOrg, setSelectedOrg] = useState(null);

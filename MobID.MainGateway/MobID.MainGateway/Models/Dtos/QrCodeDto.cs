@@ -1,37 +1,40 @@
 ﻿using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Models.Enums;
-using MobID.MainGateway.Helpers;
+using System.Text;
 
-namespace MobID.MainGateway.Models.Dtos
+namespace MobID.MainGateway.Models.Dtos;
+
+public class QrCodeDto
 {
-    public class QrCodeDto
+    public Guid Id { get; set; }
+    public string Description { get; set; }
+    public string Type { get; set; }
+
+    public Guid AccessId { get; set; }
+    public string AccessName { get; set; }
+
+    public DateTime? ExpiresAt { get; set; }
+
+    public bool IsExpired { get; set; }
+    public bool IsActive { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public string QrEncodedText { get; set; }
+
+    public QrCodeDto(QrCode qr)
     {
-        public Guid Id { get; }
-        public string Description { get; }
-        public string Type { get; }
-        public Guid AccessId { get; }
-        public DateTime? ExpiresAt { get; }
-        public DateTime CreatedAt { get; }
-        public DateTime UpdatedAt { get; }
+        Id = qr.Id;
+        Description = qr.Description;
+        Type = qr.Type.ToString();
+        AccessId = qr.AccessId;
+        AccessName = qr.Access?.Name ?? "N/A";
+        ExpiresAt = qr.ExpiresAt;
+        CreatedAt = qr.CreatedAt;
+        IsExpired = qr.ExpiresAt.HasValue && qr.ExpiresAt.Value <= DateTime.UtcNow;
+        IsActive = qr.DeletedAt == null && !IsExpired;
 
-        public string QREncodedText { get; }
-
-        public List<ScanDto> Scans { get; }
-
-        public QrCodeDto(QrCode qr)
-        {
-            Id = qr.Id;
-            Description = qr.Description;
-            Type = qr.Type.ToString();
-            AccessId = qr.AccessId;
-            ExpiresAt = qr.ExpiresAt;
-            CreatedAt = qr.CreatedAt;
-            UpdatedAt = qr.UpdatedAt;
-
-            QREncodedText = QrCodeContentGenerator.GenerateBase64Payload(qr);
-
-            Scans = qr.Scans?.Select(s => new ScanDto(s)).ToList()
-                 ?? new List<ScanDto>();
-        }
+        var payload = $"{qr.Access!.OrganizationId}:{qr.AccessId}:{qr.Id}";
+        QrEncodedText = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload));
     }
 }

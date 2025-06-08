@@ -4,28 +4,35 @@ namespace MobID.MainGateway.Models.Dtos;
 
 public class OrganizationAccessShareDto
 {
-    public Guid Id { get; }
-    public Guid SourceOrganizationId { get; }
-    public string SourceOrganizationName { get; }
-    public Guid TargetOrganizationId { get; }
-    public string TargetOrganizationName { get; }
-    public Guid AccessId { get; }
-    public string AccessName { get; }
-    public Guid CreatedBy { get; }
-    public string CreatedByName { get; }
-    public DateTime CreatedAt { get; }
+    public Guid Id { get; set; }
 
-    public OrganizationAccessShareDto(OrganizationAccessShare s)
+    public Guid SourceOrganizationId { get; set; }
+    public string SourceOrganizationName { get; set; }
+
+    public Guid TargetOrganizationId { get; set; }
+    public string TargetOrganizationName { get; set; }
+
+    public Guid AccessId { get; set; }
+    public string AccessName { get; set; }
+
+    public Guid CreatedByUserId { get; set; }
+    public string CreatedByUsername { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; }
+
+    public OrganizationAccessShareDto(OrganizationAccessShare share)
     {
-        Id = s.Id;
-        SourceOrganizationId = s.SourceOrganizationId;
-        SourceOrganizationName = s.SourceOrganization?.Name ?? "–";
-        TargetOrganizationId = s.TargetOrganizationId;
-        TargetOrganizationName = s.TargetOrganization?.Name ?? "–";
-        AccessId = s.AccessId;
-        AccessName = s.Access?.Name ?? "–";
-        CreatedBy = s.CreatedBy;
-        CreatedByName = s.Creator?.Username ?? "–";
-        CreatedAt = s.CreatedAt;
+        Id = share.Id;
+        SourceOrganizationId = share.SourceOrganizationId;
+        SourceOrganizationName = share.SourceOrganization?.Name ?? "N/A";
+        TargetOrganizationId = share.TargetOrganizationId;
+        TargetOrganizationName = share.TargetOrganization?.Name ?? "N/A";
+        AccessId = share.AccessId;
+        AccessName = share.Access?.Name ?? "N/A";
+        CreatedByUserId = share.CreatedByUserId;
+        CreatedByUsername = share.Creator?.Username ?? "N/A";
+        CreatedAt = share.CreatedAt;
+        IsActive = share.DeletedAt == null;
     }
 }

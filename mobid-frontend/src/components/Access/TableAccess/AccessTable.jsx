@@ -11,16 +11,20 @@ import {
 } from "../../../api/accessApi";
 
 export default function AccessTable({ organizationId, organizationName }) {
-  const [accesses, setAccesses]       = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
-  const [showAdd, setShowAdd]         = useState(false);
-  const [showEdit, setShowEdit]       = useState(false);
+  const [accesses, setAccesses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [showDelete, setShowDelete]   = useState(false);
-  const [selected, setSelected]       = useState(null);
+  const [showDelete, setShowDelete] = useState(false);
+  const [selected, setSelected] = useState(null);
 
-  // Prevent double-fetch under StrictMode
+  // fallback: pagină unică
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
   const didFetchRef = useRef(false);
 
   const fetchAccesses = async () => {
@@ -29,6 +33,9 @@ export default function AccessTable({ organizationId, organizationName }) {
     try {
       const data = await getAccessesForOrganization(organizationId);
       setAccesses(data);
+      setPage(0); // resetare forțată
+      setPageSize(data.length);
+      setTotal(data.length);
     } catch {
       setError("Eroare la încărcarea accese.");
     } finally {
@@ -51,20 +58,38 @@ export default function AccessTable({ organizationId, organizationName }) {
   const confirmDelete = async () => {
     await deactivateAccess(selected.id);
     setShowDelete(false);
-    // force a fresh fetch next time
     didFetchRef.current = false;
     fetchAccesses();
   };
 
   const columns = [
-    { header: "ID",           accessor: "id" },
-    { header: "Nume",         accessor: "name" },
-    { header: "Tip",          accessor: "accessType" },
-    { header: "Max Total",    accessor: "totalUseLimit" },
-    { header: "Per perioadă", accessor: "useLimitPerPeriod" },
-    { header: "Durată",       accessor: "subscriptionPeriod" },
-    { header: "Expiră",       accessor: "expirationDateTime" },
-    { header: "Activ",        accessor: "isActive" },
+    { header: "Nume", accessor: "name" },
+    { header: "Tip", accessor: "accessTypeName" },
+    {
+      header: "Multiscan",
+      accessor: "isMultiScan",
+      format: v => (v ? "Da" : "Nu")
+    },
+    {
+      header: "Expiră",
+      accessor: "expirationDateTime",
+      format: v => v ? new Date(v).toLocaleDateString() : "Nelimitat"
+    },
+    {
+      header: "Doar membri",
+      accessor: "restrictToOrgMembers",
+      format: v => (v ? "Da" : "Nu")
+    },
+    {
+      header: "Partajabil",
+      accessor: "restrictToOrgSharing",
+      format: v => (v ? "Nu" : "Da")
+    },
+    {
+      header: "Activ",
+      accessor: "isActive",
+      format: v => (v ? "✅" : "❌")
+    }
   ];
 
   return (
@@ -80,10 +105,15 @@ export default function AccessTable({ organizationId, organizationName }) {
       ) : (
         <GenericTable
           columns={columns}
-          filterColumns={["name", "accessType"]}
+          filterColumns={["name", "accessTypeName"]}
           data={accesses}
-          onAdd={() => setShowAdd(true)}
+          currentPage={page}
+          totalCount={total}
+          pageSize={pageSize}
+          onPageChange={() => {}} // dezactivăm pagination logic
+          onPageSizeChange={() => {}} // dezactivăm pagination logic
           showAddOption
+          onAdd={() => setShowAdd(true)}
           showEditOption
           onEdit={row => { setSelected(row); setShowEdit(true); }}
           showDeleteOption
@@ -97,7 +127,6 @@ export default function AccessTable({ organizationId, organizationName }) {
           organizationId={organizationId}
           onSuccess={() => {
             setShowAdd(false);
-            // allow re-fetch in effect
             didFetchRef.current = false;
             fetchAccesses();
           }}

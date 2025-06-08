@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Dtos.Rsp;
 using MobID.MainGateway.Services.Interfaces;
 using System.Security.Claims;
 
@@ -15,16 +16,12 @@ public class QrCodeController : ControllerBase
     private readonly IQrCodeService _qrService;
 
     public QrCodeController(IQrCodeService qrService)
-        => _qrService = qrService;
+    {
+        _qrService = qrService;
+    }
 
     /// <summary>
-    /// Extrage ID-ul utilizatorului curent din JWT.
-    /// </summary>
-    private Guid UserId =>
-        Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
-
-    /// <summary>
-    /// Generează un cod QR pentru un access existent.
+    /// Generează un cod QR pentru un acces.
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(QrCodeDto), 201)]
@@ -33,10 +30,12 @@ public class QrCodeController : ControllerBase
         [FromBody] QrCodeGenerateReq req,
         CancellationToken ct)
     {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
         try
         {
-            var dto = await _qrService.CreateQrCodeAsync(req, ct);
-            return Ok(dto);
+            var dto = await _qrService.CreateQrCodeAsync(req, userId, ct);
+            return CreatedAtAction(nameof(GetQrCodeByIdAsync), new { qrCodeId = dto.Id }, dto);
         }
         catch (Exception ex)
         {
@@ -45,7 +44,7 @@ public class QrCodeController : ControllerBase
     }
 
     /// <summary>
-    /// Obține un cod QR după ID.
+    /// Returnează un QR după ID.
     /// </summary>
     [HttpGet("{qrCodeId:guid}")]
     [ProducesResponseType(typeof(QrCodeDto), 200)]
@@ -54,19 +53,25 @@ public class QrCodeController : ControllerBase
         Guid qrCodeId,
         CancellationToken ct)
     {
-        try
-        {
-            var dto = await _qrService.GetQrCodeByIdAsync(qrCodeId, ct);
-            return dto == null ? NotFound() : Ok(dto);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var dto = await _qrService.GetQrCodeByIdAsync(qrCodeId, ct);
+        return dto == null ? NotFound() : Ok(dto);
     }
 
     /// <summary>
-    /// Listează codurile QR paginat.
+    /// Listează QR-urile pentru un acces.
+    /// </summary>
+    [HttpGet("forAccess/{accessId:guid}")]
+    [ProducesResponseType(typeof(List<QrCodeDto>), 200)]
+    public async Task<ActionResult<List<QrCodeDto>>> GetQrCodesForAccessAsync(
+        Guid accessId,
+        CancellationToken ct)
+    {
+        var list = await _qrService.GetQrCodesForAccessAsync(accessId, ct);
+        return Ok(list);
+    }
+
+    /// <summary>
+    /// Listează toate codurile QR paginat.
     /// </summary>
     [HttpGet("paged")]
     [ProducesResponseType(typeof(PagedResponse<QrCodeDto>), 200)]
@@ -74,39 +79,12 @@ public class QrCodeController : ControllerBase
         [FromQuery] PagedRequest req,
         CancellationToken ct)
     {
-        try
-        {
-            var page = await _qrService.GetQrCodesPagedAsync(req, ct);
-            return Ok(page);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _qrService.GetQrCodesPagedAsync(req, ct);
+        return Ok(result);
     }
 
     /// <summary>
-    /// Validează un cod QR în contextul utilizatorului curent.
-    /// </summary>
-    [HttpPost("{qrCodeId:guid}/validate")]
-    [ProducesResponseType(typeof(object), 200)]
-    public async Task<IActionResult> ValidateQrCodeAsync(
-        Guid qrCodeId,
-        CancellationToken ct)
-    {
-        try
-        {
-            var isValid = await _qrService.ValidateQrCodeAsync(qrCodeId, UserId, ct);
-            return Ok(new { isValid });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Dezactivează (soft-delete) un cod QR.
+    /// Dezactivează un cod QR.
     /// </summary>
     [HttpDelete("{qrCodeId:guid}")]
     [ProducesResponseType(204)]
@@ -115,24 +93,21 @@ public class QrCodeController : ControllerBase
         Guid qrCodeId,
         CancellationToken ct)
     {
-        try
-        {
-            var success = await _qrService.DeactivateQrCodeAsync(qrCodeId, ct);
-            return success ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var success = await _qrService.DeactivateQrCodeAsync(qrCodeId, ct);
+        return success ? NoContent() : NotFound();
     }
 
-    [HttpGet("access/{accessId:guid}")]
-    [ProducesResponseType(typeof(List<QrCodeDto>), 200)]
-    public async Task<ActionResult<List<QrCodeDto>>> GetQrCodesForAccessAsync(
-    Guid accessId,
-    CancellationToken ct = default)
+    /// <summary>
+    /// Validează un QR (pentru scanare).
+    /// </summary>
+    [HttpPost("{qrCodeId:guid}/validate")]
+    [ProducesResponseType(typeof(AccessValidationRsp), 200)]
+    public async Task<ActionResult<AccessValidationRsp>> ValidateQrCodeAsync(
+        Guid qrCodeId,
+        CancellationToken ct)
     {
-        var qrs = await _qrService.GetQrCodesForAccessAsync(accessId, ct);
-        return Ok(qrs);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var rsp = await _qrService.ValidateQrCodeAsync(qrCodeId, userId, ct);
+        return Ok(rsp);
     }
 }

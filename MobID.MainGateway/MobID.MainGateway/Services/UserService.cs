@@ -10,13 +10,25 @@ public class UserService : IUserService
 {
     private readonly IGenericRepository<User> _userRepo;
     private readonly IGenericRepository<UserRole> _userRoleRepo;
+    private readonly IGenericRepository<UserAccess> _uaRepo;
+    private readonly IGenericRepository<OrganizationUser> _orgUserRepo;
+    private readonly IGenericRepository<Access> _accessRepo;
+    private readonly IGenericRepository<OrganizationAccessShare> _shareRepo;
 
     public UserService(
         IGenericRepository<User> userRepo,
-        IGenericRepository<UserRole> userRoleRepo)
+        IGenericRepository<UserRole> userRoleRepo,
+        IGenericRepository<UserAccess> uaRepo,
+        IGenericRepository<OrganizationUser> orgUserRepo,
+        IGenericRepository<Access> accessRepo,
+        IGenericRepository<OrganizationAccessShare> shareRepo)
     {
         _userRepo = userRepo;
         _userRoleRepo = userRoleRepo;
+        _uaRepo = uaRepo;
+        _orgUserRepo = orgUserRepo;
+        _accessRepo = accessRepo;
+        _shareRepo = shareRepo;
     }
 
     /// <inheritdoc/>
@@ -128,6 +140,82 @@ public class UserService : IUserService
         if (!await _userRepo.IsIdPresent(userId)) return new List<string>();
         var roles = await _userRoleRepo.GetWhereWithInclude(r => r.UserId == userId, ct, r => r.Role);
         return roles.Where(ur => ur.Role.DeletedAt == null).Select(r => r.Role.Name).ToList();
+    }
+
+    public async Task<List<AccessDto>> GetAllUserAccessesAsync(Guid userId, CancellationToken ct = default)
+    {
+        // 1️⃣ Direct user‐assigned accesses
+        var userAccesses = await _uaRepo.GetWhereWithInclude(
+            ua => ua.UserId == userId && ua.DeletedAt == null,
+            ct,
+            ua => ua.Access,            // include the Access navigation
+            ua => ua.Access.AccessType,
+            ua => ua.Access.Organization,
+            ua => ua.Access.CreatedByUser,
+            ua => ua.Access.QrCodes
+        );
+        var direct = userAccesses.Select(ua => ua.Access);
+
+        // 2️⃣ All orgs the user belongs to
+        var memberships = await _orgUserRepo.GetWhere(
+            ou => ou.UserId == userId && ou.DeletedAt == null,
+            ct
+        );
+        var orgIds = memberships.Select(ou => ou.OrganizationId).Distinct().ToList();
+
+        // 3️⃣ All accesses belonging to those orgs
+        var orgAccesses = orgIds.Any()
+            ? await _accessRepo.GetWhereWithInclude(
+                  a => orgIds.Contains(a.OrganizationId) && a.DeletedAt == null,
+                  ct,
+                  a => a.AccessType,
+                  a => a.Organization,
+                  a => a.CreatedByUser,
+                  a => a.QrCodes
+              )
+            : new List<Access>();
+
+        // 4️⃣ All shares *to* those orgs
+        var shares = await _shareRepo.GetWhere(
+            s => orgIds.Contains(s.TargetOrganizationId) && s.DeletedAt == null,
+            ct
+        );
+        var sharedIds = shares.Select(s => s.AccessId).Distinct().ToList();
+        var shared = sharedIds.Any()
+            ? await _accessRepo.GetWhereWithInclude(
+                  a => sharedIds.Contains(a.Id) && a.DeletedAt == null,
+                  ct,
+                  a => a.AccessType,
+                  a => a.Organization,
+                  a => a.CreatedByUser,
+                  a => a.QrCodes
+              )
+            : new List<Access>();
+
+        // 5️⃣ Union and de-duplicate
+        var all = direct
+            .Union(orgAccesses)
+            .Union(shared)
+            .GroupBy(a => a.Id)
+            .Select(g => g.First());
+
+        // 6️⃣ Project into DTO
+        return all.Select(a => new AccessDto(a)).ToList();
+    }
+
+    public async Task<List<OrganizationDto>> GetUserOrganizationsAsync(Guid userId, CancellationToken ct = default)
+    {
+        // find all OrganizationUser entries for this user
+        var rels = await _orgUserRepo.GetWhereWithInclude(
+            ou => ou.UserId == userId && ou.DeletedAt == null,
+            ct,
+            ou => ou.Organization
+        );
+
+        // project to OrganizationDto
+        return rels
+            .Select(ou => new OrganizationDto(ou.Organization))
+            .ToList();
     }
 
 

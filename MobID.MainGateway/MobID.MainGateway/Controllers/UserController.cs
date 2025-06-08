@@ -120,4 +120,22 @@ public class UserController : ControllerBase
         var roles = await _userService.GetUserRolesAsync(userId, ct);
         return Ok(roles);
     }
+
+    [HttpGet("{userId}/all-accesses")]
+    [ProducesResponseType(typeof(List<AccessDto>), 200)]
+    public async Task<ActionResult<List<AccessDto>>> GetAllUserAccesses(Guid userId, CancellationToken ct)
+    {
+        var list = await _userService.GetAllUserAccessesAsync(userId, ct);
+        return Ok(list);
+    }
+
+    [HttpGet("{userId:guid}/organizations")]
+    [ProducesResponseType(typeof(List<OrganizationDto>), 200)]
+    public async Task<ActionResult<List<OrganizationDto>>> GetUserOrganizationsAsync(
+        Guid userId,
+        CancellationToken ct)
+    {
+        var list = await _userService.GetUserOrganizationsAsync(userId, ct);
+        return Ok(list);
+    }
 }

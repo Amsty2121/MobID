@@ -10,6 +10,8 @@ namespace MobID.MainGateway.Repo.Interfaces
 
         Task<T?> FirstOrDefault(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
 
+        Task<T?> FirstOrDefaultWithInclude(Expression<Func<T, bool>> predicate, CancellationToken ct = default, params Expression<Func<T, object>>[] includes);
+
         Task<int> Add(T entity, CancellationToken ct = default);
 
         Task<int> Update(T entity, CancellationToken ct = default);

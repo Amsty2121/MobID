@@ -1,0 +1,179 @@
+/* src/styles/components/organization.css */
+
+/* ===========================================
+   ORGANIZATION PAGE & HEADING
+   =========================================== */
+.org-page {
+  position: relative;
+  color: var(--color-iron);
+}
+.org-heading {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+/* ===========================================
+   REACT-SELECT DARK THEME (prefix: org-select)
+   =========================================== */
+.org-select {
+  padding: 1rem;
+}
+.org-select-wrapper {
+  width: 400px;
+  max-width: 100%;
+  margin: 1rem auto;
+}
+.org-select__control {
+  width: 100% !important;
+  background-color: var(--color-tuna-light) !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: none !important;
+}
+.org-select__control:hover,
+.org-select__control--is-focused {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
+}
+.org-select__input input,
+.org-select__single-value,
+.org-select__placeholder {
+  color: var(--color-primary) !important;
+  text-align: left !important;
+}
+.org-select__dropdown-indicator {
+  color: var(--color-iron) !important;
+}
+.org-select__dropdown-indicator:hover {
+  color: var(--color-primary) !important;
+}
+.org-select__indicator-separator {
+  display: none !important;
+}
+.org-select__menu {
+  background-color: var(--color-tuna-light) !important;
+  color: var(--color-iron) !important;
+}
+.org-select__option {
+  background-color: var(--color-tuna-light) !important;
+  color: var(--color-iron) !important;
+}
+.org-select__option--is-selected,
+.org-select__option:hover,
+.org-select__option--is-focused {
+  background-color: var(--color-primary) !important;
+  color: var(--color-shark) !important;
+}
+
+/* ===========================================
+   ORGANIZATION TABS
+   =========================================== */
+
+/* Wrapper for the tabs, with full-width bottom border */
+.org-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* Base Tab style: no border, transparent background */
+.org-tabs-wrapper .MuiTab-root {
+  text-transform: uppercase;
+  padding: 0.5rem 1.5rem;
+  min-width: auto;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Inactive font stays primary color */
+.org-tabs-wrapper .MuiTab-root:not(.Mui-selected) {
+  opacity: 0.8;
+}
+
+/* Remove the default indicator line */
+.org-tabs-wrapper .MuiTabs-indicator {
+  display: none;
+}
+
+/* Active Tab styling: primary background, white text, raised up */
+.org-tabs-wrapper .MuiTab-root.Mui-selected {
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+  position: relative;
+  top: 2px;
+  opacity: 1;
+}
+
+/* Remove focus outline, keep ripple */
+.org-tabs-wrapper .MuiTab-root:focus,
+.org-tabs-wrapper .Mui-focusVisible {
+  outline: none;
+}
+
+/* ===========================================
+   PARTNERSHIP TRANSFER LIST
+   =========================================== */
+.org-partners-container {
+  padding: 1rem;
+}
+.org-partners-container .org-partners-title strong {
+  color: var(--color-primary);
+}
+.org-transfer-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  max-width: 615px;
+  margin: 1rem auto;
+  padding: 1rem;
+  background-color: var(--color-tuna-light);
+  border-radius: 8px;
+}
+.org-transfer-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.org-transfer-actions .MuiButton-outlined {
+  background-color: var(--color-tuna);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: bold;
+}
+.org-transfer-actions .MuiButton-outlined:hover {
+  background-color: var(--color-primary);
+}
+.org-transfer-list.MuiPaper-root {
+  width: 250px;
+  height: 300px;
+  overflow: auto;
+  background-color: var(--color-tuna);
+  border-radius: 6px;
+}
+.org-transfer-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+.org-transfer-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.org-transfer-list .MuiListItemText-root span {
+  color: var(--color-iron);
+  font-weight: 600;
+}
+.MuiCheckbox-root.Mui-checked {
+  color: var(--color-primary) !important;
+}

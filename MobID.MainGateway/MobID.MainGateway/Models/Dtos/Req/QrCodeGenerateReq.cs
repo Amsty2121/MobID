@@ -8,9 +8,12 @@ public class QrCodeGenerateReq
     [Required]
     public Guid AccessId { get; set; }
 
-    public string Description { get; set; }
+    [StringLength(200)]
+    public string? Description { get; set; }
 
-    public QrCodeType Type { get; set; } = QrCodeType.Access;
+    [Required]
+    [EnumDataType(typeof(QrCodeType))]
+    public string Type { get; set; }
 
     public DateTime? ExpiresAt { get; set; }
 }

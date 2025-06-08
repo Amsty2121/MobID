@@ -5,87 +5,73 @@ using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Services.Interfaces;
 using System.Security.Claims;
 
-namespace MobID.MainGateway.Controllers
+namespace MobID.MainGateway.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class AccessController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class AccessController : ControllerBase
+    private readonly IAccessService _accessService;
+
+    public AccessController(IAccessService accessService)
     {
-        private readonly IAccessService _accessService;
+        _accessService = accessService;
+    }
 
-        public AccessController(IAccessService accessService)
-            => _accessService = accessService;
+    private Guid UserId =>
+        Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
 
-        /// <summary>
-        /// Extracts the current user's ID from the JWT.
-        /// </summary>
-        private Guid UserId
-            => Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
+    [HttpPost]
+    [ProducesResponseType(typeof(AccessDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<AccessDto>> CreateAsync([FromBody] AccessCreateReq req, CancellationToken ct)
+    {
+        var dto = await _accessService.CreateAccessAsync(req, UserId, ct);
+        return Ok(dto);
+    }
 
-        /// <summary>
-        /// Creates a new access under the current user's organization.
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(AccessDto), 201)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<AccessDto>> CreateAsync(
-            [FromBody] AccessCreateReq req,
+    [HttpGet("{accessId}")]
+    [ProducesResponseType(typeof(AccessDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AccessDto>> GetByIdAsync(Guid accessId, CancellationToken ct)
+    {
+        var dto = await _accessService.GetByIdAsync(accessId, ct);
+        if (dto == null)
+            return NotFound();
+
+        return Ok(dto);
+    }
+
+    [HttpGet("organization/{organizationId}")]
+    [ProducesResponseType(typeof(List<AccessDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<AccessDto>>> GetByOrganizationAsync(Guid organizationId, CancellationToken ct)
+    {
+        var result = await _accessService.GetAccessesForOrganizationAsync(organizationId, ct);
+        return Ok(result);
+    }
+
+    [HttpDelete("{accessId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeactivateAsync(Guid accessId, CancellationToken ct)
+    {
+        var updated = await _accessService.DeactivateAccessAsync(accessId, UserId, ct);
+        if (updated == 0) return NotFound();
+
+        return NoContent();
+    }
+
+    [HttpPut("{accessId:guid}")]
+    [ProducesResponseType(typeof(AccessDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AccessDto>> UpdateAsync(
+            [FromBody] AccessUpdateReq req,
             CancellationToken ct)
-        {
-            try
-            {
-                var dto = await _accessService.CreateAccessAsync(req, UserId, ct);
-                return Ok(dto);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    {
+        var updated = await _accessService.UpdateAccessAsync(req, UserId, ct);
+        if (updated == null)
+            return NotFound();
 
-        /// <summary>
-        /// Retrieves a single access by its ID.
-        /// </summary>
-        [HttpGet("{accessId:guid}")]
-        [ProducesResponseType(typeof(AccessDto), 200)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<AccessDto>> GetByIdAsync(
-            Guid accessId,
-            CancellationToken ct)
-        {
-            var dto = await _accessService.GetAccessByIdAsync(accessId, ct);
-            return dto is null ? NotFound() : Ok(dto);
-        }
-
-        /// <summary>
-        /// Returns a paged list of accesses.
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(PagedResponse<AccessDto>), 200)]
-        public async Task<ActionResult<PagedResponse<AccessDto>>> GetPagedAsync(
-            [FromQuery] PagedRequest request,
-            CancellationToken ct = default)
-        {
-            var page = await _accessService.GetAccessesPagedAsync(
-                request,
-                ct
-            );
-            return Ok(page);
-        }
-
-        /// <summary>
-        /// Soft‐deletes (deactivates) an access.
-        /// </summary>
-        [HttpDelete("{accessId:guid}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteAsync(
-            Guid accessId,
-            CancellationToken ct)
-        {
-            var ok = await _accessService.DeactivateAccessAsync(accessId, ct);
-            return ok ? NoContent() : NotFound();
-        }
+        return Ok(updated);
     }
 }

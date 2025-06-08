@@ -11,3 +11,14 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
 }
+
+/* Autofill fix pentru Chrome/Safari */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0px 1000px var(--color-tuna-light) inset !important;
+  -webkit-text-fill-color: var(--color-primary) !important;
+  caret-color: var(--color-tuna-primary);
+  border-radius: 0;
+}

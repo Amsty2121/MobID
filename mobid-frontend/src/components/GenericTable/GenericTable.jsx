@@ -22,6 +22,7 @@ export default function GenericTable({
   onPageSizeChange,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+
   const filteredData = useMemo(() => {
     const lower = searchTerm.toLowerCase();
     return (data || []).filter(row =>
@@ -35,7 +36,8 @@ export default function GenericTable({
 
   return (
     <div className="generic-table">
-      <h2 className="generic-table__title">{title}</h2>
+      {title && <h2 className="generic-table__title">{title}</h2>}
+
       <div className="generic-table__container">
         <div className="generic-table__filter-row">
           <div className="generic-table__filter">
@@ -63,7 +65,9 @@ export default function GenericTable({
           <table className="generic-table__table">
             <thead>
               <tr>
-                {columns.map((col, i) => <th key={i}>{col.header}</th>)}
+                {columns.map((col, i) => (
+                  <th key={i}>{col.header}</th>
+                ))}
                 {(showEditOption || showDeleteOption) && (
                   <th className="generic-table__actions-col">Acțiuni</th>
                 )}
@@ -77,7 +81,13 @@ export default function GenericTable({
                   onClick={() => onRowClick?.(row)}
                 >
                   {columns.map((col, j) => (
-                    <td key={j}>{row[col.accessor]}</td>
+                    <td key={j}>
+                      {col.format
+                        ? // if a format fn is provided, call it
+                          col.format(row[col.accessor], row)
+                        : // otherwise render the raw value
+                          row[col.accessor]}
+                    </td>
                   ))}
                   {(showEditOption || showDeleteOption) && (
                     <td
@@ -112,15 +122,19 @@ export default function GenericTable({
 
         <div className="generic-table__pagination">
           <div className="generic-table__pagination-left">
-            <button onClick={() => onPageChange(currentPage - 1)}
-                    disabled={currentPage === 0}>
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+            >
               Anterior
             </button>
             <span>
               Pagina {currentPage + 1} din {totalPages || 1}
             </span>
-            <button onClick={() => onPageChange(currentPage + 1)}
-                    disabled={currentPage + 1 >= totalPages}>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage + 1 >= totalPages}
+            >
               Următoare
             </button>
           </div>
@@ -131,8 +145,10 @@ export default function GenericTable({
               value={pageSize}
               onChange={e => onPageSizeChange(Number(e.target.value))}
             >
-              {[10,20,50,5000].map(sz => (
-                <option key={sz} value={sz}>{sz===5000 ? "ALL": sz}</option>
+              {[10, 20, 50, 5000].map(sz => (
+                <option key={sz} value={sz}>
+                  {sz === 5000 ? "ALL" : sz}
+                </option>
               ))}
             </select>
             <span>Total: {totalCount}</span>

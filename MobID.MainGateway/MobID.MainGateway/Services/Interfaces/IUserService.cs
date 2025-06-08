@@ -13,4 +13,8 @@ public interface IUserService
     Task<bool> AssignRoleToUserAsync(Guid userId, Guid roleId, CancellationToken ct = default);
     Task<bool> RemoveRoleFromUserAsync(Guid userId, Guid roleId, CancellationToken ct = default);
     Task<List<string>> GetUserRolesAsync(Guid userId, CancellationToken ct = default);
+
+    Task<List<AccessDto>> GetAllUserAccessesAsync(Guid userId, CancellationToken ct = default);
+    Task<List<OrganizationDto>> GetUserOrganizationsAsync(Guid userId, CancellationToken ct = default);
 }
+

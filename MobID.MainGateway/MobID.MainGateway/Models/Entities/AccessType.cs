@@ -1,19 +1,28 @@
-﻿namespace MobID.MainGateway.Models.Entities
+﻿using MobID.MainGateway.Models.Enums;
+
+namespace MobID.MainGateway.Models.Entities;
+
+public class AccessType : IBaseEntity
 {
-    public class AccessType : IBaseEntity
-    {
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        public string Name { get; set; } 
-        public string Description { get; set; } 
+    /// <summary>
+    /// Numele tipului de acces (ex: "OneUse", "LimitedUse").
+    /// </summary>
+    public string Name { get; set; } = null!;
 
-        public bool IsLimitedUse { get; set; } 
-        public bool IsSubscription { get; set; } 
+    /// <summary>
+    /// Descrierea tipului de acces – apare în UI.
+    /// </summary>
+    public string? Description { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? DeletedAt { get; set; }
+    public AccessTypeCode Code { get; set; }
 
-        public ICollection<Access> Accesses { get; set; } 
-    }
+    // Audit
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DeletedAt { get; set; }
+
+    // Navigație inversă
+    public ICollection<Access> Accesses { get; set; } = new List<Access>();
 }

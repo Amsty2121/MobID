@@ -48,8 +48,8 @@ function MainLayout() {
         <aside className={`left-sidebar ${sidebarOpen ? "" : "hidden"}`}>
           <nav>
             <ul>
-              <li><Link to="/users">Utilizatori</Link></li>
               <li><Link to="/roles">Roluri</Link></li>
+              <li><Link to="/users">Utilizatori</Link></li>
               <li><Link to="/organizations">Organizații</Link></li>
               <li><Link to="/accesses">Accese</Link></li>
               <li><Link to="/qrcodes">Coduri QR</Link></li>

@@ -1,74 +1,54 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MobID.MainGateway.Models.Dtos.Req;
 using MobID.MainGateway.Models.Dtos;
-using MobID.MainGateway.Services.Interfaces;
-using System.Security.Claims;
 using MobID.MainGateway.Models.Entities;
-
-namespace MobID.MainGateway.Controllers;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
 public class OrganizationAccessShareController : ControllerBase
 {
-    private readonly IOrganizationAccessShareService _shareService;
+    private readonly IOrganizationAccessShareService _service;
 
-    public OrganizationAccessShareController(IOrganizationAccessShareService shareService)
-        => _shareService = shareService;
+    public OrganizationAccessShareController(IOrganizationAccessShareService service)
+    {
+        _service = service;
+    }
 
-    /// <summary>
-    /// Extrage ID-ul utilizatorului curent din JWT.
-    /// </summary>
     private Guid UserId =>
         Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
 
-    /// <summary>
-    /// Partajează un access de la organizația sa către o altă organizație.
-    /// </summary>
-    [HttpPost("grant")]
-    [ProducesResponseType(typeof(OrganizationAccessShareDto), 200)]
+    [HttpPost]
+    [ProducesResponseType(204)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult<OrganizationAccessShareDto>> ShareAsync(
+    public async Task<IActionResult> ShareAsync(
         [FromBody] AccessShareReq req,
         CancellationToken ct)
     {
-        var success = await _shareService.ShareAccessWithOrganizationAsync(req, UserId, ct);
-        return success ? NoContent() : NotFound();
+        var result = await _service.ShareAccessWithOrganizationAsync(req, UserId, ct);
+        return result ? NoContent() : BadRequest(new { message = "Access already shared." });
     }
 
-    /// <summary>
-    /// Revocă un share existent (soft-delete).
-    /// </summary>
     [HttpDelete("revoke")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> RevokeAsync(
         [FromBody] AccessShareReq req,
         CancellationToken ct)
-        {
-        var success = await _shareService.RevokeSharedAccessAsync(req, UserId, ct);
-        return success ? NoContent() : NotFound();
+    {
+        var result = await _service.RevokeSharedAccessAsync(req, ct);
+        return result ? NoContent() : NotFound();
     }
 
-    /// <summary>
-    /// intoarce toate accesele shared intre 2 org
-    /// </summary>
     [HttpGet("{sourceOrgId:guid}/to/{targetOrgId:guid}")]
+    [ProducesResponseType(typeof(List<OrganizationAccessShareDto>), 200)]
     public async Task<IActionResult> GetSharedAccessesAsync(
-       Guid sourceOrgId,
-       Guid targetOrgId,
-       CancellationToken ct)
+        Guid sourceOrgId,
+        Guid targetOrgId,
+        CancellationToken ct)
     {
-        try
-        {
-            var shares = await _shareService
-                .GetSharedAccessesBetweenOrganizationsAsync(sourceOrgId, targetOrgId, UserId, ct);
-
-            return Ok(shares);
-        }
-        catch (Exception)
-        {
-            return BadRequest();
-        }
+        var list = await _service.GetSharedAccessesBetweenOrganizationsAsync(sourceOrgId, targetOrgId, ct);
+        return Ok(list);
     }
 }

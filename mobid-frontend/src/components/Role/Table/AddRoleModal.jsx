@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import { createRole } from "../../../api/roleApi";
 import "../../../styles/components/modal/index.css";
 
@@ -15,7 +14,7 @@ export default function AddRoleModal({ onSuccess, onClose }) {
     e.preventDefault();
     setError("");
     try {
-      await createRole(name, description);
+      await createRole({ name, description });
       onSuccess();
       onClose();
     } catch {
@@ -37,20 +36,19 @@ export default function AddRoleModal({ onSuccess, onClose }) {
         <form onSubmit={handleSubmit} className="modal__form">
           <TextField
             label="Nume Rol *"
-            variant="outlined"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            fullWidth
+            variant="outlined"
           />
 
           <TextField
             label="Descriere"
-            variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            fullWidth
+            variant="outlined"
           />
+
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
               Salvează

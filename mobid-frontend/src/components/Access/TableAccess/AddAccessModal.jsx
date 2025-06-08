@@ -1,15 +1,15 @@
-// src/components/Access/AddAccessModal.jsx
 import React, { useEffect, useState, useRef } from "react";
 import Select from "react-select";
 import TextField from "@mui/material/TextField";
 import "../../../styles/components/modal/index.css";
 import "../../../styles/components/access.css";
-import { getAllAccessTypes, createAccess } from "../../../api/accessApi";
+import { createAccess } from "../../../api/accessApi";
+import { getAllAccessTypes } from "../../../api/accessTypeApi";
 
 const Steps = {
   SELECT_TYPE: 0,
-  CONFIGURE:   1,
-  PREVIEW:     2,
+  CONFIGURE: 1,
+  PREVIEW: 2,
 };
 
 export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
@@ -19,31 +19,30 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
   const [error, setError] = useState("");
   const didFetchRef = useRef(false);
 
-  // Pasul 1: detalii generale
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedType, setSelectedType] = useState(null);
 
-  // Pasul 2: configurare
   const [expirationDate, setExpirationDate] = useState("");
   const [restrictToMembers, setRestrictToMembers] = useState(false);
+  const [restrictToSharing, setRestrictToSharing] = useState(false);
 
   const scanModeOptions = [
-    { value: "SingleScan", label: "Single Scan" },
-    { value: "MultiScan",  label: "Multi Scan"  },
+    { value: false, label: "Scanare unică" },
+    { value: true, label: "Scanare multiplă" },
   ];
-  const [scanMode, setScanMode] = useState(scanModeOptions[0]);
+  const [isMultiScan, setIsMultiScan] = useState(scanModeOptions[0]);
+
   const [totalUseLimit, setTotalUseLimit] = useState("");
   const periodOptions = [
-    { value: 1,  label: "1 lună" },
-    { value: 3,  label: "3 luni" },
-    { value: 6,  label: "6 luni" },
+    { value: 1, label: "1 lună" },
+    { value: 3, label: "3 luni" },
+    { value: 6, label: "6 luni" },
     { value: 12, label: "1 an" },
   ];
   const [subscriptionPeriod, setSubscriptionPeriod] = useState(periodOptions[0]);
   const [useLimitPerPeriod, setUseLimitPerPeriod] = useState("");
 
-  // Încarcă tipurile
   useEffect(() => {
     if (didFetchRef.current) return;
     didFetchRef.current = true;
@@ -54,9 +53,7 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
         setTypes(data.map(t => ({
           value: t.id,
           label: t.name,
-          name: t.name,
-          isLimitedUse: t.isLimitedUse,
-          isSubscription: t.isSubscription
+          code: t.code
         })));
       } catch {
         setError("Eroare la încărcarea tipurilor de acces.");
@@ -66,7 +63,6 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
     })();
   }, []);
 
-  // Navigare între pași
   const goToConfigure = () => {
     if (!name.trim()) {
       setError("Completează numele accesului.");
@@ -81,12 +77,12 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
   };
 
   const goToPreview = () => {
-    if (selectedType.isLimitedUse && (!totalUseLimit || totalUseLimit <= 0)) {
-      setError("TotalUseLimit (>0) este necesar pentru acest tip de acces.");
+    if (selectedType.code === "LimitedUse" && (!totalUseLimit || totalUseLimit <= 0)) {
+      setError("TotalUseLimit este necesar pentru LimitedUse.");
       return;
     }
-    if (selectedType.isSubscription && (!subscriptionPeriod || subscriptionPeriod.value <= 0)) {
-      setError("SubscriptionPeriod (>0) este necesar pentru acest tip de acces.");
+    if (selectedType.code === "Subscription" && (!subscriptionPeriod || subscriptionPeriod.value <= 0)) {
+      setError("SubscriptionPeriodMonths este necesar pentru Subscription.");
       return;
     }
     setError("");
@@ -98,7 +94,6 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
     setStep(step - 1);
   };
 
-  // Trimite payload către server
   const handleSubmit = async () => {
     const payload = {
       name,
@@ -106,14 +101,17 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
       organizationId,
       accessTypeId: selectedType.value,
       expirationDate: expirationDate || null,
-      restrictToOrganizationMembers: restrictToMembers,
-      scanMode: scanMode.value,
-      ...(selectedType.name === "OneUse" && { totalUseLimit: 1 }),
-      ...(selectedType.isLimitedUse && { totalUseLimit: Number(totalUseLimit) }),
-      ...(selectedType.isSubscription && {
+      restrictToOrgMembers: restrictToMembers,
+      restrictToOrgSharing: restrictToSharing,
+      isMultiScan: isMultiScan.value,
+      ...(selectedType.code === "OneUse" && { totalUseLimit: 1 }),
+      ...(selectedType.code === "LimitedUse" && {
+        totalUseLimit: Number(totalUseLimit)
+      }),
+      ...(selectedType.code === "Subscription" && {
         subscriptionPeriodMonths: subscriptionPeriod.value,
         useLimitPerPeriod: useLimitPerPeriod ? Number(useLimitPerPeriod) : null
-      })
+      }),
     };
 
     try {
@@ -133,8 +131,8 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
         )}
         <h3 className="modal__title">
           {step === Steps.SELECT_TYPE && "Adaugă acces nou"}
-          {step === Steps.CONFIGURE   && `Configurează “${selectedType?.label}”`}
-          {step === Steps.PREVIEW     && `Previzualizează “${selectedType?.label}”`}
+          {step === Steps.CONFIGURE && `Configurează “${selectedType?.label}”`}
+          {step === Steps.PREVIEW && `Previzualizează “${selectedType?.label}”`}
         </h3>
 
         {error && <p className="modal__error">{error}</p>}
@@ -195,23 +193,35 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               margin="normal"
               InputLabelProps={{ shrink: true }}
             />
-            <div className="checkbox-container">
+
+            <label  className="checkbox-container">
               <input
                 type="checkbox"
                 checked={restrictToMembers}
                 onChange={e => setRestrictToMembers(e.target.checked)}
               />
               <span>Restricționează doar la membri organizație</span>
-            </div>
+            </label >
+
+            <label  className="checkbox-container">
+              <input
+                type="checkbox"
+                checked={restrictToSharing}
+                onChange={e => setRestrictToSharing(e.target.checked)}
+              />
+              <span>Restricționează partajarea către alte organizații</span>
+            </label >
+
             <label className="modal__section-title">Mod Scanare</label>
             <Select
               options={scanModeOptions}
-              value={scanMode}
-              onChange={setScanMode}
+              value={isMultiScan}
+              onChange={setIsMultiScan}
               className="modal__react-select"
               classNamePrefix="modal__react-select"
             />
-            {selectedType.isLimitedUse && (
+
+            {selectedType.code === "LimitedUse" && (
               <TextField
                 label="Total Use Limit *"
                 type="number"
@@ -223,7 +233,8 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
                 inputProps={{ min: 1 }}
               />
             )}
-            {selectedType.isSubscription && (
+
+            {selectedType.code === "Subscription" && (
               <>
                 <label className="modal__section-title">Subscription Period *</label>
                 <Select
@@ -245,6 +256,7 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
                 />
               </>
             )}
+
             <div className="modal__actions">
               <button type="button" className="modal__button--yes" onClick={goToPreview}>
                 Previzualizare
@@ -263,21 +275,21 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               <div className="preview-row"><strong>Nume:</strong> {name}</div>
               <div className="preview-row"><strong>Descriere:</strong> {description || "(niciuna)"}</div>
               <div className="preview-row"><strong>Tip:</strong> {selectedType.label}</div>
-              {expirationDate && (
-                <div className="preview-row"><strong>Expiră:</strong> {expirationDate}</div>
-              )}
+              <div className="preview-row"><strong>Expiră:</strong> {expirationDate || "Perioada nelimitata"}</div>
               <div className="preview-row"><strong>Restricționat:</strong> {restrictToMembers ? "Da" : "Nu"}</div>
-              <div className="preview-row"><strong>Mod Scanare:</strong> {scanMode.label}</div>
-              {selectedType.isLimitedUse && (
+              <div className="preview-row"><strong>Partajabil:</strong> {!restrictToSharing ? "Da" : "Nu"}</div>
+              <div className="preview-row"><strong>Scanare multiplă:</strong> {isMultiScan.label}</div>
+              {selectedType.code === "LimitedUse" && (
                 <div className="preview-row"><strong>Total Use Limit:</strong> {totalUseLimit}</div>
               )}
-              {selectedType.isSubscription && (
+              {selectedType.code === "Subscription" && (
                 <>
                   <div className="preview-row"><strong>Subscription Period:</strong> {subscriptionPeriod.label}</div>
                   <div className="preview-row"><strong>Uses Per Period:</strong> {useLimitPerPeriod || "Nelimitat"}</div>
                 </>
               )}
             </div>
+
             <div className="modal__actions">
               <button type="button" className="modal__button--yes" onClick={handleSubmit}>
                 Confirmă și Salvează

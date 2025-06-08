@@ -41,16 +41,12 @@ namespace MobID.MainGateway.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ExpirationDateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsRestrictedToOrgMembers")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsRestrictedToOrganizationShare")
+                    b.Property<bool>("IsMultiScan")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
@@ -60,14 +56,23 @@ namespace MobID.MainGateway.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
-                    b.Property<TimeSpan?>("SubscriptionPeriod")
-                        .HasColumnType("interval");
+                    b.Property<bool>("RestrictToOrgMembers")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("RestrictToOrgSharing")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("SubscriptionPeriodMonths")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("TotalUseLimit")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UpdatedByUserId")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("UseLimitPerPeriod")
                         .HasColumnType("integer");
@@ -80,6 +85,8 @@ namespace MobID.MainGateway.Migrations
 
                     b.HasIndex("OrganizationId");
 
+                    b.HasIndex("UpdatedByUserId");
+
                     b.ToTable("Accesses");
                 });
 
@@ -89,6 +96,9 @@ namespace MobID.MainGateway.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -96,14 +106,7 @@ namespace MobID.MainGateway.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsLimitedUse")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsSubscription")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -119,33 +122,39 @@ namespace MobID.MainGateway.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7592),
-                            Description = "Acces cu limită totală de utilizări",
-                            IsLimitedUse = true,
-                            IsSubscription = false,
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Code = 0,
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7637),
+                            Description = "Valabil o singură scanare",
+                            Name = "OneUse",
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7639)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Code = 1,
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7743),
+                            Description = "Ex: 8 scanări. Se scade la fiecare utilizare.",
                             Name = "LimitedUse",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7593)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7744)
                         },
                         new
                         {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7597),
-                            Description = "Acces în abonament pe perioade",
-                            IsLimitedUse = false,
-                            IsSubscription = true,
+                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            Code = 2,
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7747),
+                            Description = "Se resetează lunar, opțional cu limită",
                             Name = "Subscription",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7597)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7748)
                         },
                         new
                         {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0003"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7601),
-                            Description = "Confirmare unică de identitate per utilizator",
-                            IsLimitedUse = false,
-                            IsSubscription = false,
-                            Name = "IdentityConfirm",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7602)
+                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            Code = 3,
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7751),
+                            Description = "Acces complet fără restricții",
+                            Name = "Unlimited",
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7751)
                         });
                 });
 
@@ -160,6 +169,9 @@ namespace MobID.MainGateway.Migrations
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -190,7 +202,7 @@ namespace MobID.MainGateway.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -209,7 +221,7 @@ namespace MobID.MainGateway.Migrations
 
                     b.HasIndex("AccessId");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("SourceOrganizationId");
 
@@ -344,26 +356,26 @@ namespace MobID.MainGateway.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7819),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7917),
                             Description = "Administrator role",
                             Name = "Admin",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7820)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7919)
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7824),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7927),
                             Description = "Organization user role",
                             Name = "OrgUser",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7824)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7927)
                         },
                         new
                         {
                             Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7827),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7929),
                             Description = "Simple user role",
                             Name = "SimpleUser",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 806, DateTimeKind.Utc).AddTicks(7828)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7930)
                         });
                 });
 
@@ -402,19 +414,19 @@ namespace MobID.MainGateway.Migrations
                         new
                         {
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4177),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5991),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$TeWi.xa.fTsRHN6vBzULU.jh.IISg2WUdvHizvv7tmYoCwNipk8Wi",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4178),
+                            PasswordHash = "$2a$11$bWpjRDRMS.cEuHT8ZPkYUetwOFp0fbRxRI4TuKr2aBSBvS4sjLQjC",
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5992),
                             Username = "admin"
                         },
                         new
                         {
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4183),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5997),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$TeWi.xa.fTsRHN6vBzULU.jh.IISg2WUdvHizvv7tmYoCwNipk8Wi",
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4183),
+                            PasswordHash = "$2a$11$bWpjRDRMS.cEuHT8ZPkYUetwOFp0fbRxRI4TuKr2aBSBvS4sjLQjC",
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5997),
                             Username = "user"
                         });
                 });
@@ -483,19 +495,19 @@ namespace MobID.MainGateway.Migrations
                         {
                             UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4323),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6119),
                             Id = new Guid("11111111-2222-3333-4444-555555555555"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4324)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6119)
                         },
                         new
                         {
                             UserId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4335),
+                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6125),
                             Id = new Guid("66666666-7777-8888-9999-aaaaaaaaaaaa"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 5, 25, 23, 56, 19, 958, DateTimeKind.Utc).AddTicks(4335)
+                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6125)
                         });
                 });
 
@@ -552,8 +564,14 @@ namespace MobID.MainGateway.Migrations
                         .IsRequired();
 
                     b.HasOne("MobID.MainGateway.Models.Entities.Organization", "Organization")
-                        .WithMany()
+                        .WithMany("Accesses")
                         .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -562,6 +580,8 @@ namespace MobID.MainGateway.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Organization");
+
+                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Organization", b =>
@@ -585,18 +605,18 @@ namespace MobID.MainGateway.Migrations
 
                     b.HasOne("MobID.MainGateway.Models.Entities.User", "Creator")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
+                        .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("MobID.MainGateway.Models.Entities.Organization", "SourceOrganization")
-                        .WithMany()
+                        .WithMany("AccessSharesAsSource")
                         .HasForeignKey("SourceOrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("MobID.MainGateway.Models.Entities.Organization", "TargetOrganization")
-                        .WithMany("OrganizationAccessShares")
+                        .WithMany("AccessSharesAsTarget")
                         .HasForeignKey("TargetOrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -730,7 +750,11 @@ namespace MobID.MainGateway.Migrations
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Organization", b =>
                 {
-                    b.Navigation("OrganizationAccessShares");
+                    b.Navigation("AccessSharesAsSource");
+
+                    b.Navigation("AccessSharesAsTarget");
+
+                    b.Navigation("Accesses");
 
                     b.Navigation("OrganizationUsers");
                 });

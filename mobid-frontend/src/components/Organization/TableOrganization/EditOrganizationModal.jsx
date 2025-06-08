@@ -4,22 +4,20 @@ import { FaTimes } from "react-icons/fa";
 import TextField from "@mui/material/TextField";
 import Select from "react-select";
 import { getUsersForOrganization } from "../../../api/organizationApi";
-// stilurile comune pentru modal + overrides MUI
 import "../../../styles/components/modal/index.css";
 
 export default function EditOrganizationModal({ organization, onSubmit, onClose }) {
-  const [newName, setNewName]        = useState("");
-  const [members, setMembers]        = useState([]);
+  const [newName, setNewName] = useState("");
+  const [members, setMembers] = useState([]);
   const [selectedOwner, setSelected] = useState(null);
-  const [loading, setLoading]        = useState(true);
-  const [error, setError]            = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const didFetch = useRef(false);
 
+  // Inițializăm numele și încărcăm membrii
   useEffect(() => {
-    // initialize form cu datele organizației
     setNewName(organization.name);
     setError("");
-    setSelected({ value: organization.ownerId, label: organization.ownerName });
 
     if (didFetch.current) return;
     didFetch.current = true;
@@ -27,14 +25,14 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
     (async () => {
       try {
         const opts = await getUsersForOrganization(organization.id);
-        setMembers(
-          opts.map(m => ({
-            value: m.userId,
-            label: m.userName,
-            id:    m.userId,
-            username: m.userName
-          }))
-        );
+        const parsed = opts.map(m => ({
+          value: m.userId,
+          label: m.userName,
+          id: m.userId,
+          username: m.userName
+        }));
+
+        setMembers(parsed);
       } catch {
         setError("Nu am putut încărca membrii.");
       } finally {
@@ -42,6 +40,13 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
       }
     })();
   }, [organization]);
+
+  // Selectăm automat owner-ul după ce avem membrii
+  useEffect(() => {
+    if (!members.length || !organization.ownerId) return;
+    const matched = members.find(m => m.value === organization.ownerId);
+    if (matched) setSelected(matched);
+  }, [members, organization.ownerId]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -52,8 +57,8 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
     setError("");
     await onSubmit({
       organizationId: organization.id,
-      name:           newName.trim() || null,
-      ownerId:        selectedOwner.value
+      name: newName.trim() || null,
+      ownerId: selectedOwner.value
     });
     onClose();
   };
@@ -86,23 +91,22 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
             onChange={setSelected}
             placeholder="Alege proprietar…"
             noOptionsMessage={() => "Niciun membru găsit"}
-            formatOptionLabel={({ label, value }) => (
+            formatOptionLabel={(option) => (
               <div className="modal__react-select__option">
                 <span className="modal__react-select__option-label">
-                  Name: {label}
+                  Name: {option.label}
                 </span>
                 <span className="modal__react-select__option-id">
-                  Id: {value}
+                  Id: {option.value}
                 </span>
               </div>
             )}
-            // portal și poziționare fixă
+
             menuPortalTarget={document.body}
             menuPosition="fixed"
-            // asigurăm z-index mare și scroll doar pe listă
             styles={{
               menuPortal: base => ({ ...base, zIndex: 9999 }),
-              menuList:   base => ({
+              menuList: base => ({
                 ...base,
                 maxHeight: "400px",
                 overflowY: "auto"

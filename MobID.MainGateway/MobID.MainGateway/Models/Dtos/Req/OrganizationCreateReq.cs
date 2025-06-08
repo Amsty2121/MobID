@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MobID.MainGateway.Models.Dtos.Req;
-
 public class OrganizationCreateReq
 {
-    [Required, MinLength(2), MaxLength(100)]
+    [Required]
+    [StringLength(100)]
     public string Name { get; set; }
+
+    [StringLength(500)]
+    public string? Description { get; set; }
 
     [Required]
     public Guid OwnerId { get; set; }
