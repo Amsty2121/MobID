@@ -3,27 +3,30 @@ import React, { useEffect, useState, useRef } from "react";
 import "../../../styles/components/access.css";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddAccessModal from "./AddAccessModal";
-import AccessDetailsModal from "./AccessDetailsModal";
+import EditAccessModal from "./EditAccessModal";      // ← import pentru edit
 import DeleteAccessModal from "./DeleteAccessModal";
 import {
-  getAccessesForOrganization,
+  getAllAccesses,
   deactivateAccess
 } from "../../../api/accessApi";
 
-export default function AccessTable({ organizationId, organizationName }) {
+export default function AccessTable({
+  showAddOption    = false,
+  showEditOption   = false,
+  showDeleteOption = false,
+  onRowClick       = () => {},
+}) {
   const [accesses, setAccesses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
+  const [showAdd,  setShowAdd]  = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
+  const [showDel,  setShowDel]  = useState(false);
   const [selected, setSelected] = useState(null);
 
-  // fallback: pagină unică
-  const [page, setPage] = useState(0);
+  // paginare locală
+  const [page, setPage]         = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
 
   const didFetchRef = useRef(false);
 
@@ -31,62 +34,65 @@ export default function AccessTable({ organizationId, organizationName }) {
     setLoading(true);
     setError("");
     try {
-      const data = await getAccessesForOrganization(organizationId);
+      const data = await getAllAccesses();
       setAccesses(data);
-      setPage(0); // resetare forțată
-      setPageSize(data.length);
-      setTotal(data.length);
+      setPage(0);
     } catch {
-      setError("Eroare la încărcarea accese.");
+      setError("Eroare la încărcarea acceselor.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!organizationId) return;
     if (didFetchRef.current) return;
     didFetchRef.current = true;
     fetchAccesses();
-  }, [organizationId]);
+  }, []);
 
   const handleDelete = row => {
     setSelected(row);
-    setShowDelete(true);
+    setShowDel(true);
   };
 
   const confirmDelete = async () => {
     await deactivateAccess(selected.id);
-    setShowDelete(false);
+    setShowDel(false);
     didFetchRef.current = false;
     fetchAccesses();
   };
 
+  // slice pentru paginare
+  const totalCount = accesses.length;
+  const start = page * pageSize;
+  const pagedData = accesses.slice(start, start + pageSize);
+
   const columns = [
-    { header: "Nume", accessor: "name" },
-    { header: "Tip", accessor: "accessTypeName" },
+    { header: "Nume",          accessor: "name" },
+    { header: "Tip",           accessor: "accessTypeName" },
+    { header: "Organizație",   accessor: "organizationName" },
     {
       header: "Multiscan",
       accessor: "isMultiScan",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "Nu")
     },
     {
-      header: "Expiră",
+      header: "Expieres",
       accessor: "expirationDateTime",
-      format: v => v ? new Date(v).toLocaleDateString() : "Nelimitat"
+      format: v => v ? new Date(v).toLocaleDateString() : "Unlimited"
     },
     {
-      header: "Doar membri",
+      header: "Member restricted",
       accessor: "restrictToOrgMembers",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Partajabil",
+      header: "Shareadble",
       accessor: "restrictToOrgSharing",
-      format: v => (v ? "Nu" : "Da")
+      format: v => (v ? "Nu" : "Yes")
     },
     {
-      header: "Activ",
+      header: "IsActive",
       accessor: "isActive",
       format: v => (v ? "✅" : "❌")
     }
@@ -94,37 +100,34 @@ export default function AccessTable({ organizationId, organizationName }) {
 
   return (
     <>
-      <h2 className="access-heading">
-        Accese pentru «{organizationName}»
-      </h2>
-
       {error && <p className="error">{error}</p>}
 
       {loading ? (
         <p>Se încarcă accesele...</p>
       ) : (
         <GenericTable
+          title="Toate Accesele"
           columns={columns}
-          filterColumns={["name", "accessTypeName"]}
-          data={accesses}
+          filterColumns={["name","accessTypeName"]}
+          data={pagedData}
           currentPage={page}
-          totalCount={total}
+          totalCount={totalCount}
           pageSize={pageSize}
-          onPageChange={() => {}} // dezactivăm pagination logic
-          onPageSizeChange={() => {}} // dezactivăm pagination logic
-          showAddOption
+          onPageChange={setPage}
+          onPageSizeChange={size => { setPageSize(size); setPage(0); }}
+          showAddOption={showAddOption}
           onAdd={() => setShowAdd(true)}
-          showEditOption
+          showEditOption={showEditOption}
           onEdit={row => { setSelected(row); setShowEdit(true); }}
-          showDeleteOption
+          showDeleteOption={showDeleteOption}
           onDelete={handleDelete}
-          onRowClick={row => { setSelected(row); setShowDetails(true); }}
+          onRowClick={onRowClick}
         />
       )}
 
+      {/* Modal de adăugat acces */}
       {showAdd && (
         <AddAccessModal
-          organizationId={organizationId}
           onSuccess={() => {
             setShowAdd(false);
             didFetchRef.current = false;
@@ -134,8 +137,9 @@ export default function AccessTable({ organizationId, organizationName }) {
         />
       )}
 
+      {/* Modal de editat acces */}
       {showEdit && selected && (
-        <AddAccessModal
+        <EditAccessModal
           access={selected}
           onSuccess={() => {
             setShowEdit(false);
@@ -146,19 +150,15 @@ export default function AccessTable({ organizationId, organizationName }) {
         />
       )}
 
-      {showDetails && selected && (
-        <AccessDetailsModal
-          access={selected}
-          onClose={() => setShowDetails(false)}
+      {/* Modal de șters acces */}
+      {showDel && selected && (
+        <DeleteAccessModal
+          open
+          accessName={selected.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDel(false)}
         />
       )}
-
-      <DeleteAccessModal
-        open={showDelete}
-        accessName={selected?.name}
-        onConfirm={confirmDelete}
-        onCancel={() => setShowDelete(false)}
-      />
     </>
   );
 }

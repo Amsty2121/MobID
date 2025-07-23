@@ -32,10 +32,10 @@ export default function DeleteMemberModal({
         <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Confirmă Eliminarea</h3>
+        <h3 className="modal__title">Confirm Member Elimination</h3>
         {error && <p className="modal__error">{error}</p>}
         <p className="modal__message">
-          Ești sigur că vrei să elimini membrul{" "}
+          Are you sure you want to remove the member{" "}
           <strong>
             {member.userName} | {member.userId}
           </strong>
@@ -56,7 +56,7 @@ export default function DeleteMemberModal({
             onClick={onCancel}
             disabled={loading}
           >
-            Anulează
+            Cancel
           </button>
         </div>
       </div>

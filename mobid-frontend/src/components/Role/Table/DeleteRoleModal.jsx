@@ -31,10 +31,10 @@ export default function DeleteRoleModal({
         <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Confirmă Ștergerea</h3>
+        <h3 className="modal__title">Confirm Delete</h3>
         {error && <p className="modal__error">{error}</p>}
         <p className="modal__message">
-          Ești sigur că vrei să ştergi rolul <strong>{role.name}</strong>?
+          Are you sure you want to delete the role <strong>{role.name}</strong>?
         </p>
         <div className="modal__actions">
           <button
@@ -51,7 +51,7 @@ export default function DeleteRoleModal({
             onClick={onCancel}
             disabled={loading}
           >
-            Anulează
+            Cancel
           </button>
         </div>
       </div>

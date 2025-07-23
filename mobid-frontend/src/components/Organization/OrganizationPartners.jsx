@@ -170,7 +170,7 @@ export default function OrganizationPartners({
           <Box sx={{ flexGrow: 1, textAlign: "left" }}>
             {title}
             <div className="org-transfer-count">
-              {intersection(checked, items).length}/{items.length} selectate
+              {intersection(checked, items).length}/{items.length} Selected
             </div>
           </Box>
         </Box>
@@ -205,7 +205,7 @@ export default function OrganizationPartners({
   return (
     <Box className="org-partners-container" sx={{ mb: 4, textAlign: "center", p: 1 }}>
       <Typography variant="h6" gutterBottom className="org-partners-title">
-        <strong>Parteneriat pentru „{organizationName}”</strong>
+        <strong>Partnership for „{organizationName}”</strong>
       </Typography>
 
       <div className="org-select-wrapper">
@@ -215,7 +215,7 @@ export default function OrganizationPartners({
           options={allOrgs}
           value={targetOrg}
           onChange={setTargetOrg}
-          placeholder="Selectează organizație…"
+          placeholder="Select organization…"
           formatOptionLabel={({ name, id }) => (
             <div className="org-option">
               <div className="org-option-name"><strong>Name:</strong> {name}</div>
@@ -227,7 +227,7 @@ export default function OrganizationPartners({
 
       {targetOrg && (
         <Box className="org-transfer-container">
-          {customList("Disponibile", leftOnly)}
+          {customList("Available", leftOnly)}
           <Box className="org-transfer-actions">
             <Button
               variant="outlined"

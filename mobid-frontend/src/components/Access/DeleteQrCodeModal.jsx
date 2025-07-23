@@ -11,17 +11,17 @@ export default function DeleteQrCodeModal({ open, description, onConfirm, onCanc
         <button className="modal-close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3>Confirmă dezactivarea</h3>
+        <h3>Confirm Deactivation</h3>
         <p>
-          Ești sigur că vrei să dezactivezi codul QR{" "}
+          Are you sure you want to disable the QR code?{" "}
           <strong>{description}</strong>?
         </p>
         <div className="form-actions">
           <button type="button" onClick={onConfirm}>
-            Dezactivează
+            Deactivate
           </button>
           <button type="button" onClick={onCancel}>
-            Anulează
+            Cancel
           </button>
         </div>
       </div>

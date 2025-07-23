@@ -32,6 +32,15 @@ export async function getAccessesForOrganization(organizationId) {
 }
 
 /**
+ * Obține toate accesele din sistem.
+ * @returns {Promise<AccessDto[]>}
+ */
+export async function getAllAccesses() {
+  const { data } = await api.get("/access/all");
+  return data;
+}
+
+/**
  * Actualizează un access existent.
  * @param {object} payload – AccessUpdateReq cu proprietatea `id`
  * @returns {Promise<AccessDto>}

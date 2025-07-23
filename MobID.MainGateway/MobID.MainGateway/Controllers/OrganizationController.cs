@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Entities;
+using MobID.MainGateway.Services;
 using MobID.MainGateway.Services.Interfaces;
+using System.Security.Claims;
 
 namespace MobID.MainGateway.Controllers
 {
@@ -15,6 +18,10 @@ namespace MobID.MainGateway.Controllers
         private readonly IOrganizationService _orgService;
         public OrganizationController(IOrganizationService orgService)
             => _orgService = orgService;
+
+
+        private Guid UserId =>
+            Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
 
         /// <summary>
         /// Creează o organizaţie nouă.
@@ -250,6 +257,14 @@ namespace MobID.MainGateway.Controllers
         {
             var combined = await _orgService.GetAllOrganizationAccessesAsync(organizationId, ct);
             return Ok(combined);
+        }
+
+        [HttpGet("for-user")]
+        [Authorize]
+        public async Task<IActionResult> GetMyOrganizations(CancellationToken ct)
+        {
+            var orgs = await _orgService.GetOrganizationsForUserAsync(UserId, ct);
+            return Ok(orgs);
         }
     }
 }

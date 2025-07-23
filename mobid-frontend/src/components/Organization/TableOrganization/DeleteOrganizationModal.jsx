@@ -11,9 +11,9 @@ const DeleteOrganizationModal = ({ organization, onConfirm, onCancel }) => {
         <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Confirmă Ștergerea</h3>
+        <h3 className="modal__title">Confirm Delete</h3>
         <p className="modal__message">
-          Ești sigur că vrei să ștergi organizația{" "}
+          Are you sure you want to delete the organization{" "}
           <strong>{organization?.name}</strong>?
         </p>
         <div className="modal__actions">
@@ -22,14 +22,14 @@ const DeleteOrganizationModal = ({ organization, onConfirm, onCancel }) => {
             className="modal__button--yes"
             onClick={onConfirm}
           >
-            Șterge
+            Delete
           </button>
           <button
             type="button"
             className="modal__button--no"
             onClick={onCancel}
           >
-            Anulează
+            Cancel
           </button>
         </div>
       </div>

@@ -68,13 +68,13 @@ const EditUserRolesModal = ({ user, onClose }) => {
         <button className="modal__close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Editează Rolurile pentru {user.username}</h3>
+        <h3 className="modal__title">Edit roles for {user.username}</h3>
         {error && <p className="modal__error">{error}</p>}
 
         <div className="modal__section">
-          <h4>Roluri Atribuite:</h4>
+          <h4>Active roles:</h4>
           {userRoles.length === 0 ? (
-            <p>Niciun rol atribuit.</p>
+            <p>User has no roles</p>
           ) : (
             <ul className="modal__role-list">
               {userRoles.map((roleName, idx) => {
@@ -87,7 +87,7 @@ const EditUserRolesModal = ({ user, onClose }) => {
                         className="modal__button--no"
                         onClick={() => handleRemoveRole(roleObj.id)}
                       >
-                        Elimină
+                        Exclude
                       </button>
                     )}
                   </li>
@@ -98,9 +98,9 @@ const EditUserRolesModal = ({ user, onClose }) => {
         </div>
 
         <div className="modal__section">
-          <h4>Roluri Disponibile:</h4>
+          <h4>Available Roles:</h4>
           {availableRoles.length === 0 ? (
-            <p>Toate rolurile sunt deja atribuite.</p>
+            <p>All roles assigned.</p>
           ) : (
             <ul className="modal__role-list">
               {availableRoles.map(role => (
@@ -110,7 +110,7 @@ const EditUserRolesModal = ({ user, onClose }) => {
                     className="modal__button--yes"
                     onClick={() => handleAssignRole(role.id)}
                   >
-                    Adaugă
+                    Add
                   </button>
                 </li>
               ))}

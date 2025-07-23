@@ -34,8 +34,8 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "CardAccessApi",
-        Description = "CardAccessApi"
+        Title = "MobID",
+        Description = "MobID"
     });
 
     swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()

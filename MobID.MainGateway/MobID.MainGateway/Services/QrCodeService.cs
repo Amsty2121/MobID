@@ -26,7 +26,6 @@ namespace MobID.MainGateway.Services
 
         public async Task<QrCodeDto> CreateQrCodeAsync(
             QrCodeGenerateReq req,
-            Guid createdByUserId,
             CancellationToken ct = default)
         {
             // ensure the Access + its OrganizationId is loaded
@@ -36,16 +35,12 @@ namespace MobID.MainGateway.Services
                 a => a.Organization
             ) ?? throw new InvalidOperationException("Access not found.");
 
-            if (!Enum.TryParse<QrCodeType>(req.Type, true, out var type))
-                throw new InvalidOperationException("Invalid QR code type.");
-
             var qr = new QrCode
             {
                 Id = Guid.NewGuid(),
                 Description = req.Description ?? $"QR for {access.Name}",
-                Type = type,
+                Type = QrCodeType.AccessConfirm,
                 AccessId = req.AccessId,
-                ExpiresAt = req.ExpiresAt,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 DeletedAt = null
@@ -134,8 +129,7 @@ namespace MobID.MainGateway.Services
                 q => q.Access
             );
 
-            if (qr == null
-             || (qr.ExpiresAt.HasValue && qr.ExpiresAt.Value <= DateTime.UtcNow))
+            if (qr == null)
             {
                 return new AccessValidationRsp(false, "QR code is invalid or expired.");
             }

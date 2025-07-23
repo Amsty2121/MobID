@@ -124,37 +124,37 @@ namespace MobID.MainGateway.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             Code = 0,
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7637),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(2950),
                             Description = "Valabil o singură scanare",
                             Name = "OneUse",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7639)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(2954)
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
                             Code = 1,
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7743),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3056),
                             Description = "Ex: 8 scanări. Se scade la fiecare utilizare.",
                             Name = "LimitedUse",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7744)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3057)
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
                             Code = 2,
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7747),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3061),
                             Description = "Se resetează lunar, opțional cu limită",
                             Name = "Subscription",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7748)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3061)
                         },
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
                             Code = 3,
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7751),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3065),
                             Description = "Acces complet fără restricții",
                             Name = "Unlimited",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7751)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3066)
                         });
                 });
 
@@ -282,9 +282,6 @@ namespace MobID.MainGateway.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
@@ -356,26 +353,26 @@ namespace MobID.MainGateway.Migrations
                         new
                         {
                             Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7917),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3296),
                             Description = "Administrator role",
                             Name = "Admin",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7919)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3297)
                         },
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7927),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3303),
                             Description = "Organization user role",
                             Name = "OrgUser",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7927)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3304)
                         },
                         new
                         {
                             Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7929),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3308),
                             Description = "Simple user role",
                             Name = "SimpleUser",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 868, DateTimeKind.Utc).AddTicks(7930)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 253, DateTimeKind.Utc).AddTicks(3308)
                         });
                 });
 
@@ -414,19 +411,19 @@ namespace MobID.MainGateway.Migrations
                         new
                         {
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5991),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7569),
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$bWpjRDRMS.cEuHT8ZPkYUetwOFp0fbRxRI4TuKr2aBSBvS4sjLQjC",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5992),
+                            PasswordHash = "$2a$11$mcYH1OQTlEJYVtKquwlOnerA2Vu5yYZ.2IXUVCGsOqxZqMU./oLp2",
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7570),
                             Username = "admin"
                         },
                         new
                         {
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5997),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7573),
                             Email = "user@example.com",
-                            PasswordHash = "$2a$11$bWpjRDRMS.cEuHT8ZPkYUetwOFp0fbRxRI4TuKr2aBSBvS4sjLQjC",
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(5997),
+                            PasswordHash = "$2a$11$mcYH1OQTlEJYVtKquwlOnerA2Vu5yYZ.2IXUVCGsOqxZqMU./oLp2",
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7574),
                             Username = "user"
                         });
                 });
@@ -495,19 +492,19 @@ namespace MobID.MainGateway.Migrations
                         {
                             UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6119),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7757),
                             Id = new Guid("11111111-2222-3333-4444-555555555555"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6119)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7758)
                         },
                         new
                         {
                             UserId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                             RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            CreatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6125),
+                            CreatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7765),
                             Id = new Guid("66666666-7777-8888-9999-aaaaaaaaaaaa"),
                             IsActive = true,
-                            UpdatedAt = new DateTime(2025, 6, 7, 18, 16, 39, 984, DateTimeKind.Utc).AddTicks(6125)
+                            UpdatedAt = new DateTime(2025, 6, 22, 20, 23, 47, 367, DateTimeKind.Utc).AddTicks(7765)
                         });
                 });
 
@@ -526,13 +523,16 @@ namespace MobID.MainGateway.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsSuccessfull")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("QrCodeId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ScannedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid>("ScannedByUserId")
+                        .HasColumnType("uuid");
 
-                    b.Property<Guid>("ScannedById")
+                    b.Property<Guid>("ScannedForUserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -544,7 +544,9 @@ namespace MobID.MainGateway.Migrations
 
                     b.HasIndex("QrCodeId");
 
-                    b.HasIndex("ScannedById");
+                    b.HasIndex("ScannedByUserId");
+
+                    b.HasIndex("ScannedForUserId");
 
                     b.ToTable("Scans");
                 });
@@ -721,15 +723,23 @@ namespace MobID.MainGateway.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MobID.MainGateway.Models.Entities.User", "ScannedBy")
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "ScannedByUser")
                         .WithMany()
-                        .HasForeignKey("ScannedById")
+                        .HasForeignKey("ScannedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MobID.MainGateway.Models.Entities.User", "ScannedForUser")
+                        .WithMany()
+                        .HasForeignKey("ScannedForUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("QrCode");
 
-                    b.Navigation("ScannedBy");
+                    b.Navigation("ScannedByUser");
+
+                    b.Navigation("ScannedForUser");
                 });
 
             modelBuilder.Entity("MobID.MainGateway.Models.Entities.Access", b =>

@@ -51,3 +51,358 @@
 .modal__actions button {
   min-width: 6rem;
 }
+
+
+/* ===========================================
+   QR PREVIEW + GENERATE MODAL (scoped)
+   =========================================== */
+
+.qr-modal-overlay,
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal-content,
+.modal-content {
+  background: var(--color-tuna);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.form-actions button:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Download button */
+.download-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.download-btn:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* QR frame + footer */
+.qr-design-frame {
+  background: #fff;
+  border: 5px solid var(--color-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  margin: 0 auto;
+}
+.qr-design-frame .qr-code-wrap {
+  padding: 2rem 0;
+  background: #fff;
+}
+.qr-design-frame .qr-footer {
+  background: var(--color-primary);
+  padding: 0.5rem;
+}
+.qr-design-frame .qr-footer-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Generic icon-buttons */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+  transition: color 0.2s;
+}
+.icon-btn:hover {
+  color: var(--color-primary);
+}
+
+
+/* src/components/Access/Access.css */
+/* ===========================================
+   QR PREVIEW MODAL (scoped)
+   =========================================== */
+.qr-modal-overlay, .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal-content, .modal-content {
+  background: var(--color-tuna);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.form-actions button:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Download button */
+.download-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.download-btn:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* QR frame + footer */
+.qr-design-frame {
+  background: #fff;
+  border: 5px solid var(--color-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  margin: 0 auto;
+}
+.qr-design-frame .qr-code-wrap {
+  padding: 2rem 0rem 2rem 0rem;
+  background: #fff;
+}
+.qr-design-frame .qr-footer {
+  background: var(--color-primary);
+  padding: 0.5rem;
+}
+.qr-design-frame .qr-footer-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Generic icon-buttons */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+  transition: color 0.2s;
+}
+.icon-btn:hover {
+  color: var(--color-primary);
+}
+
+
+/*-----------------------------------------*/
+
+/* src/components/Access/Access.css */
+/* ===========================================
+   QR PREVIEW MODAL (scoped)
+   =========================================== */
+.qr-modal-overlay, .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal-content, .modal-content {
+  background: var(--color-tuna);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-align: center;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.form-actions button:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Download button */
+.download-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  transition: box-shadow 0.2s;
+}
+.download-btn:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* QR frame + footer */
+.qr-design-frame {
+  background: #fff;
+  border: 5px solid var(--color-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  margin: 0 auto;
+}
+.qr-design-frame .qr-code-wrap {
+  padding: 2rem 0rem 2rem 0rem;
+  background: #fff;
+}
+.qr-design-frame .qr-footer {
+  background: var(--color-primary);
+  padding: 0.5rem;
+}
+.qr-design-frame .qr-footer-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Generic icon-buttons */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-iron);
+  transition: color 0.2s;
+}
+.icon-btn:hover {
+  color: var(--color-primary);
+}

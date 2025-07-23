@@ -29,7 +29,7 @@ const AddUserModal = ({ onSuccess, onClose }) => {
         <button className="modal__close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Adaugă Utilizator Nou</h3>
+        <h3 className="modal__title">Add new User</h3>
         {error && <p className="modal__error">{error}</p>}
         <form onSubmit={handleSubmit} className="modal__form">
           <TextField
@@ -48,7 +48,7 @@ const AddUserModal = ({ onSuccess, onClose }) => {
             variant="outlined"
           />
           <TextField
-            label="Parolă"
+            label="Password"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -58,13 +58,13 @@ const AddUserModal = ({ onSuccess, onClose }) => {
 
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
-              Salvează
+              Save
             </button>
             <button
               type="button"
               className="modal__button--no"
               onClick={onClose}>
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

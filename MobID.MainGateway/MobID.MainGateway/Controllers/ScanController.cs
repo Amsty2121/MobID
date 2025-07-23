@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Entities;
 using MobID.MainGateway.Models.Enums;
 using MobID.MainGateway.Services.Interfaces;
 using System;
@@ -18,11 +19,13 @@ public class ScanController : ControllerBase
 {
     private readonly IScanService _scanService;
     private readonly IUserAccessService _userAccessService;
+    private readonly IScanOrchestrationService _scanOrch;
 
-    public ScanController(IScanService scanService, IUserAccessService userAccessService)
+    public ScanController(IScanService scanService, IUserAccessService userAccessService, IScanOrchestrationService scanOrch)
     {
         _scanService = scanService;
         _userAccessService = userAccessService;
+        _scanOrch = scanOrch;
     }
 
     private Guid UserId =>
@@ -32,24 +35,23 @@ public class ScanController : ControllerBase
     /// Înregistrează o nouă scanare (pentru QrCodeId), atribuită utilizatorului curent.
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(ScanDto), 201)]
-    [ProducesResponseType(400)]
-    public async Task<ActionResult<ScanDto>> CreateScanAsync(
-        [FromBody] ScanCreateReq req,
-        CancellationToken ct)
+    public async Task<ActionResult<ScanDto>> PostScanAsync(
+    [FromBody] ScanQrReq req,
+    CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
-        // Override userul care scanează cu cel curent
-        req.ScannedById = UserId;
-
-        var dto = await _scanService.AddScanAsync(req, ct);
-        return CreatedAtAction(
-            nameof(GetScanByIdAsync),
-            new { scanId = dto.Id },
-            dto
-        );
+        try
+        {
+            var scan = await _scanOrch.HandleQrScanAsync(req.QrRawValue, UserId, ct);
+            return Ok(scan);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
@@ -92,23 +94,36 @@ public class ScanController : ControllerBase
         return Ok(page);
     }
 
-    /*[HttpPost]
-    public async Task<IActionResult> AddScanAsync(
-        [FromBody] ScanCreateReq req,
+    [HttpGet("user")]
+    [ProducesResponseType(typeof(List<ScanDto>), 200)]
+    public async Task<ActionResult<List<ScanDto>>> GetScansForUserAsync(CancellationToken ct)
+    {
+        var userId = UserId; // preluat din token
+        var list = await _scanService.GetScansForUserAsync(userId, ct);
+        return Ok(list);
+    }
+
+    /// <summary>
+    /// Listează toate scanările cu detalii complete (QR → Access → Org → useri).
+    /// </summary>
+    [HttpGet("full")]
+    [ProducesResponseType(typeof(List<ScanFullDto>), 200)]
+    public async Task<ActionResult<List<ScanFullDto>>> GetAllScansWithDetailsAsync(
         CancellationToken ct)
     {
-        // 1. Înregistrăm scanarea
-        var dto = await _scanService.AddScanAsync(req, ct);
+        var list = await _scanService.GetAllScansWithIncludedAsync(ct);
+        return Ok(list);
+    }
 
-        // 2. Acordăm accesul cu Invitation
-        var grantReq = new UserGrantAccessReq
-        {
-            AccessId = dto.QrCodeId  sau dto.AccessId dacă-l extinzi ,
-            TargetUserId = req.ScannedById,
-            FromOrganizationId =  poți extrage din QR/Access entitate 
-        };
-        await _userAccessService.GrantAccessToUserAsync(grantReq, req.ScannedById, ct, AccessGrantType.Invitation);
 
-        return CreatedAtAction(nameof(GetScanByIdAsync), new { scanId = dto.Id }, dto);
-    }*/
+
+    [HttpPost("by-scanner")]
+    public async Task<IActionResult> AddScanByScanerAsync(
+        [FromBody] ScanQRByScanerReq req,
+        CancellationToken ct)
+    {
+        var result = await _scanService.ScanUserQr(req.Payload, UserId, req.OrganizationId, req.AccessId, ct);
+
+        return Ok( new { success = result});  
+    }
 }

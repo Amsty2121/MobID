@@ -69,12 +69,12 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
         <button className="modal__close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Actualizează Organizația</h3>
+        <h3 className="modal__title">Edit Organization</h3>
         {error && <p className="modal__error">{error}</p>}
 
         <form onSubmit={handleSubmit} className="modal__form">
           <TextField
-            label="Nume Organizație"
+            label="Org name"
             value={newName}
             onChange={e => setNewName(e.target.value)}
             required
@@ -89,7 +89,7 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
             isLoading={loading}
             value={selectedOwner}
             onChange={setSelected}
-            placeholder="Alege proprietar…"
+            placeholder="Select Owner…"
             noOptionsMessage={() => "Niciun membru găsit"}
             formatOptionLabel={(option) => (
               <div className="modal__react-select__option">
@@ -116,10 +116,10 @@ export default function EditOrganizationModal({ organization, onSubmit, onClose 
 
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
-              Salvează
+              Save
             </button>
             <button type="button" className="modal__button--no" onClick={onClose}>
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

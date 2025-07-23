@@ -2,43 +2,40 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../../../styles/components/access.css";
 import GenericTable from "../../GenericTable/GenericTable";
-import AddAccessModal from "./AddAccessModal";
-import EditAccessModal from "./EditAccessModal";
+
+import AddAccessModal     from "./AddAccessModal";
+import EditAccessModal    from "./EditAccessModal";
 import AccessDetailsModal from "./AccessDetailsModal";
-import DeleteAccessModal from "./DeleteAccessModal";
-// ← pull in the new combined‐accesses call:
+import DeleteAccessModal  from "./DeleteAccessModal";
+import AccessQRCodes      from "./AccessQRCodes";
+
 import { getAllOrganizationAccesses } from "../../../api/organizationApi";
-import { deactivateAccess } from "../../../api/accessApi";
+import { deactivateAccess }           from "../../../api/accessApi";
+
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 export default function AccessTable({ organizationId, organizationName }) {
-  const [accesses, setAccesses]       = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
-  const [showAdd, setShowAdd]         = useState(false);
-  const [showEdit, setShowEdit]       = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showDelete, setShowDelete]   = useState(false);
-  const [selected, setSelected]       = useState(null);
+  const [accesses, setAccesses]         = useState([]);
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState("");
+  const [showAdd, setShowAdd]           = useState(false);
+  const [showEdit, setShowEdit]         = useState(false);
+  const [showDelete, setShowDelete]     = useState(false);
 
-  // disable paging: single‐page view
-  const [page, setPage]       = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal]     = useState(0);
+  const [selected, setSelected]         = useState(null);
+  const [selectedForQr, setSelectedForQr] = useState(null);
 
+  // o singură “pagină”
+  const [pageSize, setPageSize]         = useState(0);
   const didFetchRef = useRef(false);
 
   const fetchAccesses = async () => {
     setLoading(true);
     setError("");
     try {
-      // ← switch to the new method
       const data = await getAllOrganizationAccesses(organizationId);
       setAccesses(data);
-
-      // show all on one page
-      setPage(0);
       setPageSize(data.length);
-      setTotal(data.length);
     } catch {
       setError("Eroare la încărcarea accese.");
     } finally {
@@ -47,8 +44,7 @@ export default function AccessTable({ organizationId, organizationName }) {
   };
 
   useEffect(() => {
-    if (!organizationId) return;
-    if (didFetchRef.current) return;
+    if (!organizationId || didFetchRef.current) return;
     didFetchRef.current = true;
     fetchAccesses();
   }, [organizationId]);
@@ -57,7 +53,6 @@ export default function AccessTable({ organizationId, organizationName }) {
     setSelected(row);
     setShowDelete(true);
   };
-
   const confirmDelete = async () => {
     await deactivateAccess(selected.id);
     setShowDelete(false);
@@ -65,45 +60,77 @@ export default function AccessTable({ organizationId, organizationName }) {
     fetchAccesses();
   };
 
+  const handleEdit = row => {
+    setSelected(row);
+    setShowEdit(true);
+  };
+
+  // coloanele + acțiuni
   const columns = [
-    { header: "Nume",        accessor: "name" },
-    { header: "Tip",         accessor: "accessTypeName" },
+    { header: "Name",        accessor: "name" },
+    { header: "Type",         accessor: "accessTypeName" },
+    { header: "Organization", accessor: "organizationName" },
     {
       header: "Multiscan",
       accessor: "isMultiScan",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Expiră",
+      header: "Expires",
       accessor: "expirationDateTime",
-      format: v => (v ? new Date(v).toLocaleDateString() : "Nelimitat")
+      format: v => (v ? new Date(v).toLocaleDateString() : "Unlimited")
     },
     {
-      header: "Doar membri",
+      header: "Members Restricted",
       accessor: "restrictToOrgMembers",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Partajabil",
+      header: "Shareable",
       accessor: "restrictToOrgSharing",
-      format: v => (v ? "Da" : "Nu")
-    },
-    // ← show which org this access came from
-    {
-      header: "Organizație",
-      accessor: "organizationName"
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Activ",
+      header: "IsActive",
       accessor: "isActive",
       format: v => (v ? "✅" : "❌")
+    },
+    {
+      header: "Actions",
+      accessor: "actions"
     }
   ];
+
+  // construim datele cu butoanele noastre FaEdit / FaTrash
+  const dataWithActions = accesses.map(row => {
+    const own = row.organizationId === organizationId;
+    return {
+      ...row,
+      actions: own ? (
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button
+            className="generic-table__icon-btn"
+            title="Editează"
+            onClick={e => { e.stopPropagation(); handleEdit(row); }}
+          >
+            <FaEdit />
+          </button>
+          <button
+            className="generic-table__icon-btn"
+            title="Șterge"
+            onClick={e => { e.stopPropagation(); handleDelete(row); }}
+          >
+            <FaTrash />
+          </button>
+        </div>
+      ) : null
+    };
+  });
 
   return (
     <>
       <h2 className="access-heading">
-        Accese pentru «{organizationName}»
+        Accesses for «{organizationName}»
       </h2>
 
       {error && <p className="error">{error}</p>}
@@ -113,31 +140,26 @@ export default function AccessTable({ organizationId, organizationName }) {
       ) : (
         <GenericTable
           columns={columns}
-          filterColumns={["name", "accessTypeName", "organizationName"]}
-          data={accesses}
-          currentPage={page}
-          totalCount={total}
+          filterColumns={["name","accessTypeName","organizationName"]}
+          data={dataWithActions}
+          // dezactivează butoanele implicite
+          showAddOption
+          showEditOption={false}
+          showDeleteOption={false}
+          onAdd={() => setShowAdd(true)}
+          onRowClick={row => setSelectedForQr(row)}
+          currentPage={0}
+          totalCount={pageSize}
           pageSize={pageSize}
           onPageChange={() => {}}
           onPageSizeChange={() => {}}
-          showAddOption
-          onAdd={() => setShowAdd(true)}
-          showEditOption
-          onEdit={row => { setSelected(row); setShowEdit(true); }}
-          showDeleteOption
-          onDelete={handleDelete}
-          onRowClick={row => { setSelected(row); setShowDetails(true); }}
         />
       )}
 
       {showAdd && (
         <AddAccessModal
           organizationId={organizationId}
-          onSuccess={() => {
-            setShowAdd(false);
-            didFetchRef.current = false;
-            fetchAccesses();
-          }}
+          onSuccess={() => { setShowAdd(false); didFetchRef.current = false; fetchAccesses(); }}
           onClose={() => setShowAdd(false)}
         />
       )}
@@ -145,29 +167,24 @@ export default function AccessTable({ organizationId, organizationName }) {
       {showEdit && selected && (
         <EditAccessModal
           access={selected}
-          onSuccess={() => {
-            setShowEdit(false);
-            didFetchRef.current = false;
-            fetchAccesses();
-          }}
+          onSuccess={() => { setShowEdit(false); didFetchRef.current = false; fetchAccesses(); }}
           onClose={() => setShowEdit(false)}
-        />
-      )}
-
-      {showDetails && selected && (
-        <AccessDetailsModal
-          access={selected}
-          onClose={() => setShowDetails(false)}
         />
       )}
 
       {showDelete && selected && (
         <DeleteAccessModal
-          open={showDelete}
+          open
           accessName={selected.name}
           onConfirm={confirmDelete}
           onCancel={() => setShowDelete(false)}
         />
+      )}
+
+      {selectedForQr && (
+        <div style={{ marginTop: "2rem" }}>
+          <AccessQRCodes access={selectedForQr} />
+        </div>
       )}
     </>
   );

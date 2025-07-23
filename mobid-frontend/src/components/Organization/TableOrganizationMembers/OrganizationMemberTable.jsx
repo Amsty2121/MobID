@@ -54,7 +54,7 @@ export default function OrganizationMemberTable({
   const columns = [
     { header: "User ID",   accessor: "userId"   },
     { header: "User Name", accessor: "userName" },
-    { header: "Rol",       accessor: "role"     },
+    { header: "Role",       accessor: "role"     },
   ];
 
   return (
@@ -65,7 +65,7 @@ export default function OrganizationMemberTable({
         <p>Se încarcă membrii...</p>
       ) : (
         <GenericTable
-          title={`Membri din „${organizationName}”`}
+          title={`Members of „${organizationName}”`}
           columns={columns}
           filterColumns={["userName", "userId", "role"]}
           data={members}

@@ -29,9 +29,9 @@ export default function Organization() {
         <TabContext value={tabValue}>
           <div className="org-tabs-wrapper">
             <TabList onChange={handleTabChange} aria-label="Organization tabs">
-              <Tab label="Membri" value="members" />
-              <Tab label="Accese" value="accese" />
-              <Tab label="Parteneriat" value="parteneriat" />
+              <Tab label="members" value="members" />
+              <Tab label="Accesses" value="accese" />
+              <Tab label="Partnership" value="parteneriat" />
             </TabList>
           </div>
 

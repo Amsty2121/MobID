@@ -85,7 +85,7 @@ export default function AddMemberModal({
         <button className="modal__close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Adaugă Membru</h3>
+        <h3 className="modal__title">Add member</h3>
 
         {error && <p className="modal__error">{error}</p>}
 
@@ -97,7 +97,7 @@ export default function AddMemberModal({
             isLoading={loading}
             value={selectedUser}
             onChange={setSelectedUser}
-            placeholder="Caută utilizator…"
+            placeholder="Find User…"
             noOptionsMessage={() => "Niciun utilizator disponibil"}
             formatOptionLabel={({ label, value }) => (
               <div className="modal__react-select__option">
@@ -136,7 +136,7 @@ export default function AddMemberModal({
               className="modal__button--yes"
               disabled={loading}
             >
-              {loading ? "Adaugă…" : "Adaugă"}
+              {loading ? "Add…" : "Add"}
             </button>
             <button
               type="button"
@@ -144,7 +144,7 @@ export default function AddMemberModal({
               onClick={onClose}
               disabled={loading}
             >
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

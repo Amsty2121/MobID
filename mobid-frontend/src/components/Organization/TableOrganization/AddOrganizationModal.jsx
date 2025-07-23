@@ -60,14 +60,14 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
     <div className="modal__overlay">
       <div className="modal__content">
         <button className="modal__close" onClick={onClose}>×</button>
-        <h3 className="modal__title">Adaugă Organizație Nouă</h3>
+        <h3 className="modal__title">Add new organization</h3>
 
         {error && <p className="modal__error">{error}</p>}
 
         <form onSubmit={handleSubmit} className="modal__form">
           <TextField
             id="orgName"
-            label="Nume Organizație *"
+            label="Org name"
             variant="outlined"
             value={name}
             onChange={e => setName(e.target.value)}
@@ -81,7 +81,7 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
             onMenuOpen={loadUsers}
             value={selected}
             onChange={setSelected}
-            placeholder="Proprietar…"
+            placeholder="Select Owner…"
             className="modal__react-select"
             classNamePrefix="modal__react-select"
             formatOptionLabel={({ username, id }) => (
@@ -104,10 +104,10 @@ export default function AddOrganizationModal({ onSuccess, onClose }) {
 
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
-              Salvează
+              Save
             </button>
             <button type="button" className="modal__button--no" onClick={onClose}>
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

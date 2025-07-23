@@ -10,4 +10,5 @@ public interface IAccessService
     Task<List<AccessDto>> GetAccessesForOrganizationAsync(Guid organizationId, CancellationToken ct = default);
     Task<int> DeactivateAccessAsync(Guid accessId, Guid userId, CancellationToken ct = default);
     Task<AccessDto?> UpdateAccessAsync(AccessUpdateReq req, Guid userId, CancellationToken ct = default);
+    Task<List<AccessDto>> GetAllAccessesAsync(CancellationToken ct = default);
 }

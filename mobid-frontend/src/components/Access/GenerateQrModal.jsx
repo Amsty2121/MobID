@@ -23,8 +23,8 @@ export default function GenerateQrModal({ accessId, onSuccess, onClose }) {
         <h3>Generează Cod QR</h3>
         {eroare && <p className="error">{eroare}</p>}
         <div className="form-actions">
-          <button onClick={handleGenerate}>Generează</button>
-          <button onClick={onClose}>Anulează</button>
+          <button onClick={handleGenerate}>Generate</button>
+          <button onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>

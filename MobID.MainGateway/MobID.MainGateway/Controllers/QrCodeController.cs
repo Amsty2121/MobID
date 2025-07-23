@@ -20,6 +20,9 @@ public class QrCodeController : ControllerBase
         _qrService = qrService;
     }
 
+    private Guid UserId =>
+        Guid.Parse(User.FindFirstValue(nameof(MobID.MainGateway.Models.Entities.User.Id)));
+
     /// <summary>
     /// Generează un cod QR pentru un acces.
     /// </summary>
@@ -30,12 +33,11 @@ public class QrCodeController : ControllerBase
         [FromBody] QrCodeGenerateReq req,
         CancellationToken ct)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         try
         {
-            var dto = await _qrService.CreateQrCodeAsync(req, userId, ct);
-            return CreatedAtAction(nameof(GetQrCodeByIdAsync), new { qrCodeId = dto.Id }, dto);
+            var dto = await _qrService.CreateQrCodeAsync(req, ct);
+            return Ok(dto);
         }
         catch (Exception ex)
         {
@@ -106,8 +108,7 @@ public class QrCodeController : ControllerBase
         Guid qrCodeId,
         CancellationToken ct)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var rsp = await _qrService.ValidateQrCodeAsync(qrCodeId, userId, ct);
+        var rsp = await _qrService.ValidateQrCodeAsync(qrCodeId, UserId, ct);
         return Ok(rsp);
     }
 }

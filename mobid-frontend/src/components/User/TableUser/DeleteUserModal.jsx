@@ -26,10 +26,10 @@ export default function DeleteUserModal({ user, onSuccess, onCancel }) {
         <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Confirmă Ștergerea</h3>
+        <h3 className="modal__title">Confirm Delete</h3>
         {error && <p className="modal__error">{error}</p>}
         <p className="modal__message">
-          Ești sigur că vrei să ștergi utilizatorul <strong>{user.username}</strong>?
+          Are you sure you want to delete the role <strong>{user.username}</strong>?
         </p>
         <div className="modal__actions">
           <button
@@ -38,7 +38,7 @@ export default function DeleteUserModal({ user, onSuccess, onCancel }) {
             onClick={handleConfirm}
             disabled={loading}
           >
-            {loading ? "Șterg..." : "Șterge"}
+            {loading ? "Șterg..." : "Delete"}
           </button>
           <button
             type="button"
@@ -46,7 +46,7 @@ export default function DeleteUserModal({ user, onSuccess, onCancel }) {
             onClick={onCancel}
             disabled={loading}
           >
-            Anulează
+            Cancel
           </button>
         </div>
       </div>

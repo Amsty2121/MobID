@@ -39,7 +39,7 @@ export default function UserOrganizationTable({ userId, userName }) {
   const columns = [
     { header: "ID",          accessor: "id" },
     { header: "Nume",        accessor: "name" },
-    { header: "Descriere",   accessor: "description" },
+    { header: "Description",   accessor: "description" },
     {
       header: "Join Date",
       accessor: "createdAt",

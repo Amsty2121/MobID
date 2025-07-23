@@ -74,4 +74,12 @@ public class AccessController : ControllerBase
 
         return Ok(updated);
     }
+
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(List<AccessDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<AccessDto>>> GetAllAsync(CancellationToken ct)
+    {
+        var list = await _accessService.GetAllAccessesAsync(ct);
+        return Ok(list);
+    }
 }

@@ -8,6 +8,7 @@ import Role from "../components/Role/Role";
 import User from "../components/User/User";
 import Organization from "../components/Organization/Organization";
 import Access from "../components/Access/Access";
+import Scan from "../components/Scan/Scan"
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -23,8 +24,7 @@ const AppRoutes = () => (
         <Route path="/users" element={<User />} />
         <Route path="/organizations" element={<Organization />} />
         <Route path="/accesses" element={<Access />} />
-        <Route path="/qrcodes" element={<div>Coduri QR (Template)</div>} />
-        <Route path="/scans" element={<div>Scanări (Template)</div>} />
+        <Route path="/scans" element={<Scan/>} />
       </Route>
     </Routes>
   </BrowserRouter>

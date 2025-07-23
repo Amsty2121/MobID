@@ -89,7 +89,7 @@
   margin: 0 auto;
 }
 .qr-design-frame .qr-code-wrap {
-  padding: 1rem;
+  padding: 2rem 0rem 2rem 0rem;
   background: #fff;
 }
 .qr-design-frame .qr-footer {
@@ -113,3 +113,4 @@
 .icon-btn:hover {
   color: var(--color-primary);
 }
+

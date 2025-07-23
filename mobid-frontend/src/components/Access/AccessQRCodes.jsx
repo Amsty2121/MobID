@@ -1,47 +1,51 @@
 // src/components/Access/AccessQRCodes.jsx
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import GenericTable from "../GenericTable/GenericTable";
 import GenerateQrModal from "./GenerateQrModal";
+import QrPreviewModal from "./QrPreviewModal";
 import DeleteQrCodeModal from "./DeleteQrCodeModal";
 import { getQrCodesForAccess, deactivateQrCode } from "../../api/qrCodeApi";
-import { QRCodeSVG } from "qrcode.react";
-import "./Access.css";
+import "../../styles/components/modal/index.css";
 
 export default function AccessQRCodes({ access }) {
-  const [qrCodes, setQrCodes]         = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
-  const [showGenQr, setShowGenQr]     = useState(false);
-  const [previewQr, setPreviewQr]     = useState(null);
-  const [qrToDelete, setQrToDelete]   = useState(null);
+  const [qrCodes, setQrCodes]                 = useState([]);
+  const [loading, setLoading]                 = useState(false);
+  const [error, setError]                     = useState("");
+  const [showGenQr, setShowGenQr]             = useState(false);
+  const [previewQr, setPreviewQr]             = useState(null);
+  const [qrToDelete, setQrToDelete]           = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const fetchQrs = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await getQrCodesForAccess(access.id);
-      setQrCodes(data);
-    } catch {
-      setError("Eroare la încărcarea codurilor QR.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // pagination local
+  const [page, setPage]       = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
+  // Re-fetch la fiecare schimbare de `access`
   useEffect(() => {
-    if (access) fetchQrs();
+    if (!access) return;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getQrCodesForAccess(access.id);
+        setQrCodes(data);
+        setPage(0);
+      } catch {
+        setError("Eroare la încărcarea codurilor QR.");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [access]);
 
-  const handleRowClick = row => setPreviewQr(row);
-
+  // descarcă SVG-ul curent din previewQr
   const handleDownload = () => {
     const svg = document.getElementById("qr-code-svg");
-    const serializer = new XMLSerializer();
-    const svgBlob = new Blob(
-      [serializer.serializeToString(svg)],
+    const blob = new Blob(
+      [new XMLSerializer().serializeToString(svg)],
       { type: "image/svg+xml;charset=utf-8" }
     );
-    const url = URL.createObjectURL(svgBlob);
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `${previewQr.id}.svg`;
@@ -49,43 +53,37 @@ export default function AccessQRCodes({ access }) {
     URL.revokeObjectURL(url);
   };
 
-  const confirmDeactivate = async () => {
-    await deactivateQrCode(qrToDelete.id);
-    setQrToDelete(null);
-    fetchQrs();
+  // gestionare delete
+  const handleDeleteClick = row => {
+    setQrToDelete(row);
+    setShowDeleteModal(true);
   };
+  const confirmDelete = async () => {
+    await deactivateQrCode(qrToDelete.id);
+    setShowDeleteModal(false);
+    // re-fetch și resetează pagina
+    const data = await getQrCodesForAccess(access.id);
+    setQrCodes(data);
+    setPage(0);
+  };
+
+  // calcul paginat
+  const totalCount = qrCodes.length;
+  const start = page * pageSize;
+  const end = start + pageSize;
+  const pagedData = qrCodes.slice(start, end);
 
   const columns = [
     { header: "ID",        accessor: "id" },
-    { header: "Descriere", accessor: "description" },
-    { header: "Tip",       accessor: "type" },
-    { header: "Expiră",    accessor: "expiresAt" },
-    { header: "Creat",     accessor: "createdAt" },
-    { header: "Acțiuni",   accessor: "actions" }
+    { header: "Description", accessor: "description" },
+    { header: "Type",       accessor: "type" },
+    { header: "ExpiresAt",    accessor: "expiresAt" },
+    { header: "CreatedAt",     accessor: "createdAt" }
   ];
-
-  const dataWithActions = qrCodes.map(q => ({
-    ...q,
-    actions: (
-      <button
-        className="icon-btn"
-        onClick={e => {
-          e.stopPropagation();
-          setQrToDelete(q);
-        }}
-        title="Dezactivează"
-      >
-        🗑
-      </button>
-    )
-  }));
 
   return (
     <div className="qr-codes-section">
-      <h2 className="access-heading">
-        QR Codes pentru «{access.name}»
-      </h2>
-
+      <h2 className="access-heading">QR Codes for «{access.name}»</h2>
       {error && <p className="error">{error}</p>}
 
       {loading ? (
@@ -94,12 +92,18 @@ export default function AccessQRCodes({ access }) {
         <GenericTable
           columns={columns}
           filterColumns={["description", "id"]}
-          data={dataWithActions}
-          onAdd={() => setShowGenQr(true)}
+          data={pagedData}
+          currentPage={page}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={size => { setPageSize(size); setPage(0); }}
           showAddOption
+          onAdd={() => setShowGenQr(true)}
           showEditOption={false}
-          showDeleteOption={false}
-          onRowClick={handleRowClick}
+          showDeleteOption={true}
+          onDelete={handleDeleteClick}
+          onRowClick={row => setPreviewQr(row)}
         />
       )}
 
@@ -107,54 +111,26 @@ export default function AccessQRCodes({ access }) {
       {showGenQr && (
         <GenerateQrModal
           accessId={access.id}
-          onSuccess={() => { setShowGenQr(false); fetchQrs(); }}
+          onSuccess={() => setShowGenQr(false)}
           onClose={() => setShowGenQr(false)}
         />
       )}
 
-      {/* Modal de preview */}
+      {/* Modal preview + download */}
       {previewQr && (
-        <div
-          className="qr-modal-overlay"
-          onClick={() => setPreviewQr(null)}
-        >
-          <div
-            className="qr-modal-content"
-            onClick={e => e.stopPropagation()}
-          >
-            <h3 className="qr-modal-title">
-              {previewQr.name}
-            </h3>
-            <div className="qr-design-frame">
-              <div className="qr-code-wrap">
-                <QRCodeSVG
-                  id="qr-code-svg"
-                  value={previewQr.qrEncodedText}
-                  size={200}
-                  includeMargin={false}
-                  bgColor="#fff"
-                  fgColor="var(--color-tuna-light)"
-                />
-              </div>
-              <div className="qr-footer">
-                <span className="qr-footer-text">
-                  Scan me to get access
-                </span>
-              </div>
-            </div>
-            <button className="download-btn" onClick={handleDownload}>
-              Descarcă QR ca imagine
-            </button>
-          </div>
-        </div>
+        <QrPreviewModal
+          qr={previewQr}
+          onClose={() => setPreviewQr(null)}
+          onDownload={handleDownload}
+        />
       )}
 
       {/* Modal confirm dezactivare QR */}
       <DeleteQrCodeModal
-        open={!!qrToDelete}
+        open={showDeleteModal}
         description={qrToDelete?.description}
-        onConfirm={confirmDeactivate}
-        onCancel={() => setQrToDelete(null)}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteModal(false)}
       />
     </div>
   );

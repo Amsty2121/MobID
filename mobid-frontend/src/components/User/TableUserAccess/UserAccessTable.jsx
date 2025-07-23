@@ -41,34 +41,34 @@ export default function UserAccessTable({ userId, userName }) {
   }, [userId]);
 
   const columns = [
-    { header: "Nume",           accessor: "name" },
-    { header: "Tip",            accessor: "accessTypeName" },
+    { header: "Name",           accessor: "name" },
+    { header: "Type",            accessor: "accessTypeName" },
     {
-      header: "Organizație",
+      header: "Organization",
       accessor: "organizationName"
     },
     {
       header: "Multiscan",
       accessor: "isMultiScan",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Expiră",
+      header: "Expires",
       accessor: "expirationDateTime",
-      format: v => (v ? new Date(v).toLocaleDateString() : "Nelimitat")
+      format: v => (v ? new Date(v).toLocaleDateString() : "Unlimited")
     },
     {
-      header: "Doar membri",
+      header: "Member Restricted",
       accessor: "restrictToOrgMembers",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Partajabil",
+      header: "Shareadble",
       accessor: "restrictToOrgSharing",
-      format: v => (v ? "Da" : "Nu")
+      format: v => (v ? "Yes" : "No")
     },
     {
-      header: "Activ",
+      header: "IsActive",
       accessor: "isActive",
       format: v => (v ? "✅" : "❌")
     }
@@ -82,7 +82,7 @@ export default function UserAccessTable({ userId, userName }) {
         <p>Se încarcă accesele...</p>
       ) : (
         <GenericTable
-          title={`Accese pentru User - «${userName}»`}
+          title={`Accesses for User - «${userName}»`}
           columns={columns}
           filterColumns={["name", "accessTypeName", "organizationName"]}
           data={accesses}

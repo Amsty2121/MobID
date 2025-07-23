@@ -15,7 +15,6 @@ public class QrCodeDto
 
     public DateTime? ExpiresAt { get; set; }
 
-    public bool IsExpired { get; set; }
     public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -29,12 +28,10 @@ public class QrCodeDto
         Type = qr.Type.ToString();
         AccessId = qr.AccessId;
         AccessName = qr.Access?.Name ?? "N/A";
-        ExpiresAt = qr.ExpiresAt;
         CreatedAt = qr.CreatedAt;
-        IsExpired = qr.ExpiresAt.HasValue && qr.ExpiresAt.Value <= DateTime.UtcNow;
-        IsActive = qr.DeletedAt == null && !IsExpired;
+        IsActive = qr.DeletedAt == null;
 
-        var payload = $"{qr.Access!.OrganizationId}:{qr.AccessId}:{qr.Id}";
+        var payload = $"{qr.Access!.OrganizationId}:{qr.AccessId}:{qr.Id}:{qr.Type}";
         QrEncodedText = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload));
     }
 }

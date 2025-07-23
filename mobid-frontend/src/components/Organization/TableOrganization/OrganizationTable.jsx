@@ -73,10 +73,10 @@ export default function OrganizationTable({ onSelect }) {
 
   const columns = [
     { header: "ID",               accessor: "id"        },
-    { header: "Nume Organizație", accessor: "name"      },
-    { header: "Proprietar",       accessor: "ownerName" }
+    { header: "Organization Name", accessor: "name"      },
+    { header: "Owner Name",       accessor: "ownerUsername" }
   ];
-  const filterCols = ["name", "ownerName"];
+  const filterCols = ["name", "ownerUsername"];
 
   return (
     <>
@@ -84,7 +84,7 @@ export default function OrganizationTable({ onSelect }) {
       {error   && <p style={{ color: "#ff5555", margin: "0.5rem 0" }}>{error}</p>}
 
       <GenericTable
-        title="Organizații"
+        title="Organizations"
         columns={columns}
         filterColumns={filterCols}
         data={items}

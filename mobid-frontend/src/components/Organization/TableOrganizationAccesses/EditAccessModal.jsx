@@ -82,11 +82,11 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
         <button className="modal__close" onClick={onClose}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Editează Acces “{access.name}”</h3>
+        <h3 className="modal__title">Edit Access “{access.name}”</h3>
         {error && <p className="modal__error">{error}</p>}
         <form onSubmit={handleSubmit} className="modal__form">
           <TextField
-            label="Nume Acces"
+            label="Access Name"
             value={name}
             onChange={e => setName(e.target.value)}
             required
@@ -95,7 +95,7 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
             margin="normal"
           />
           <TextField
-            label="Descriere"
+            label="Description"
             value={description}
             onChange={e => setDescription(e.target.value)}
             variant="outlined"
@@ -105,7 +105,7 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
             rows={3}
           />
           <TextField
-            label="Data expirării"
+            label="Expiration Date"
             type="date"
             value={expirationDate}
             onChange={e => setExpirationDate(e.target.value)}
@@ -120,7 +120,7 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
                 checked={restrictToMembers}
                 onChange={e => setRestrictToMembers(e.target.checked)}
               />
-              <span>Restricționează doar la membri organizație</span>
+              <span>Restricts to organization members only</span>
           </label>
           <label className="checkbox-container">
               <input
@@ -128,7 +128,7 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
                 checked={restrictToSharing}
                 onChange={e => setRestrictToSharing(e.target.checked)}
               />
-              <span>Permite partajarea accesului</span>
+              <span>Shareable</span>
           </label>
           <label className="checkbox-container">
               <input
@@ -136,7 +136,7 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
                 checked={isMultiScan}
                 onChange={e => setIsMultiScan(e.target.checked)}
               />
-              <span>Scanare multiplă</span>
+              <span>Multi Scan</span>
           </label>
 
           {isLimitedUse && (
@@ -180,14 +180,14 @@ export default function EditAccessModal({ access, onSuccess, onClose }) {
 
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
-              Salvează
+              Save
             </button>
             <button
               type="button"
               className="modal__button--no"
               onClick={onClose}
             >
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

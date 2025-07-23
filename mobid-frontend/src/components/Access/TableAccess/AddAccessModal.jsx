@@ -130,9 +130,9 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
           <button className="modal__close" onClick={onClose}>×</button>
         )}
         <h3 className="modal__title">
-          {step === Steps.SELECT_TYPE && "Adaugă acces nou"}
-          {step === Steps.CONFIGURE && `Configurează “${selectedType?.label}”`}
-          {step === Steps.PREVIEW && `Previzualizează “${selectedType?.label}”`}
+          {step === Steps.SELECT_TYPE && "Add new access"}
+          {step === Steps.CONFIGURE && `Config “${selectedType?.label}”`}
+          {step === Steps.PREVIEW && `Preview “${selectedType?.label}”`}
         </h3>
 
         {error && <p className="modal__error">{error}</p>}
@@ -150,7 +150,7 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
               margin="normal"
             />
             <TextField
-              label="Descriere"
+              label="Description"
               variant="outlined"
               value={description}
               onChange={e => setDescription(e.target.value)}
@@ -171,10 +171,10 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
             />
             <div className="modal__actions">
               <button type="button" className="modal__button--yes" onClick={goToConfigure}>
-                Următor
+                Next
               </button>
               <button type="button" className="modal__button--no" onClick={onClose}>
-                Anulează
+                Cancel
               </button>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
                 checked={restrictToMembers}
                 onChange={e => setRestrictToMembers(e.target.checked)}
               />
-              <span>Restricționează doar la membri organizație</span>
+              <span>Restricted to orgmambers</span>
             </label >
 
             <label  className="checkbox-container">
@@ -209,7 +209,7 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
                 checked={restrictToSharing}
                 onChange={e => setRestrictToSharing(e.target.checked)}
               />
-              <span>Restricționează partajarea către alte organizații</span>
+              <span>Restricted Sharing</span>
             </label >
 
             <label className="modal__section-title">Mod Scanare</label>
@@ -259,10 +259,10 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
 
             <div className="modal__actions">
               <button type="button" className="modal__button--yes" onClick={goToPreview}>
-                Previzualizare
+                Preview
               </button>
               <button type="button" className="modal__button--no" onClick={goBack}>
-                Înapoi
+                Back
               </button>
             </div>
           </div>
@@ -272,13 +272,13 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
         {step === Steps.PREVIEW && (
           <>
             <div className="modal__form">
-              <div className="preview-row"><strong>Nume:</strong> {name}</div>
-              <div className="preview-row"><strong>Descriere:</strong> {description || "(niciuna)"}</div>
-              <div className="preview-row"><strong>Tip:</strong> {selectedType.label}</div>
-              <div className="preview-row"><strong>Expiră:</strong> {expirationDate || "Perioada nelimitata"}</div>
-              <div className="preview-row"><strong>Restricționat:</strong> {restrictToMembers ? "Da" : "Nu"}</div>
-              <div className="preview-row"><strong>Partajabil:</strong> {!restrictToSharing ? "Da" : "Nu"}</div>
-              <div className="preview-row"><strong>Scanare multiplă:</strong> {isMultiScan.label}</div>
+              <div className="preview-row"><strong>Name:</strong> {name}</div>
+              <div className="preview-row"><strong>Description:</strong> {description || "(niciuna)"}</div>
+              <div className="preview-row"><strong>Type:</strong> {selectedType.label}</div>
+              <div className="preview-row"><strong>Espires:</strong> {expirationDate || "Perioada nelimitata"}</div>
+              <div className="preview-row"><strong>Restricted:</strong> {restrictToMembers ? "Da" : "Nu"}</div>
+              <div className="preview-row"><strong>Shareable:</strong> {!restrictToSharing ? "Da" : "Nu"}</div>
+              <div className="preview-row"><strong>Multi scan:</strong> {isMultiScan.label}</div>
               {selectedType.code === "LimitedUse" && (
                 <div className="preview-row"><strong>Total Use Limit:</strong> {totalUseLimit}</div>
               )}
@@ -292,10 +292,10 @@ export default function AddAccessModal({ organizationId, onSuccess, onClose }) {
 
             <div className="modal__actions">
               <button type="button" className="modal__button--yes" onClick={handleSubmit}>
-                Confirmă și Salvează
+                Confirm and Save
               </button>
               <button type="button" className="modal__button--no" onClick={goBack}>
-                Înapoi
+                Back
               </button>
             </div>
           </>

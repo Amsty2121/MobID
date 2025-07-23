@@ -29,7 +29,7 @@ export default function AddRoleModal({ onSuccess, onClose }) {
           <FaTimes />
         </button>
 
-        <h3 className="modal__title">Adaugă Rol Nou</h3>
+        <h3 className="modal__title">Add new role</h3>
 
         {error && <div className="modal__error">{error}</div>}
 
@@ -51,13 +51,13 @@ export default function AddRoleModal({ onSuccess, onClose }) {
 
           <div className="modal__actions">
             <button type="submit" className="modal__button--yes">
-              Salvează
+              Save
             </button>
             <button
               type="button"
               className="modal__button--no"
               onClick={onClose}>
-              Anulează
+              Cancel
             </button>
           </div>
         </form>

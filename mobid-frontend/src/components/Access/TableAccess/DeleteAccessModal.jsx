@@ -11,16 +11,16 @@ export default function DeleteAccessModal({ open, accessName, onConfirm, onCance
         <button className="modal__close" onClick={onCancel}>
           <FaTimes />
         </button>
-        <h3 className="modal__title">Confirmă Dezactivarea</h3>
+        <h3 className="modal__title">Confirm Deactivation</h3>
         <p className="modal__message">
-          Ești sigur că vrei să dezactivezi accesul <strong>{accessName}</strong>?
+          Are you sure you want to deactivate access <strong>{accessName}</strong>?
         </p>
         <div className="modal__actions">
           <button className="modal__button--yes" onClick={onConfirm}>
-            Dezactivează
+            Deactivate
           </button>
           <button className="modal__button--no" onClick={onCancel}>
-            Anulează
+            Canel
           </button>
         </div>
       </div>

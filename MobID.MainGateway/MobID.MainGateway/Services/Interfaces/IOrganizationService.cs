@@ -1,5 +1,7 @@
 ﻿using MobID.MainGateway.Models.Dtos;
 using MobID.MainGateway.Models.Dtos.Req;
+using MobID.MainGateway.Models.Entities;
+using System.Threading.Tasks;
 
 namespace MobID.MainGateway.Services.Interfaces;
 
@@ -20,4 +22,6 @@ public interface IOrganizationService
     Task<List<AccessDto>> GetOrganizationAccessesAsync(Guid organizationId, CancellationToken ct = default);
     Task<List<OrganizationAccessShareDto>> GetAccessesSharedToOrganizationAsync(Guid organizationId, CancellationToken ct = default);
     Task<List<AccessDto>> GetAllOrganizationAccessesAsync(Guid organizationId, CancellationToken ct = default);
+
+    Task<IEnumerable<OrganizationDto>> GetOrganizationsForUserAsync(Guid userId, CancellationToken ct = default);
 }

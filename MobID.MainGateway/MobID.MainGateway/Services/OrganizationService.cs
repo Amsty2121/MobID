@@ -115,7 +115,6 @@ public class OrganizationService : IOrganizationService
             Description = $"QR invitație organizație «{org.Name}»",
             Type = QrCodeType.InviteToOrganization,
             AccessId = inviteAccess.Id,
-            ExpiresAt = null,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -328,5 +327,17 @@ public class OrganizationService : IOrganizationService
             .Select(g => g.First())
             .Select(a => new AccessDto(a))
             .ToList();
+    }
+
+    public async Task<IEnumerable<OrganizationDto>> GetOrganizationsForUserAsync(Guid userId, CancellationToken ct)
+    {
+        var user = await _userRepo.GetByIdWithInclude(userId, ct, x => x.OrganizationUsers) ?? throw new InvalidOperationException("user not found.");
+
+        var orgIds = user.OrganizationUsers.Where(x => x.Role == OrganizationUserRole.Admin || x.Role == OrganizationUserRole.Owner).Select(x => x.OrganizationId);
+
+        var orgs = await _orgRepo.GetWhere(x => orgIds.Contains(x.Id), ct);
+
+
+        return orgs.Select(x => new OrganizationDto(x));
     }
 }

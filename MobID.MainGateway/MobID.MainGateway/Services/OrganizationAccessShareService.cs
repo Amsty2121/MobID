@@ -20,15 +20,22 @@ public class OrganizationAccessShareService : IOrganizationAccessShareService
 
     public async Task<bool> ShareAccessWithOrganizationAsync(AccessShareReq req, Guid userId, CancellationToken ct = default)
     {
+        // Încarcă accesul
         var access = await _accessRepo.GetById(req.AccessId, ct)
             ?? throw new InvalidOperationException("Access not found.");
 
+        // Regula nouă: dacă partajarea este restricționată, nu permitem sharing-ul
+        if (access.RestrictToOrgSharing)
+            throw new InvalidOperationException("Partajarea accesului către alte organizații nu este permisă pentru acest acces.");
+
+        // Încarcă organizațiile sursă și destinație
         var sourceOrg = await _orgRepo.GetById(req.SourceOrganizationId, ct)
             ?? throw new InvalidOperationException("Source organization not found.");
 
         var targetOrg = await _orgRepo.GetById(req.TargetOrganizationId, ct)
             ?? throw new InvalidOperationException("Target organization not found.");
 
+        // Verifică duplicatul
         var exists = await _repo.FirstOrDefault(
             s => s.AccessId == req.AccessId &&
                  s.SourceOrganizationId == req.SourceOrganizationId &&
@@ -39,6 +46,7 @@ public class OrganizationAccessShareService : IOrganizationAccessShareService
         if (exists != null)
             return false;
 
+        // Creează partajarea
         var share = new OrganizationAccessShare
         {
             Id = Guid.NewGuid(),

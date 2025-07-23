@@ -43,7 +43,7 @@ export default function GenericTable({
           <div className="generic-table__filter">
             <input
               type="text"
-              placeholder="Filtrează..."
+              placeholder="Filter..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -52,7 +52,7 @@ export default function GenericTable({
             <div
               className="generic-table__add-icon"
               onClick={onAdd}
-              title="Adaugă"
+              title="Add"
             >
               <FaPlus />
             </div>
@@ -69,7 +69,7 @@ export default function GenericTable({
                   <th key={i}>{col.header}</th>
                 ))}
                 {(showEditOption || showDeleteOption) && (
-                  <th className="generic-table__actions-col">Acțiuni</th>
+                  <th className="generic-table__actions-col">Actions</th>
                 )}
               </tr>
             </thead>
@@ -126,20 +126,20 @@ export default function GenericTable({
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 0}
             >
-              Anterior
+              Previous
             </button>
             <span>
-              Pagina {currentPage + 1} din {totalPages || 1}
+              Page {currentPage + 1} of {totalPages || 1}
             </span>
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage + 1 >= totalPages}
             >
-              Următoare
+              Next
             </button>
           </div>
           <div className="generic-table__pagination-right">
-            <label htmlFor="pageSizeSelect">Pe pagină:</label>
+            <label htmlFor="pageSizeSelect">On page:</label>
             <select
               id="pageSizeSelect"
               value={pageSize}

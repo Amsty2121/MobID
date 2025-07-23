@@ -39,7 +39,7 @@ export default function AccessDetailsModal({ access, onClose }) {
       ? [{ label: "Utilizări/ perioadă", value: access.usesPerPeriod }]
       : []),
     {
-      label: "Descriere",
+      label: "Descriptions",
       value: access.description || "(niciuna)"
     }
   ];

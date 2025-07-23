@@ -1,5 +1,5 @@
 // src/components/User/Table/UserTable.jsx
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { getUsersPaged, deactivateUser } from "../../../api/userApi";
 import GenericTable from "../../GenericTable/GenericTable";
 import AddUserModal from "./AddUserModal";
@@ -9,28 +9,27 @@ import "../../../styles/components/user.css";
 
 export default function UserTable({ onSelect }) {
   const DEFAULT_PAGE_SIZE = 10;
-  const [users, setUsers]               = useState([]);
-  const [totalCount, setTotalCount]     = useState(0);
-  const [currentPage, setCurrentPage]   = useState(0);
-  const [pageSize, setPageSize]         = useState(DEFAULT_PAGE_SIZE);
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState("");
+  const [users, setUsers]             = useState([]);
+  const [totalCount, setTotalCount]   = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize]       = useState(DEFAULT_PAGE_SIZE);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
 
-  const [showAddModal, setShowAddModal]               = useState(false);
-  const [showDeleteModal, setShowDeleteModal]         = useState(false);
-  const [userToDelete, setUserToDelete]               = useState(null);
-  const [showEditRolesModal, setShowEditRolesModal]   = useState(false);
-  const [userToEditRoles, setUserToEditRoles]         = useState(null);
+  const [showAddModal, setShowAddModal]             = useState(false);
+  const [showDeleteModal, setShowDeleteModal]       = useState(false);
+  const [userToDelete, setUserToDelete]             = useState(null);
+  const [showEditRolesModal, setShowEditRolesModal] = useState(false);
+  const [userToEditRoles, setUserToEditRoles]       = useState(null);
 
-  const didFetchRef = useRef(false);
-
+  // 1) fetchUsers e memoizat pe currentPage și pageSize
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getUsersPaged({ pageIndex: currentPage, pageSize });
-      setUsers(data.items || []);
-      setTotalCount(data.total || 0);
+      const { items = [], total = 0 } = await getUsersPaged({ pageIndex: currentPage, pageSize });
+      setUsers(items);
+      setTotalCount(total);
     } catch {
       setError("Eroare la preluarea utilizatorilor.");
     } finally {
@@ -38,9 +37,8 @@ export default function UserTable({ onSelect }) {
     }
   }, [currentPage, pageSize]);
 
+  // 2) apelăm fetchUsers la montare și ori de câte ori se schimbă pagina / dimensiunea paginii
   useEffect(() => {
-    if (didFetchRef.current) return;
-    didFetchRef.current = true;
     fetchUsers();
   }, [fetchUsers]);
 
@@ -83,7 +81,7 @@ export default function UserTable({ onSelect }) {
       {error   && <p className="error">{error}</p>}
 
       <GenericTable
-        title="Utilizatori"
+        title="Users"
         columns={columns}
         filterColumns={filterCols}
         data={data}
@@ -93,18 +91,25 @@ export default function UserTable({ onSelect }) {
         showDeleteOption
         onEdit={handleEditRoles}
         showEditOption
-        // **NEW**: when a row is clicked, bubble up to parent
         onRowClick={row => onSelect && onSelect(row)}
+
+        // ** PAGINATION props **
         currentPage={currentPage}
         totalCount={totalCount}
         pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={size => { setPageSize(size); setCurrentPage(0); }}
+        onPageChange={page => setCurrentPage(page)}
+        onPageSizeChange={size => {
+          setPageSize(size);
+          setCurrentPage(0);
+        }}
       />
 
       {showAddModal && (
         <AddUserModal
-          onSuccess={() => { setShowAddModal(false); fetchUsers(); }}
+          onSuccess={() => {
+            setShowAddModal(false);
+            fetchUsers();
+          }}
           onClose={() => setShowAddModal(false)}
         />
       )}
